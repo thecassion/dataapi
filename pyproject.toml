@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "unops_backend"
+version = "0.1.0"
+description = "Backend API for dataintegration between UNOPS and PEQH/USI MENFP"
+authors = ["thecassion <pierrerobentz.cassion@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+uvicorn = "^0.15.0"
+gunicorn = "^20.1.0"
+fastapi = "^0.70.0"
+
+[tool.poetry.dev-dependencies]
+pytest = "^6.2.5"
+requests = "^2.26.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
