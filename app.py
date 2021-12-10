@@ -8,7 +8,7 @@ from typing import Optional, List
 import tempfile
 import pandas as pd
 import io
-
+import json
 
 app = FastAPI()
 @app.get("/")
@@ -21,5 +21,7 @@ async def read_item(item_id: int, q: Optional[str] = None):
 
 @app.post("/form/")
 async def form(file: UploadFile = File(...)):
-    df = pd.read_excel(file.file.read())
-    return {"message": file, "content": df.to_json(orient='records').encode('utf-8')}
+    df = pd.read_excel(file.file.read(), header=1)
+    df.to_excel("tmp.xlsx")
+    _json = json.loads(df.to_json(orient='records'))
+    return JSONResponse(content=_json)
