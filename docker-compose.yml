@@ -10,15 +10,23 @@ services:
       dockerfile: ./Dockerfile
     ports:
       - 8000:8000
+    networks:
+      - unops-tiers
+    environment:
+      # - MONGODB_CONNSTRING=mongodb://root:root@mongo:27017/unops
+      - MONGODB_URI=mongodb://mongo/unops
+    depends_on:
+      - mongo
   mongo:
     image: mongo
     ports:
       - 27017:27017
-    volumes:
-      - ./data:/data/db
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME=root
-      - MONGO_INITDB_ROOT_PASSWORD=root
-      - MONGO_INITDB_DATABASE=unops
-    depends_on:
-      - unopsbackend
+    # environment:
+    #   - MONGO_INITDB_ROOT_USERNAME=root
+    #   - MONGO_INITDB_ROOT_PASSWORD=root
+    #   - MONGO_INITDB_DATABASE=unops
+    networks:
+      - unops-tiers
+networks:
+  unops-tiers:
+    driver: bridge
