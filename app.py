@@ -19,7 +19,7 @@ app = FastAPI(title="UNOPS DATA INTEGRATION", description="A data integration sy
 
 client = motor.motor_asyncio.AsyncIOMotorClient(os.environ.get('MONGODB_URI'))
 db = client["unops"]
-saq = db.saq
+_forms = db["forms"]
 
 
 @app.get("/")
@@ -33,7 +33,7 @@ async def form(file: UploadFile = File(...)):
     df["_id_site_identifier_12"]=df.site_identifier_12
     df.site_identifier_12 = df.site_identifier_12.astype(str)
     _json = json.loads(df.to_json(orient='records'))
-    await saq.insert_many(_json)
+    await _forms.insert_many(_json)
     return JSONResponse(content=_json)
 
 @app.post("/questions",summary="create a list of questions on our server and the output server", response_model=List[dict],response_description="Create a list of questions on our server and the output server", status_code=201)
@@ -51,9 +51,11 @@ async def url_out(url: str):
     return {"url": url}
 
 @app.post("/form")
-async def form(form_data: Form):
-    return {"form": form_data}
+async def create_form(form_data: Form):
+    await _forms.insert_one(form_data.dict())
+    return JSONResponse(content=form_data.dict(), status_code=201)
 
 @app.post("/forms")
-async def forms(forms: List[Form]):
+async def create_forms(forms: List[Form]):
+    _forms.insert_many(forms)
     return {"forms": forms}
