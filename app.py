@@ -7,20 +7,19 @@ import pandas as pd
 import io
 import json
 import motor.motor_asyncio
-from models.question import UpadateQuestion, Question
+from models.question import UpdateQuestions, Questions
 from models.form import Form
 from typing import  List
+import pymongo as pm
+from db import db
+from db.form import retrieveForm
 
-# import pymongo as pm
 
 app = FastAPI(title="UNOPS DATA INTEGRATION", description="A data integration system that helps UNOPS send their data to USI system", version="0.1")
 
 
-
-client = motor.motor_asyncio.AsyncIOMotorClient(os.environ.get('MONGODB_URI'))
-db = client["unops"]
 _forms = db["forms"]
-
+_forms.create_index([("type",pm.ASCENDING),("name",pm.ASCENDING)], unique=True)
 
 @app.get("/")
 async def root():
@@ -37,12 +36,14 @@ async def form(file: UploadFile = File(...)):
     return JSONResponse(content=_json)
 
 @app.post("/questions",summary="create a list of questions on our server and the output server", response_model=List[dict],response_description="Create a list of questions on our server and the output server", status_code=201)
-async def questions(questions: List[Question]):
-
+async def questions(questions: Questions):
+    __form = retrieveForm(questions.form_name,questions.form_type).to_dict()
+    __form["questions"].create_index([("guuid",pm.ASCENDING)], unique=True)
+    __form["questions"].create_index([("name",pm.ASCENDING)], unique=True)
     return {"questions": "questions"}
 
 @app.put("/questions")
-async def update_questions(questions: List[UpadateQuestion]):
+async def update_questions(questions: UpdateQuestions):
 
     return {"questions": "questions"}
 
@@ -58,4 +59,4 @@ async def create_form(form_data: Form):
 @app.post("/forms")
 async def create_forms(forms: List[Form]):
     _forms.insert_many(forms)
-    return {"forms": forms}
+    return JSONResponse(content=forms, status_code=201)
