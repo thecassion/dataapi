@@ -7,20 +7,19 @@ import pandas as pd
 import io
 import json
 import motor.motor_asyncio
-from models.question import UpadateQuestion, Question
+from models.question import UpdateQuestions, Questions
 from models.form import Form
 from typing import  List
+import pymongo as pm
+from db import db
+from db.form import retrieveForm
 
-# import pymongo as pm
 
 app = FastAPI(title="UNOPS DATA INTEGRATION", description="A data integration system that helps UNOPS send their data to USI system", version="0.1")
 
 
-
-client = motor.motor_asyncio.AsyncIOMotorClient(os.environ.get('MONGODB_URI'))
-db = client["unops"]
-saq = db.saq
-
+_forms = db["forms"]
+_forms.create_index([("type",pm.ASCENDING),("name",pm.ASCENDING)], unique=True)
 
 @app.get("/")
 async def root():
@@ -33,16 +32,18 @@ async def form(file: UploadFile = File(...)):
     df["_id_site_identifier_12"]=df.site_identifier_12
     df.site_identifier_12 = df.site_identifier_12.astype(str)
     _json = json.loads(df.to_json(orient='records'))
-    await saq.insert_many(_json)
+    await _forms.insert_many(_json)
     return JSONResponse(content=_json)
 
 @app.post("/questions",summary="create a list of questions on our server and the output server", response_model=List[dict],response_description="Create a list of questions on our server and the output server", status_code=201)
-async def questions(questions: List[Question]):
-
+async def questions(questions: Questions):
+    __form = retrieveForm(questions.form_name,questions.form_type).to_dict()
+    __form["questions"].create_index([("guuid",pm.ASCENDING)], unique=True)
+    __form["questions"].create_index([("name",pm.ASCENDING)], unique=True)
     return {"questions": "questions"}
 
 @app.put("/questions")
-async def update_questions(questions: List[UpadateQuestion]):
+async def update_questions(questions: UpdateQuestions):
 
     return {"questions": "questions"}
 
@@ -51,9 +52,11 @@ async def url_out(url: str):
     return {"url": url}
 
 @app.post("/form")
-async def form(form_data: Form):
-    return {"form": form_data}
+async def create_form(form_data: Form):
+    await _forms.insert_one(form_data.dict())
+    return JSONResponse(content=form_data.dict(), status_code=201)
 
 @app.post("/forms")
-async def forms(forms: List[Form]):
-    return {"forms": forms}
+async def create_forms(forms: List[Form]):
+    _forms.insert_many(forms)
+    return JSONResponse(content=forms, status_code=201)
