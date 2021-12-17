@@ -1,18 +1,14 @@
 import os
 from fastapi import FastAPI, Body, HTTPException, status,File, UploadFile, Form
 from fastapi.responses import JSONResponse
-from fastapi.encoders import jsonable_encoder
-from bson import ObjectId
 import pandas as pd
-import io
 import json
-import motor.motor_asyncio
 from models.question import UpdateQuestions, Questions
 from models.form import Form
 from typing import  List
 import pymongo as pm
 from db import db
-from db.form import retrieveForm
+from db.form import createForms, retrieveForm, updateForm,createForm
 from db.question import create_question
 
 
@@ -39,23 +35,23 @@ async def form(file: UploadFile = File(...)):
 @app.post("/questions",summary="create a list of questions on our server and the output server", response_model=List[dict],response_description="Create a list of questions on our server and the output server", status_code=201)
 async def questions(questions: Questions):
     result = await create_question(questions)
-    return JSONResponse(content=result)
+    return result
 
 @app.put("/questions")
 async def update_questions(questions: UpdateQuestions):
 
     return {"questions": "questions"}
 
-@app.post("/url_out")
-async def url_out(url: str):
-    return {"url": url}
-
 @app.post("/form")
 async def create_form(form_data: Form):
-    await _forms.insert_one(form_data.dict())
-    return JSONResponse(content=form_data.dict(), status_code=201)
+    result = await createForm(form_data)
+    return JSONResponse(content=result.to_dict())
+@app.put("/form")
+async def update_form(form_data: Form):
+    result = await updateForm(form_data)
+    return JSONResponse(content=result.to_dict())
 
 @app.post("/forms")
 async def create_forms(forms: List[Form]):
-    _forms.insert_many(forms)
-    return JSONResponse(content=forms, status_code=201)
+    result = await createForms(forms)
+    return JSONResponse(content=result.to_dict())
