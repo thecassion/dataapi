@@ -10,6 +10,7 @@ import pymongo as pm
 from db import db
 from db.form import createForms, retrieveForm, updateForm,createForm
 from db.question import create_question
+from utils.data import dataInToDataOut
 
 
 app = FastAPI(title="UNOPS DATA INTEGRATION", description="A data integration system that helps UNOPS send their data to USI system", version="0.1")
@@ -55,3 +56,9 @@ async def update_form(form_data: Form):
 async def create_forms(forms: List[Form]):
     result = await createForms(forms)
     return JSONResponse(content=result.to_dict())
+
+@app.put("/tsform")
+async def transform_data_in_to_data_out(name:str,type:str):
+    result = await retrieveForm(name,type)
+    result_1 = dataInToDataOut(result.get("data_in"),result.get('format_in'),result.get("format_out"))
+    return JSONResponse(content=result_1)
