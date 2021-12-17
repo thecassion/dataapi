@@ -13,6 +13,7 @@ from typing import  List
 import pymongo as pm
 from db import db
 from db.form import retrieveForm
+from db.question import create_question
 
 
 app = FastAPI(title="UNOPS DATA INTEGRATION", description="A data integration system that helps UNOPS send their data to USI system", version="0.1")
@@ -37,10 +38,8 @@ async def form(file: UploadFile = File(...)):
 
 @app.post("/questions",summary="create a list of questions on our server and the output server", response_model=List[dict],response_description="Create a list of questions on our server and the output server", status_code=201)
 async def questions(questions: Questions):
-    __form = retrieveForm(questions.form_name,questions.form_type).to_dict()
-    __form["questions"].create_index([("guuid",pm.ASCENDING)], unique=True)
-    __form["questions"].create_index([("name",pm.ASCENDING)], unique=True)
-    return {"questions": "questions"}
+    result = await create_question(questions)
+    return JSONResponse(content=result)
 
 @app.put("/questions")
 async def update_questions(questions: UpdateQuestions):
