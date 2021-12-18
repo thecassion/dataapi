@@ -8,7 +8,7 @@ from models.form import Form
 from typing import  List
 import pymongo as pm
 from db import db
-from db.form import createForms, retrieveForm, updateForm,createForm
+from db.form import createForms, retrieveForm, updateForm,createForm, retrieveForms
 from db.question import create_question
 from utils.data import dataInToDataOut
 
@@ -56,6 +56,10 @@ async def update_form(form_data: Form):
 async def create_forms(forms: List[Form]):
     result = await createForms(forms)
     return JSONResponse(content=result.to_dict())
+@app.get("/forms", response_model=List[Form],response_description="Create a list of forms on our server and the output server", status_code=201, summary="Create a list of forms on our server and the output server")
+async def retrieve_forms():
+    result = await retrieveForms()
+    return result
 
 @app.put("/tsform")
 async def transform_data_in_to_data_out(name:str,type:str):
