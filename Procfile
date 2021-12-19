@@ -1,0 +1,1 @@
+web: uvicorn --reload app:app
