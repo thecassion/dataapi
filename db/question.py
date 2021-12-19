@@ -12,8 +12,8 @@ async def create_question(questions: Questions):
     if __form:
         questions_collection =__form["questions"]
         # Create unique index for the questions_collection
-        questions_collection.create_index([("guuid",pm.ASCENDING)], unique=True)
-        questions_collection.create_index([("name",pm.ASCENDING)], unique=True)
+        questions_collection.create_index([("uid",pm.ASCENDING)], unique=True)
+        questions_collection.create_index([("code",pm.ASCENDING)], unique=True)
         # Insert  questions into the questions_collection
         result = await questions_collection.insert_many(questions.questions)
         return result
