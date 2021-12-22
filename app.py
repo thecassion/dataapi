@@ -17,7 +17,13 @@ app = FastAPI(title="UNOPS DATA INTEGRATION", description="A data integration sy
 
 
 _forms = db["forms"]
-_forms.create_index([("type",pm.ASCENDING),("name",pm.ASCENDING)], unique=True)
+_forms.create_index([("type",pm.ASCENDING),("name",pm.ASCENDING)], unique=True,name="form_index")
+_forms.create_index([("questions.uid",pm.ASCENDING)], unique=True,name="question_uid_index")
+_forms.create_index([("questions.code",pm.ASCENDING)], unique=True,name="question_code_index")
+
+_questions = db["questions"]
+_form_data_in = db["form_data_in"]
+_form_data_out = db["form_data_out"]
 
 @app.get("/")
 async def root():
@@ -46,16 +52,16 @@ async def update_questions(questions: UpdateQuestions):
 @app.post("/form")
 async def create_form(form_data: Form):
     result = await createForm(form_data)
-    return JSONResponse(content=result.to_dict())
+    return JSONResponse(content=result.dict())
 @app.put("/form")
 async def update_form(form_data: Form):
     result = await updateForm(form_data)
-    return JSONResponse(content=result.to_dict())
+    return JSONResponse(content=result.dict())
 
 @app.post("/forms")
 async def create_forms(forms: List[Form]):
     result = await createForms(forms)
-    return JSONResponse(content=result.to_dict())
+    return result
 @app.get("/forms", response_model=List[Form],response_description="Create a list of forms on our server and the output server", status_code=201, summary="Create a list of forms on our server and the output server")
 async def retrieve_forms():
     result = await retrieveForms()
