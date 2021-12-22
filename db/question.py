@@ -3,19 +3,18 @@ from models.question import Questions, UpdateQuestions, Question, UpadateQuestio
 from db.form import retrieveForm
 import pymongo as pm
 
+__questions = db["questions"]
+__questions.create_index([("uid",pm.ASCENDING)], unique=True,name="question_uid_index")
+__questions.create_index([("code",pm.ASCENDING),("form",pm.ASCENDING)], unique=True,name="form_question_code_index")
 async def create_question(questions: Questions):
     """
     Create a new question
     """
-    __form_obj = await retrieveForm(questions.form_name,questions.form_type)
-    __form = __form_obj.to_dict()
+    __form = await retrieveForm(name=questions.form_name,type=questions.form_type)
     if __form:
-        questions_collection =__form["questions"]
-        # Create unique index for the questions_collection
-        questions_collection.create_index([("uid",pm.ASCENDING)], unique=True)
-        questions_collection.create_index([("code",pm.ASCENDING)], unique=True)
         # Insert  questions into the questions_collection
-        result = await questions_collection.insert_many(questions.questions)
+        __list_questions = [{**q.dict(), "form":__form.get("_id")} for q in questions.questions]
+        result = await __questions.insert_many(__list_questions)
         return result
     else:
         return {"message": "Form not found"}
