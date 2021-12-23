@@ -23,7 +23,7 @@ async def createForms(forms:List[Form])->List[Form]:
     __forms = [form.dict() for form in forms]
     result = await form_collection.insert_many(__forms)
     if result:
-        return result
+        return {"numer_forms_saved":len(result.inserted_ids)}
 
 async def updateForm(form:Form)->Form:
     result = await form_collection.update_one({"name":form.name,"type":form.type},{"$set":form.dict()})
