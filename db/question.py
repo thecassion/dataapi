@@ -15,6 +15,6 @@ async def create_question(questions: Questions):
         # Insert  questions into the questions_collection
         __list_questions = [{**q.dict(), "form":__form.get("_id")} for q in questions.questions]
         result = await __questions.insert_many(__list_questions)
-        return result
+        return {"number_questions_saved":len(result.inserted_ids)}
     else:
         return {"message": "Form not found"}

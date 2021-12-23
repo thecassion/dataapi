@@ -18,10 +18,6 @@ app = FastAPI(title="UNOPS DATA INTEGRATION", description="A data integration sy
 
 _forms = db["forms"]
 _forms.create_index([("type",pm.ASCENDING),("name",pm.ASCENDING)], unique=True,name="form_index")
-_forms.create_index([("questions.uid",pm.ASCENDING)], unique=True,name="question_uid_index")
-_forms.create_index([("questions.code",pm.ASCENDING)], unique=True,name="question_code_index")
-
-_questions = db["questions"]
 _form_data_in = db["form_data_in"]
 _form_data_out = db["form_data_out"]
 
@@ -39,7 +35,7 @@ async def form(file: UploadFile = File(...)):
     await _forms.insert_many(_json)
     return JSONResponse(content=_json)
 
-@app.post("/questions",summary="create a list of questions on our server and the output server", response_model=List[dict],response_description="Create a list of questions on our server and the output server", status_code=201)
+@app.post("/questions",summary="create a list of questions on our server and the output server",response_description="Create a list of questions on our server and the output server", status_code=201)
 async def questions(questions: Questions):
     result = await create_question(questions)
     return result
