@@ -5,5 +5,5 @@ uvicorn>=0.15.0,<0.16.0
 pandas
 python-multipart
 openpyxl
-pymongo
+pymongo[srv]
 motor
