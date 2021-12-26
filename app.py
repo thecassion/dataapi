@@ -15,8 +15,9 @@ from db.question import create_question, get_questions_by_form
 from utils.data import dataInToDataOut
 import io
 from datetime import datetime
+from core.config import settings
 
-app = FastAPI(title="UNOPS DATA INTEGRATION", description="A data integration system that helps UNOPS send their data to USI system", version="0.1")
+app = FastAPI(title=settings.PROJECT_TITLE, description=settings.PORJECT_DESCRIPTION, version=settings.PROJECT_VERSION)
 
 
 _forms = db["forms"]
@@ -24,9 +25,9 @@ _forms.create_index([("type",pm.ASCENDING),("name",pm.ASCENDING)], unique=True,n
 _form_data_in = db["form_data_in"]
 _form_data_out = db["form_data_out"]
 
-@app.get("/")
+@app.get("/", tags=['Home'])
 async def root():
-    return {"message": "Hello World"}
+    return {"message": "Please write /docs into the browser path to enter to openapi"}
 
 @app.post("/bulksuploadformdata", response_model=List[dict],response_description="Create form data_in in the server using an xlsx, json , csv or xml format", status_code=201, summary="Create form data_in in the server using an xlsx, json , csv or xml format")
 async def form(file: UploadFile = File(...)):
