@@ -34,3 +34,8 @@ async def updateForms(forms:List[Form])->List[Form]:
     result = await form_collection.insert_many(forms)
     if result:
         return forms
+
+async def deleteForm(name:str,type:str)->Form:
+    result = await form_collection.delete_one({"name":name,"type":type})
+    if result:
+        return {"deleted":True}
