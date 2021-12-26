@@ -82,19 +82,21 @@ async def check_form(name:str,type:str, file : UploadFile = File(...)):
     old_questions = await get_questions_by_form(name,type)
     if old_questions["message"] == "Form not found":
         return {"message":"Form not found"}
-    __df_old_questions = pd.DataFrame(old_questions)
-    __old_join_new_by_description = pd.merge(__df_col,__df_old_questions,on="description",how="left")
-    __new_join_old_by_description = pd.merge(__df_old_questions,__df_col,on="description",how="left")
-    __new_join_old_by_code = pd.merge(__df_col,__df_old_questions,on="code",how="left")
-    __old_join_new_by_code = pd.merge(__df_old_questions,__df_col,on="code",how="left")
+    if len(old_questions) > 0:
+        __df_old_questions = pd.DataFrame(old_questions)
+        __old_join_new_by_description = pd.merge(__df_col,__df_old_questions,on="description",how="left")
+        __new_join_old_by_description = pd.merge(__df_old_questions,__df_col,on="description",how="left")
+        __new_join_old_by_code = pd.merge(__df_col,__df_old_questions,on="code",how="left")
+        __old_join_new_by_code = pd.merge(__df_old_questions,__df_col,on="code",how="left")
     buffer = io.BytesIO()
     with pd.ExcelWriter(buffer) as writer:
         __df_col.to_excel(writer, sheet_name="new", index=False)
-        __df_old_questions.to_excel(writer, sheet_name="old", index=False)
-        __old_join_new_by_description.to_excel(writer, sheet_name="old_join_new_by_description", index=False)
-        __new_join_old_by_description.to_excel(writer, sheet_name="new_join_old_by_description", index=False)
-        __new_join_old_by_code.to_excel(writer, sheet_name="new_join_old_by_code", index=False)
-        __old_join_new_by_code.to_excel(writer, sheet_name="old_join_new_by_code", index=False)
+        if len(old_questions) > 0:
+            __df_old_questions.to_excel(writer, sheet_name="old", index=False)
+            __old_join_new_by_description.to_excel(writer, sheet_name="old_join_new_by_description", index=False)
+            __new_join_old_by_description.to_excel(writer, sheet_name="new_join_old_by_description", index=False)
+            __new_join_old_by_code.to_excel(writer, sheet_name="new_join_old_by_code", index=False)
+            __old_join_new_by_code.to_excel(writer, sheet_name="old_join_new_by_code", index=False)
     buffer.seek(0)
     # Download the file
     headers = {"Content-Disposition": "attachment; filename="+type+"_"+name+"_"+str(datetime.now())+".xlsx"}

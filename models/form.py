@@ -8,6 +8,5 @@ class Form(BaseModel):
     type: str = Field(..., title="type of the form")
     url_out :str = Field(..., title="url_out: Url to forward the form")
     questions_url_out: str = Field(..., title="questions_url_out: Url to forward the questions")
-    questions :Optional[List[Question]] = Field(None, title="questions: list of questions")
     format_out :Optional[dict] = Field(None ,title="The format of the output data to url_out")
     format_in :Optional[dict] = Field(None, title="The format of the input data to the form")
