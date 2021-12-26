@@ -14,6 +14,7 @@ from db.form import createForms, retrieveForm, updateForm,createForm, retrieveFo
 from db.question import create_question, get_questions_by_form
 from utils.data import dataInToDataOut
 import io
+from datetime import datetime
 
 app = FastAPI(title="UNOPS DATA INTEGRATION", description="A data integration system that helps UNOPS send their data to USI system", version="0.1")
 
@@ -71,9 +72,8 @@ async def transform_data_in_to_data_out(name:str,type:str):
     result_1 = dataInToDataOut(result.get("data_in"),result.get('format_in'),result.get("format_out"))
     return JSONResponse(content=result_1)
 
-@app.post("/checkform")
+@app.post("/checkform/xlsx")
 async def check_form(name:str,type:str, file : UploadFile = File(...)):
-    result = await retrieveForm(name,type)
     df = pd.read_excel(file.file.read())
     df = df[:1]
     __df_col = df.transpose()
@@ -81,18 +81,23 @@ async def check_form(name:str,type:str, file : UploadFile = File(...)):
     __df_col.columns = ["code","description"]
     old_questions = await get_questions_by_form(name,type)
     __df_old_questions = pd.DataFrame(old_questions)
-    __df_col = pd.merge(__df_col,__df_old_questions,on="description",how="left")
+    __old_join_new_by_description = pd.merge(__df_col,__df_old_questions,on="description",how="left")
+    __new_join_old_by_description = pd.merge(__df_old_questions,__df_col,on="description",how="left")
+    __new_join_old_by_code = pd.merge(__df_col,__df_old_questions,on="code",how="left")
+    __old_join_new_by_code = pd.merge(__df_old_questions,__df_col,on="code",how="left")
     buffer = io.BytesIO()
     with pd.ExcelWriter(buffer) as writer:
         __df_col.to_excel(writer, sheet_name="new", index=False)
         __df_old_questions.to_excel(writer, sheet_name="old", index=False)
+        __old_join_new_by_description.to_excel(writer, sheet_name="old_join_new_by_description", index=False)
+        __new_join_old_by_description.to_excel(writer, sheet_name="new_join_old_by_description", index=False)
+        __new_join_old_by_code.to_excel(writer, sheet_name="new_join_old_by_code", index=False)
+        __old_join_new_by_code.to_excel(writer, sheet_name="old_join_new_by_code", index=False)
     buffer.seek(0)
-    # __my_json = json.loads(__df_col.to_json(orient='records'))
-    headers = {"Content-Disposition": "attachment; filename="+type+"_"+name+".xlsx"}
+    # Download the file
+    headers = {"Content-Disposition": "attachment; filename="+type+"_"+name+"_"+str(datetime.now())+".xlsx"}
     return StreamingResponse(buffer,headers=headers)
-    return FileResponse(type+"_"+name+".xlsx",media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-
-@app.post("/insert_columndata_from_xlsx")
+@app.post("/form/questions/xlsx", response_description="Create a list of questions for a specific form using an excel ", status_code=201, summary="Create a list of questions on our server using an excel")
 async def column_data_from_xlsx(name:str,type:str, file : UploadFile = File(...)):
     result = await retrieveForm(name,type)
     df = pd.read_excel(file.file.read())
@@ -102,8 +107,7 @@ async def column_data_from_xlsx(name:str,type:str, file : UploadFile = File(...)
     __df_col.columns = ["code","description"]
     old_questions = await get_questions_by_form(name,type)
     __df_old_questions = pd.DataFrame(old_questions)
-    __df_col = pd.merge(__df_col,__df_old_questions,on="description",how="left")
-    __df_col = __df_col.to_excel(type+"_"+name+".xlsx")
+    __df_col.to_excel(type+"_"+name+".xlsx")
     __df_old_questions.to_excel(type+"_"+name+".xlsx")
 
     __my_json = json.loads(__df_col.to_json(orient='records'))
