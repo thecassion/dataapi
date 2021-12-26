@@ -80,7 +80,7 @@ async def check_form(name:str,type:str, file : UploadFile = File(...)):
     __df_col["description"] = __df_col.index
     __df_col.columns = ["code","description"]
     old_questions = await get_questions_by_form(name,type)
-    if old_questions["message"] == "Form not found":
+    if isinstance(old_questions,dict) & old_questions["message"] == "Form not found":
         return {"message":"Form not found"}
     if len(old_questions) > 0:
         __df_old_questions = pd.DataFrame(old_questions)
