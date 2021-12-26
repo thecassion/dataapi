@@ -8,3 +8,8 @@ openpyxl
 pymongo[srv]
 motor
 aiofiles
+#for email validation
+pydantic[email]
+
+#hashing
+passlib[bcrypt]
