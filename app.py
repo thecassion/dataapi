@@ -80,6 +80,8 @@ async def check_form(name:str,type:str, file : UploadFile = File(...)):
     __df_col["description"] = __df_col.index
     __df_col.columns = ["code","description"]
     old_questions = await get_questions_by_form(name,type)
+    if old_questions["message"] == "Form not found":
+        return {"message":"Form not found"}
     __df_old_questions = pd.DataFrame(old_questions)
     __old_join_new_by_description = pd.merge(__df_col,__df_old_questions,on="description",how="left")
     __new_join_old_by_description = pd.merge(__df_old_questions,__df_col,on="description",how="left")
