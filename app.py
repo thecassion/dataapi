@@ -7,11 +7,13 @@ import json
 from starlette.responses import StreamingResponse
 from models.question import UpdateQuestions, Questions
 from models.form import Form
+from models.user import ShowUser, UserCreate
 from typing import  List
 import pymongo as pm
 from db import db
 from db.form import createForms, retrieveForm, updateForm,createForm, retrieveForms
 from db.question import create_question, get_questions_by_form
+from db.user import createUser, retrieveUser, retrieveUsers
 from utils.data import dataInToDataOut
 import io
 from datetime import datetime
@@ -29,7 +31,7 @@ _form_data_out = db["form_data_out"]
 async def root():
     return {"message": "Please write /docs into the browser path to enter to openapi"}
 
-@app.post("/bulksuploadformdata", response_model=List[dict],response_description="Create form data_in in the server using an xlsx, json , csv or xml format", status_code=201, summary="Create form data_in in the server using an xlsx, json , csv or xml format")
+@app.post("/bulksuploadformdata", response_model=List[dict],response_description=settings.BULKUPLOADFORMDATA_DESCRIPTION, status_code=201, summary=settings.BULKUPLOADFORMDATA_SUMMARY,tags=['Data Processing'])
 async def form(file: UploadFile = File(...)):
     df = pd.read_excel(file.file.read(), header=1)
     df["_id"] = df.site_identifier_11
@@ -39,41 +41,42 @@ async def form(file: UploadFile = File(...)):
     await _forms.insert_many(_json)
     return JSONResponse(content=_json)
 
-@app.post("/questions",summary="create a list of questions on our server and the output server",response_description="Create a list of questions on our server and the output server", status_code=201)
+@app.post("/questions",summary=settings.QUESTIONS_SUMMARY,response_description=settings.QUESTIONS_DESCRIPTION, status_code=201, tags=['Question'])
 async def questions(questions: Questions):
     result = await create_question(questions)
     return result
 
-@app.put("/questions")
+@app.put("/questions",summary=settings.QUESTION_UPDATE_SUMMARY, response_description=settings.QUESTION_UPDATE_DESCRIPTION, tags=['Question'])
 async def update_questions(questions: UpdateQuestions):
-
     return {"questions": "questions"}
 
-@app.post("/form")
+@app.post("/form", tags=['Form'])
 async def create_form(form_data: Form):
     result = await createForm(form_data)
     return JSONResponse(content=result.dict())
-@app.put("/form")
+
+@app.put("/form", tags=['Form'])
 async def update_form(form_data: Form):
     result = await updateForm(form_data)
     return JSONResponse(content=result.dict())
 
-@app.post("/forms")
+@app.post("/forms",tags=['Form'])
 async def create_forms(forms: List[Form]):
     result = await createForms(forms)
     return result
-@app.get("/forms", response_model=List[Form],response_description="Create a list of forms on our server and the output server", status_code=201, summary="Create a list of forms on our server and the output server")
+
+@app.get("/forms", response_model=List[Form],response_description=settings.FORMS_DESCRIPTION, status_code=201, summary=settings.FORMS_SUMMARY, tags=['Form'])
 async def retrieve_forms():
     result = await retrieveForms()
     return result
 
-@app.put("/tsform")
+@app.put("/tsform", tags=['Form'])
 async def transform_data_in_to_data_out(name:str,type:str):
     result = await retrieveForm(name,type)
     result_1 = dataInToDataOut(result.get("data_in"),result.get('format_in'),result.get("format_out"))
     return JSONResponse(content=result_1)
 
-@app.post("/checkform/xlsx")
+@app.post("/checkform/xlsx", tags=['Form'])
 async def check_form(name:str,type:str, file : UploadFile = File(...)):
     df = pd.read_excel(file.file.read())
     df = df[:1]
@@ -103,7 +106,8 @@ async def check_form(name:str,type:str, file : UploadFile = File(...)):
     # Download the file
     headers = {"Content-Disposition": "attachment; filename="+type+"_"+name+"_"+str(datetime.now())+".xlsx"}
     return StreamingResponse(buffer,headers=headers)
-@app.post("/form/questions/xlsx", response_description="Create a list of questions for a specific form using an excel ", status_code=201, summary="Create a list of questions on our server using an excel")
+
+@app.post("/form/questions/xlsx", response_description=settings.FORM_QUESTIONS_DESCRIPTION, status_code=201, summary=settings.FORM_QUESTIONS_SUMMARY, tags=['Form'])
 async def column_data_from_xlsx(name:str,type:str, file : UploadFile = File(...)):
     result = await retrieveForm(name,type)
     df = pd.read_excel(file.file.read())
