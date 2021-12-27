@@ -27,9 +27,33 @@ _forms.create_index([("type",pm.ASCENDING),("name",pm.ASCENDING)], unique=True,n
 _form_data_in = db["form_data_in"]
 _form_data_out = db["form_data_out"]
 
+
 @app.get("/", tags=['Home'])
 async def root():
     return {"message": "Please write /docs into the browser path to enter to openapi"}
+
+
+
+@app.post("/createUser",  response_model=UserCreate, response_description=settings.CREATE_USER_DESCRIPTION, response_summary=settings.CREATE_USER_SUMMARY, status_code=status.HTTP_201_CREATED, tags=['USER'])
+async def post_user(user:UserCreate):
+    resUser = await createUser(user)
+    if resUser:
+        return resUser
+    raise HTTPException(status.HTTP_404_NOT_FOUND, "Something went wrong")
+    
+    
+
+
+
+
+
+
+
+
+
+
+
+
 
 @app.post("/bulksuploadformdata", response_model=List[dict],response_description=settings.BULKUPLOADFORMDATA_DESCRIPTION, status_code=201, summary=settings.BULKUPLOADFORMDATA_SUMMARY,tags=['Data Processing'])
 async def form(file: UploadFile = File(...)):
