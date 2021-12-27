@@ -20,8 +20,8 @@ class Settings:
     FORM_QUESTIONS_DESCRIPTION = "Create a list of questions for a specific form using an excel "
     FORM_QUESTIONS_SUMMARY = "Create a list of questions for a specific form using an excel "
     
-    CREATE_USER_DESCRIPTION = "CREATE USER INTO THE DB WITH HASHED PASSWORD"
-    CREATE_USER_SUMMARY = "CREATE USER INTO THE DB WITH HASHED PASSWORD"
+    CREATE_USER_DESCRIPTION = "create user in the db with hashed password"
+    CREATE_USER_SUMMARY = "create user in the db with hashed password"
     
     
     

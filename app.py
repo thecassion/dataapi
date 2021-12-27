@@ -7,7 +7,7 @@ import json
 from starlette.responses import StreamingResponse
 from models.question import UpdateQuestions, Questions
 from models.form import Form
-from models.user import ShowUser, UserCreate
+from models.user import ShowUser, UserCreate, User
 from typing import  List
 import pymongo as pm
 from db import db
@@ -34,9 +34,10 @@ async def root():
 
 
 
-@app.post("/createUser",  response_model=UserCreate, response_description=settings.CREATE_USER_DESCRIPTION, response_summary=settings.CREATE_USER_SUMMARY, status_code=status.HTTP_201_CREATED, tags=['USER'])
-async def post_user(user:UserCreate):
-    resUser = await createUser(user)
+@app.post("/createUser", response_model=User ,response_description=settings.CREATE_USER_DESCRIPTION, summary=settings.CREATE_USER_SUMMARY, status_code=status.HTTP_201_CREATED, tags=['USER'])
+async def post_user(user:User):
+    _user = user.dict()
+    resUser = await createUser(_user)
     if resUser:
         return resUser
     raise HTTPException(status.HTTP_404_NOT_FOUND, "Something went wrong")

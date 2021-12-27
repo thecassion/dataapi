@@ -5,12 +5,14 @@ from models.user import User, ShowUser, UserCreate
 
 user_collection = db.users
 
-async def createUser(user:UserCreate)->UserCreate:
-    __user = user.dict()
-    __user['password'] = Hasher.get_password_hash(__user.password)
-    __usercreate = await user_collection.insert_one(__user.dict())
-    if __usercreate:
-        return __usercreate
+async def createUser(user: dict)-> User:
+    _user = dict(user)
+    _hashed_password = Hasher().get_password_hash(_user.get('password'))
+    _user['password'] = _hashed_password
+    _usercreate = await user_collection.insert_one(_user)
+    _new_user = await user_collection.find_one({"_id": _usercreate.inserted_id})
+    if _new_user:
+        return User(**_new_user)
     
     
 async def retrieveUser(username: str,email:str)->ShowUser:
