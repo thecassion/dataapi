@@ -42,9 +42,17 @@ async def post_user(user:User):
         return resUser
     raise HTTPException(status.HTTP_404_NOT_FOUND, "Something went wrong")
     
+
+
+@app.get('/get_allUser', response_description=settings.GET_USERS_DESCRIPTION, summary=settings.GET_USERS_SUMMARY,status_code=status.HTTP_201_CREATED, tags=['USER'])
+async def get_users():
+    pass
+
+
     
-
-
+@app.get('/get_oneUser', response_model=User, response_description=settings.GET_USER_DESCRIPTION, summary=settings.GET_USER_SUMMARY, status_code=status.HTTP_201_CREATED, tags=['USER'])
+async def get_user(username:str, email:str):
+    pass
 
 
 

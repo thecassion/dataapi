@@ -15,13 +15,21 @@ async def createUser(user: dict)-> User:
         return User(**_new_user)
     
     
-async def retrieveUser(username: str,email:str)->ShowUser:
+async def retrieveUser(username: str,email:str)->User:
     __user_FindOne = await user_collection.find_one({"username":username},{"email":email})
     if __user_FindOne:
         return __user_FindOne
 
-async def retrieveUsers()-> List[ShowUser]:
+async def retrieveUsers()-> List[User]:
     __users = await user_collection.find().to_list(100000)
     if __users:
         return __users
+    
+
+async def updateUser():
+    pass
+
+async def deleteUser():
+    pass
+
 
