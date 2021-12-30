@@ -1,4 +1,4 @@
-
+from decouple import config
 
 class Settings:
     PROJECT_TITLE:  str = "UNOPS DATA INTEGRATION"
@@ -34,6 +34,11 @@ class Settings:
     
     DELETE_USER_DESCRIPTION = "admin can DELETE any user "
     DELETE_USER_SUMMARY = "admin can DELETE any user"
+    
+    ALGORITHM = config('ALG')
+    ACCESS_TOKEN_EXPIRE_MINUTES = config('TOKEN_EXPIRING')
+    SECRET_KEY : str = config('SECRET_KEY')
+    
     
     
     
