@@ -4,7 +4,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-
 class Settings:
     PROJECT_TITLE:  str = "UNOPS DATA INTEGRATION"
     PORJECT_DESCRIPTION: str = "A data integration system that helps UNOPS send their data to USI system"
