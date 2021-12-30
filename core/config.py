@@ -1,4 +1,9 @@
 from decouple import config
+from dotenv import load_dotenv
+
+
+load_dotenv()
+
 
 class Settings:
     PROJECT_TITLE:  str = "UNOPS DATA INTEGRATION"
