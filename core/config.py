@@ -39,6 +39,12 @@ class Settings:
     DELETE_USER_DESCRIPTION = "admin can DELETE any user "
     DELETE_USER_SUMMARY = "admin can DELETE any user"
     
+    REGISTRATION_DESCRIPTION = 'register normal users on the system'
+    REGISTRATION_SUMMARY = 'register normal users on the system'
+    
+    REGISTER_ADMIN_DESCRIPTION = 'register an admin on the system'
+    REGISTER_ADMIN_SUMMARY = 'register an admin on the system'
+    
     ALGORITHM = config('ALG')
     ACCESS_TOKEN_EXPIRE_MINUTES = config('TOKEN_EXPIRING')
     SECRET_KEY : str = config('SECRET_KEY')

@@ -9,7 +9,7 @@ from typing import Optional
 from starlette.responses import StreamingResponse
 from models.question import UpdateQuestions, Questions
 from models.form import Form
-from models.user import User, UserUpdate
+from models.user import User, RegisterUser, RegisterAdmin
 from typing import  List
 import pymongo as pm
 from db import db
@@ -23,7 +23,9 @@ from db.user import (
     updateUser,
     updateUser_byEmail,
     delUserByEmail,
-    delUserByUsername   
+    delUserByUsername,
+    registerUser,
+    registerAdmin   
 )
 from utils.data import dataInToDataOut
 import io
@@ -63,9 +65,9 @@ async def get_userByUsername(username:str)->User:
 @app.post("/admin/createUser", response_model=User ,response_description=settings.CREATE_USER_DESCRIPTION, summary=settings.CREATE_USER_SUMMARY, status_code=status.HTTP_201_CREATED, tags=['USER'])
 async def post_user(user:User)->User:
     _user = user.dict()
-    resUser = await createUser(_user)
-    if resUser:
-        return resUser
+    _resUser = await createUser(_user)
+    if _resUser:
+        return _resUser
     raise HTTPException(status.HTTP_404_NOT_FOUND, "Something went wrong")
     
 
@@ -126,9 +128,26 @@ async def delete_userByUsername(username:str)->dict:
 ############### Registration
 
 
-@app.post('/register',tags=['Register'])
-async def register():
-    pass
+@app.post('/register', response_model=RegisterUser, response_description=settings.REGISTRATION_DESCRIPTION, summary=settings.REGISTRATION_SUMMARY, status_code=status.HTTP_201_CREATED, tags=['Register'])
+async def register(user: RegisterUser)->RegisterUser:
+    _user = user.dict()
+    _resUser = await registerUser(_user)
+    if _resUser:
+        return _resUser
+    raise HTTPException(status.HTTP_404_NOT_FOUND, "Something went wrong")
+
+
+
+@app.post('/admin/register', response_model=RegisterAdmin, response_description=settings.REGISTER_ADMIN_DESCRIPTION, summary=settings.REGISTER_ADMIN_SUMMARY, status_code=status.HTTP_201_CREATED, tags=['Register'])
+async def register_admin(admin: RegisterAdmin)->RegisterAdmin:
+    _user = admin.dict()
+    _resUser = await registerAdmin(_user)
+    if _resUser:
+        return _resUser
+    raise HTTPException(status.HTTP_404_NOT_FOUND, "Something went wrong")
+
+
+
 
 
 ################# TOken/Login

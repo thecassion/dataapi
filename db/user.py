@@ -1,7 +1,7 @@
 from typing import List
 from db import db
 from core.hashing import Hasher
-from models.user import User, UserUpdate
+from models.user import User, RegisterUser, RegisterAdmin
 from typing import Optional
 
 user_collection = db.users
@@ -14,6 +14,28 @@ async def createUser(user: dict)-> User:
     _new_user = await user_collection.find_one({"_id": _usercreate.inserted_id})
     if _new_user:
         return User(**_new_user)
+
+async def registerUser(user: dict)-> RegisterUser:
+    _user = dict(user)
+    _hashed_password = Hasher.get_password_hash(_user.get('password'))
+    _user['password'] = _hashed_password
+    _user['is_active'] = RegisterUser.is_active
+    _user['is_superUser'] = RegisterUser.is_superUser
+    _usercreate = await user_collection.insert_one(_user)
+    _new_user = await user_collection.find_one({"_id": _usercreate.inserted_id})
+    if _new_user:
+        return RegisterUser(**_new_user)
+
+async def registerAdmin(user: dict)-> RegisterAdmin:
+    _user = dict(user)
+    _hashed_password = Hasher.get_password_hash(_user.get('password'))
+    _user['password'] = _hashed_password
+    _user['is_active'] = RegisterAdmin.is_active
+    _user['is_superUser'] = RegisterAdmin.is_superUser
+    _usercreate = await user_collection.insert_one(_user)
+    _new_user = await user_collection.find_one({"_id": _usercreate.inserted_id})
+    if _new_user:
+        return RegisterAdmin(**_new_user)
     
 
 async def getUsers()-> List[User]:
