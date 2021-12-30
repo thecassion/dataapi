@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, ClassVar
 from pydantic import BaseModel,EmailStr, Field 
 
 
@@ -6,19 +6,26 @@ class User(BaseModel):
     username: str = Field(...,title='username of the USER')
     email: EmailStr = Field(...,title='email of the USER')
     password: str = Field(...,title=' hashed password of the USER')
-    is_active: bool = Field(True,title='is the USER active')
-    is_superUser: bool = Field(False,title='does the USER have admin credentials')
+    is_active: Optional[bool] = Field(True,title='is the USER active')
+    is_superUser: Optional[bool] = Field(False,title='does the USER have admin credentials')
 
 
-class UserCreate(User):
-    username : str = Field(...,title='username of the USER')
-    email : EmailStr = Field(...,title='email of the USER')
-    password : str = Field(...,title=' hashed password of the USER')
-    is_superUser: bool = Field(False,title='does the USER have admin credentials') 
+
+class RegisterUser(BaseModel):
+    username: str 
+    email: EmailStr 
+    password: str 
+    is_active: ClassVar[bool] = True
+    is_superUser: ClassVar[bool] = False
 
 
-class ShowUser(User):
-    username : str = Field(...,title='username of the USER')
-    email : EmailStr = Field(...,title='email of the USER')
-    is_active: bool = Field(True,title='is the USER active')
-    is_superUser: bool = Field(False,title='does the USER have admin credentials')
+
+class RegisterAdmin(BaseModel):
+    username: str 
+    email: EmailStr 
+    password: str 
+    is_active: ClassVar[bool] = True
+    is_superUser: ClassVar[bool] = True
+    
+
+

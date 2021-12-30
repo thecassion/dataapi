@@ -10,6 +10,11 @@ motor
 aiofiles
 #for email validation
 pydantic[email]
-
 #hashing
 passlib[bcrypt]
+# for env var
+python-decouple
+python-dotenv
+#for jwt tokens
+python-jose
+
