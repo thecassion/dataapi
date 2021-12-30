@@ -23,11 +23,17 @@ class Settings:
     CREATE_USER_DESCRIPTION = "create user in the db with hashed password"
     CREATE_USER_SUMMARY = "create user in the db with hashed password"
     
-    GET_USER_DESCRIPTION = "get user in the db with hashed password"
-    GET_USER_SUMMARY = "get user in the db with hashed password"
+    GET_USER_DESCRIPTION = "get user by username or email in the db with hashed password"
+    GET_USER_SUMMARY = "get user by username or email in the db with hashed password"
     
     GET_USERS_DESCRIPTION = "get users in the db with hashed password"
     GET_USERS_SUMMARY = "get users in the db with hashed password"
+    
+    UPDATE_USER_DESCRIPTION = "admin can Update any user "
+    UPDATE_USER_SUMMARY = "admin can Update any user"
+    
+    DELETE_USER_DESCRIPTION = "admin can DELETE any user "
+    DELETE_USER_SUMMARY = "admin can DELETE any user"
     
     
     
