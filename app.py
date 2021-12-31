@@ -16,7 +16,7 @@ from db import db
 from db.form import createForms, retrieveForm, updateForm,createForm, retrieveForms
 from db.question import create_question, get_questions_by_form
 from db.user import (
-    createUser, 
+    createUser,
     getUsers,
     getUserByEmail,
     getUserByUsername,
@@ -25,7 +25,7 @@ from db.user import (
     delUserByEmail,
     delUserByUsername,
     registerUser,
-    registerAdmin   
+    registerAdmin
 )
 from utils.data import dataInToDataOut
 import io
@@ -37,7 +37,7 @@ app = FastAPI(title=settings.PROJECT_TITLE, description=settings.PORJECT_DESCRIP
 
 _forms = db["forms"]
 _forms.create_index([("type",pm.ASCENDING),("name",pm.ASCENDING)], unique=True,name="form_index")
-_form_data_in = db["form_data_in"]
+_form_data = db["form_data"]
 _form_data_out = db["form_data_out"]
 
 
@@ -50,15 +50,15 @@ async def root():
 
 ################ Admin
 
-   
+
 @app.get("/admin/user/{username}", response_model=User,response_description=settings.GET_USER_DESCRIPTION, summary=settings.GET_USER_SUMMARY, status_code=status.HTTP_201_CREATED, tags=['USER'])
 async def get_userByUsername(username:str)->User:
     _user = await getUserByUsername(username)
     if _user:
         return _user
     raise HTTPException(status.HTTP_404_NOT_FOUND, f"Something went wrong wwith {username}")
-    
-    
+
+
 
 
 
@@ -69,7 +69,7 @@ async def post_user(user:User)->User:
     if _resUser:
         return _resUser
     raise HTTPException(status.HTTP_404_NOT_FOUND, "Something went wrong")
-    
+
 
 
 @app.get("/admin/user/{email}/", response_model=User, response_description=settings.GET_USER_DESCRIPTION, summary=settings.GET_USER_SUMMARY,status_code=status.HTTP_201_CREATED, tags=['USER'])
@@ -88,7 +88,7 @@ async def get_users()->List[User]:
         return _users
     raise HTTPException(status.HTTP_404_NOT_FOUND, "Something went wrong")
 
-    
+
 
 @app.put("/admin/update_user/{username}", response_model=User,response_description=settings.UPDATE_USER_DESCRIPTION, summary=settings.UPDATE_USER_SUMMARY, status_code=status.HTTP_201_CREATED,  tags=['USER'])
 async def put_user(username:str,email:EmailStr,password:str, is_active:Optional[bool], is_superUser:Optional[bool])->User:
@@ -122,7 +122,7 @@ async def delete_userByUsername(username:str)->dict:
     if _userdeleted:
         return {"Message": f"the user with the {username} has been deleted" }
     raise HTTPException(status.HTTP_404_NOT_FOUND, f"Something went wrong with {username}")
-    
+
 
 
 ############### Registration
@@ -252,15 +252,6 @@ async def check_form(name:str,type:str, file : UploadFile = File(...)):
 async def column_data_from_xlsx(name:str,type:str, file : UploadFile = File(...)):
     result = await retrieveForm(name,type)
     df = pd.read_excel(file.file.read())
-    df = df[:1]
-    __df_col = df.transpose()
-    __df_col["description"] = __df_col.index
-    __df_col.columns = ["code","description"]
-    old_questions = await get_questions_by_form(name,type)
-    __df_old_questions = pd.DataFrame(old_questions)
-    __df_col.to_excel(type+"_"+name+".xlsx")
-    __df_old_questions.to_excel(type+"_"+name+".xlsx")
-
-    __my_json = json.loads(__df_col.to_json(orient='records'))
+    __my_json = json.loads(df.to_json(orient='records'))
     return __my_json
 
