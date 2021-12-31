@@ -1,5 +1,14 @@
 import os
-from fastapi import FastAPI, Body, HTTPException, status,File, UploadFile, Form
+from fastapi import (
+    FastAPI, 
+    Body, 
+    HTTPException, 
+    status,
+    File, 
+    UploadFile, 
+    Form, 
+    Depends
+)
 from fastapi.responses import JSONResponse, FileResponse
 import pandas as pd
 import json
@@ -10,6 +19,7 @@ from starlette.responses import StreamingResponse
 from models.question import UpdateQuestions, Questions
 from models.form import Form
 from models.user import User, RegisterUser, RegisterAdmin
+from models.token import Token, TokenData
 from typing import  List
 import pymongo as pm
 from db import db
@@ -29,8 +39,11 @@ from db.user import (
 )
 from utils.data import dataInToDataOut
 import io
-from datetime import datetime
+from datetime import datetime, timedelta
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from jose import jwt, JWTError
 from core.config import settings
+from core.hashing import Hasher
 
 app = FastAPI(title=settings.PROJECT_TITLE, description=settings.PORJECT_DESCRIPTION, version=settings.PROJECT_VERSION)
 
@@ -147,12 +160,59 @@ async def register_admin(admin: RegisterAdmin)->RegisterAdmin:
     raise HTTPException(status.HTTP_404_NOT_FOUND, "Something went wrong")
 
 
+##################### helper
+
+async def authenticate_user(username:str,password:str)->User:
+    _user =  await getUserByUsername(username)
+    print(_user)
+    if not _user:
+        return False
+    if not Hasher.verify_password(password,_user.password):
+        return False 
+    return _user
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/token")
+
+def create_access_token(data: dict, expires_delta: timedelta):
+    to_encode = data.copy()
+    expire = datetime.utcnow() + expires_delta
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+    return encoded_jwt
+
+
+async def get_current_user_from_token(token:str = Depends(oauth2_scheme)):
+    credentials_exception = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+    detail="Could not validate credentials")
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            raise credentials_exception
+        token_data = TokenData(username=username)
+    except JWTError:
+        raise credentials_exception
+    user = await getUserByUsername(username=token_data.username)
+    if user is None:
+        raise credentials_exception
+    return user
 
 
 
-################# TOken/Login
 
+################# /login/token
 
+@app.post("/token" , response_description=settings.LOGIN_DESCRIPTION, summary=settings.LOGIN_SUMMARY, response_model=Token, status_code=status.HTTP_201_CREATED, tags=['LOGIN'])
+async def login(form_data: OAuth2PasswordRequestForm = Depends()):
+    username = form_data.username
+    password = form_data.password
+    _user = await authenticate_user(username, password)
+    if not _user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Incorrect username or password")
+    access_token = create_access_token(data={"sub": username}, expires_delta=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES))
+    return {"access_token": access_token, "token_type": "bearer"}
+        
 
 
 
@@ -173,7 +233,7 @@ async def register_admin(admin: RegisterAdmin)->RegisterAdmin:
 ################
 
 @app.post("/bulksuploadformdata", response_model=List[dict],response_description=settings.BULKUPLOADFORMDATA_DESCRIPTION, status_code=201, summary=settings.BULKUPLOADFORMDATA_SUMMARY,tags=['Data Processing'])
-async def form(file: UploadFile = File(...)):
+async def form(file: UploadFile = File(...),current_user: User=Depends(get_current_user_from_token)):
     df = pd.read_excel(file.file.read(), header=1)
     df["_id"] = df.site_identifier_11
     df["_id_site_identifier_12"]=df.site_identifier_12
@@ -183,42 +243,42 @@ async def form(file: UploadFile = File(...)):
     return JSONResponse(content=_json)
 
 @app.post("/questions",summary=settings.QUESTIONS_SUMMARY,response_description=settings.QUESTIONS_DESCRIPTION, status_code=201, tags=['Question'])
-async def questions(questions: Questions):
+async def questions(questions: Questions,current_user: User=Depends(get_current_user_from_token)):
     result = await create_question(questions)
     return result
 
 @app.put("/questions",summary=settings.QUESTION_UPDATE_SUMMARY, response_description=settings.QUESTION_UPDATE_DESCRIPTION, tags=['Question'])
-async def update_questions(questions: UpdateQuestions):
+async def update_questions(questions: UpdateQuestions,current_user: User=Depends(get_current_user_from_token)):
     return {"questions": "questions"}
 
 @app.post("/form", tags=['Form'])
-async def create_form(form_data: Form):
+async def create_form(form_data: Form,current_user: User=Depends(get_current_user_from_token)):
     result = await createForm(form_data)
     return JSONResponse(content=result.dict())
 
 @app.put("/form", tags=['Form'])
-async def update_form(form_data: Form):
+async def update_form(form_data: Form,current_user: User=Depends(get_current_user_from_token)):
     result = await updateForm(form_data)
     return JSONResponse(content=result.dict())
 
 @app.post("/forms",tags=['Form'])
-async def create_forms(forms: List[Form]):
+async def create_forms(forms: List[Form],current_user: User=Depends(get_current_user_from_token)):
     result = await createForms(forms)
     return result
 
 @app.get("/forms", response_model=List[Form],response_description=settings.FORMS_DESCRIPTION, status_code=201, summary=settings.FORMS_SUMMARY, tags=['Form'])
-async def retrieve_forms():
+async def retrieve_forms(current_user: User=Depends(get_current_user_from_token)):
     result = await retrieveForms()
     return result
 
 @app.put("/tsform", tags=['Form'])
-async def transform_data_in_to_data_out(name:str,type:str):
+async def transform_data_in_to_data_out(name:str,type:str,current_user: User=Depends(get_current_user_from_token)):
     result = await retrieveForm(name,type)
     result_1 = dataInToDataOut(result.get("data_in"),result.get('format_in'),result.get("format_out"))
     return JSONResponse(content=result_1)
 
 @app.post("/checkform/xlsx", tags=['Form'])
-async def check_form(name:str,type:str, file : UploadFile = File(...)):
+async def check_form(name:str,type:str, file : UploadFile = File(...),current_user: User=Depends(get_current_user_from_token)):
     df = pd.read_excel(file.file.read())
     df = df[:1]
     __df_col = df.transpose()
@@ -249,7 +309,7 @@ async def check_form(name:str,type:str, file : UploadFile = File(...)):
     return StreamingResponse(buffer,headers=headers)
 
 @app.post("/form/questions/xlsx", response_description=settings.FORM_QUESTIONS_DESCRIPTION, status_code=201, summary=settings.FORM_QUESTIONS_SUMMARY, tags=['Form'])
-async def column_data_from_xlsx(name:str,type:str, file : UploadFile = File(...)):
+async def column_data_from_xlsx(name:str,type:str, file : UploadFile = File(...),current_user: User=Depends(get_current_user_from_token)):
     result = await retrieveForm(name,type)
     df = pd.read_excel(file.file.read())
     __my_json = json.loads(df.to_json(orient='records'))
