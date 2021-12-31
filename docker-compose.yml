@@ -15,6 +15,9 @@ services:
     environment:
       # - MONGODB_CONNSTRING=mongodb://root:root@mongo:27017/unops
       - MONGODB_URI=mongodb://mongo/unops
+      - SECRET_KEY=NdRgUkXp2s5v8x/A?D(G+KbPeShVmYq3t6w9z$B&E)H@McQfTjWnZr4u7x!A%D*F
+      - ALG=HS256
+      - TOKEN_EXPIRING=30
     depends_on:
       - mongo
   mongo:
