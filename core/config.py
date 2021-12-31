@@ -45,9 +45,12 @@ class Settings:
     REGISTER_ADMIN_DESCRIPTION = 'register an admin on the system'
     REGISTER_ADMIN_SUMMARY = 'register an admin on the system'
     
-    ALGORITHM = config('ALG')
-    ACCESS_TOKEN_EXPIRE_MINUTES = config('TOKEN_EXPIRING')
-    SECRET_KEY : str = config('SECRET_KEY')
+    ALGORITHM = config('ALG', cast=str)
+    ACCESS_TOKEN_EXPIRE_MINUTES = config('TOKEN_EXPIRING',cast=int)
+    SECRET_KEY : str = config('SECRET_KEY',cast=str)
+    
+    LOGIN_DESCRIPTION = 'Basic login system without differencing the admin or normal users'
+    LOGIN_SUMMARY = 'Basic login system without differencing the admin or normal users'
     
     
     

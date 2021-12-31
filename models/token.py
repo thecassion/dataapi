@@ -7,7 +7,7 @@ class Token(BaseModel):
     token_type: str
     
 class TokenData(BaseModel):
-    username: str
-    email: EmailStr
-    is_active: Optional[bool]
-    is_superUser: Optional[bool]
+    username: Optional[str]
+    #email: EmailStr
+    #is_active: Optional[bool]
+    #is_superUser: Optional[bool]
