@@ -22,15 +22,14 @@ async def create_form_question_xlsx(form_type: str, form_name: str, file: Upload
     Create new form question.
     """
     try:
-        result = await retrieveForm(form_name, form_type)
-        if result:
-            form = result
-            df = pd.read_excel(file.file.read(), header=1)
-            __dict = df.to_dict(orient='records')
-            result = await create_question(__dict)
+        df = pd.read_excel(file.file.read())
+        __dict = df.to_dict(orient='records')
+        questions ={"questions":__dict,"form_name":form_name,"form_type":form_type}
+        questions = Questions.parse_obj(questions)
+        result = await create_question(questions)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
-    return result
+    return {"number of questions":len(result.inserted_ids)}
 
 
 @router.post("/",summary=settings.QUESTIONS_SUMMARY,response_description=settings.QUESTIONS_DESCRIPTION, status_code=201)

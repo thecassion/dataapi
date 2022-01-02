@@ -13,7 +13,6 @@ class Question(BaseModel):
     code: str=Field(..., title="name of the question")
     description: str=Field(None, title="label of the question")
     path: Optional[str]=Field(None, title="path of the question")
-    uid: Optional[str]=Field(None, title="guuid of the question")
 class UpdateQuestions(BaseModel):
     questions: List[UpadateQuestion] = Field(..., title="list of questions to be updated")
     form_name: str = Field(..., title="name of the form")
