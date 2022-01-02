@@ -1,12 +1,12 @@
 import os
 from fastapi import (
-    FastAPI, 
-    Body, 
-    HTTPException, 
+    FastAPI,
+    Body,
+    HTTPException,
     status,
-    File, 
-    UploadFile, 
-    Form, 
+    File,
+    UploadFile,
+    Form,
     Depends
 )
 from fastapi.responses import JSONResponse, FileResponse
@@ -26,7 +26,7 @@ from db import db
 from db.form import createForms, retrieveForm, updateForm,createForm, retrieveForms
 from db.question import create_question, get_questions_by_form
 from db.user import (
-    createUser, 
+    createUser,
     getUsers,
     getUserByEmail,
     getUserByUsername,
@@ -35,7 +35,7 @@ from db.user import (
     delUserByEmail,
     delUserByUsername,
     registerUser,
-    registerAdmin   
+    registerAdmin
 )
 from utils.data import dataInToDataOut
 import io
@@ -44,34 +44,32 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import jwt, JWTError
 from core.config import settings
 from core.hashing import Hasher
+from routers.form_data import router as data_router
 
-app = FastAPI(title=settings.PROJECT_TITLE, description=settings.PORJECT_DESCRIPTION, version=settings.PROJECT_VERSION)
+app = FastAPI(title=settings.PROJECT_TITLE, description=settings.PORJECT_DESCRIPTION, version=settings.PROJECT_VERSION, docs_url=settings.DOCS_URL)
 
-
+app.include_router(data_router)
 _forms = db["forms"]
 _forms.create_index([("type",pm.ASCENDING),("name",pm.ASCENDING)], unique=True,name="form_index")
-_form_data_in = db["form_data_in"]
-_form_data_out = db["form_data_out"]
 
-
-@app.get("/", tags=['Home'])
-async def root():
-    return {"message": "Please write /docs into the browser path to enter to openapi"}
+# @app.get("/", tags=['Home'])
+# async def root():
+#     return {"message": "Please write /docs into the browser path to enter to openapi"}
 
 
 
 
 ################ Admin
 
-   
+
 @app.get("/admin/user/{username}", response_model=User,response_description=settings.GET_USER_DESCRIPTION, summary=settings.GET_USER_SUMMARY, status_code=status.HTTP_201_CREATED, tags=['USER'])
 async def get_userByUsername(username:str)->User:
     _user = await getUserByUsername(username)
     if _user:
         return _user
     raise HTTPException(status.HTTP_404_NOT_FOUND, f"Something went wrong wwith {username}")
-    
-    
+
+
 
 
 
@@ -82,7 +80,7 @@ async def post_user(user:User)->User:
     if _resUser:
         return _resUser
     raise HTTPException(status.HTTP_404_NOT_FOUND, "Something went wrong")
-    
+
 
 
 @app.get("/admin/user/{email}/", response_model=User, response_description=settings.GET_USER_DESCRIPTION, summary=settings.GET_USER_SUMMARY,status_code=status.HTTP_201_CREATED, tags=['USER'])
@@ -101,7 +99,7 @@ async def get_users()->List[User]:
         return _users
     raise HTTPException(status.HTTP_404_NOT_FOUND, "Something went wrong")
 
-    
+
 
 @app.put("/admin/update_user/{username}", response_model=User,response_description=settings.UPDATE_USER_DESCRIPTION, summary=settings.UPDATE_USER_SUMMARY, status_code=status.HTTP_201_CREATED,  tags=['USER'])
 async def put_user(username:str,email:EmailStr,password:str, is_active:Optional[bool], is_superUser:Optional[bool])->User:
@@ -135,7 +133,7 @@ async def delete_userByUsername(username:str)->dict:
     if _userdeleted:
         return {"Message": f"the user with the {username} has been deleted" }
     raise HTTPException(status.HTTP_404_NOT_FOUND, f"Something went wrong with {username}")
-    
+
 
 
 ############### Registration
@@ -168,7 +166,7 @@ async def authenticate_user(username:str,password:str)->User:
     if not _user:
         return False
     if not Hasher.verify_password(password,_user.password):
-        return False 
+        return False
     return _user
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/token")
@@ -212,7 +210,6 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
         detail="Incorrect username or password")
     access_token = create_access_token(data={"sub": username}, expires_delta=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES))
     return {"access_token": access_token, "token_type": "bearer"}
-        
 
 
 
@@ -312,15 +309,6 @@ async def check_form(name:str,type:str, file : UploadFile = File(...),current_us
 async def column_data_from_xlsx(name:str,type:str, file : UploadFile = File(...),current_user: User=Depends(get_current_user_from_token)):
     result = await retrieveForm(name,type)
     df = pd.read_excel(file.file.read())
-    df = df[:1]
-    __df_col = df.transpose()
-    __df_col["description"] = __df_col.index
-    __df_col.columns = ["code","description"]
-    old_questions = await get_questions_by_form(name,type)
-    __df_old_questions = pd.DataFrame(old_questions)
-    __df_col.to_excel(type+"_"+name+".xlsx")
-    __df_old_questions.to_excel(type+"_"+name+".xlsx")
-
-    __my_json = json.loads(__df_col.to_json(orient='records'))
+    __my_json = json.loads(df.to_json(orient='records'))
     return __my_json
 
