@@ -229,15 +229,6 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
 
 ################
 
-@app.post("/bulksuploadformdata", response_model=List[dict],response_description=settings.BULKUPLOADFORMDATA_DESCRIPTION, status_code=201, summary=settings.BULKUPLOADFORMDATA_SUMMARY,tags=['Data Processing'])
-async def form(file: UploadFile = File(...),current_user: User=Depends(get_current_user_from_token)):
-    df = pd.read_excel(file.file.read(), header=1)
-    df["_id"] = df.site_identifier_11
-    df["_id_site_identifier_12"]=df.site_identifier_12
-    df.site_identifier_12 = df.site_identifier_12.astype(str)
-    _json = json.loads(df.to_json(orient='records'))
-    await _forms.insert_many(_json)
-    return JSONResponse(content=_json)
 
 @app.post("/questions",summary=settings.QUESTIONS_SUMMARY,response_description=settings.QUESTIONS_DESCRIPTION, status_code=201, tags=['Question'])
 async def questions(questions: Questions,current_user: User=Depends(get_current_user_from_token)):
