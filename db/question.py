@@ -23,9 +23,12 @@ async def get_questions_by_form(form_name:str,form_type:str):
     """
     Get all questions by form
     """
-    __form = await retrieveForm(name=form_name,type=form_type)
-    if __form:
-        questions = await __questions.find({"form":__form.get("_id")}).to_list(100000)
-        return questions
-    else:
-        return {"message":"Form not found"}
+    try:
+        __form = await retrieveForm(name=form_name,type=form_type)
+        if __form:
+            result = await __questions.find({"form":__form.get("_id")},{"form":0,"_id":0}).to_list(100000)
+            return result
+        else:
+            return {"message": "Form not found"}
+    except Exception as e:
+        return {"message": str(e)}

@@ -30,6 +30,39 @@ async def create_form_question_xlsx(form_type: str, form_name: str, file: Upload
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
     return {"number of questions":len(result.inserted_ids)}
+@router.get("/xlsx")
+async def get_form_question_xlsx(form_name: str, form_type: str):
+    """
+    Get all questions.
+    """
+    try:
+        __questions = await get_questions_by_form(form_name, form_type)
+        if len(__questions) > 0:
+            df = pd.DataFrame(__questions)
+            buffer = io.BytesIO()
+            with pd.ExcelWriter(buffer) as writer:
+                df.to_excel(writer, sheet_name='questions', index=False)
+                writer.save()
+            buffer.seek(0)
+            headers = {"Content-Disposition": "attachment; filename="+form_type+"_"+form_name+"_questions.xlsx"}
+            return StreamingResponse(buffer, headers=headers)
+        else:
+            raise HTTPException(status_code=404, detail="No questions found")
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+@router.get("/")
+async def get_form_question(form_name: str, form_type: str):
+    """
+    Get all questions.
+    """
+    try:
+        __questions = await get_questions_by_form(form_name, form_type)
+        if len(__questions) > 0:
+            return __questions
+        else:
+            raise HTTPException(status_code=404, detail="No questions found")
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @router.post("/",summary=settings.QUESTIONS_SUMMARY,response_description=settings.QUESTIONS_DESCRIPTION, status_code=201)
