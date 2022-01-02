@@ -8,7 +8,6 @@ async def retrieveForm(name:str,type:str)->Form:
     __form = await form_collection.find_one({"$and":[{"name":name},{"type":type}]})
     if __form:
         return __form
-
 async def retrieveForms()->List[Form]:
     __forms = await form_collection.find().to_list(100000)
     # __forms = [Form(f) for f in __forms]

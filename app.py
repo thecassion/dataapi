@@ -1,12 +1,12 @@
 import os
 from fastapi import (
-    FastAPI, 
-    Body, 
-    HTTPException, 
+    FastAPI,
+    Body,
+    HTTPException,
     status,
-    File, 
-    UploadFile, 
-    Form, 
+    File,
+    UploadFile,
+    Form,
     Depends
 )
 from fastapi.responses import JSONResponse, FileResponse
@@ -44,19 +44,17 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import jwt, JWTError
 from core.config import settings
 from core.hashing import Hasher
+from routers.form_data import router as data_router
 
-app = FastAPI(title=settings.PROJECT_TITLE, description=settings.PORJECT_DESCRIPTION, version=settings.PROJECT_VERSION)
+app = FastAPI(title=settings.PROJECT_TITLE, description=settings.PORJECT_DESCRIPTION, version=settings.PROJECT_VERSION, docs_url=settings.DOCS_URL)
 
-
+app.include_router(data_router)
 _forms = db["forms"]
 _forms.create_index([("type",pm.ASCENDING),("name",pm.ASCENDING)], unique=True,name="form_index")
-_form_data = db["form_data"]
-_form_data_out = db["form_data_out"]
 
-
-@app.get("/", tags=['Home'])
-async def root():
-    return {"message": "Please write /docs into the browser path to enter to openapi"}
+# @app.get("/", tags=['Home'])
+# async def root():
+#     return {"message": "Please write /docs into the browser path to enter to openapi"}
 
 
 
@@ -168,7 +166,7 @@ async def authenticate_user(username:str,password:str)->User:
     if not _user:
         return False
     if not Hasher.verify_password(password,_user.password):
-        return False 
+        return False
     return _user
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/token")
@@ -212,7 +210,6 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
         detail="Incorrect username or password")
     access_token = create_access_token(data={"sub": username}, expires_delta=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES))
     return {"access_token": access_token, "token_type": "bearer"}
-        
 
 
 
