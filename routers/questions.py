@@ -8,13 +8,13 @@ from models.question import UpdateQuestions, Questions
 from core.config import settings
 import io
 
+from dependencies import get_current_user_from_token
 
 router = APIRouter(
     prefix="/form/questions",
-    tags=["Question"]
+    tags=["Question"],
+    dependencies=[Depends(get_current_user_from_token)]
 )
-from models.user import User
-from dependencies import authenticate_user, get_current_user_from_token
 
 @router.post("/xlsx")
 async def create_form_question_xlsx(form_type: str, form_name: str, file: UploadFile = File(...)):
@@ -34,16 +34,16 @@ async def create_form_question_xlsx(form_type: str, form_name: str, file: Upload
 
 
 @router.post("/",summary=settings.QUESTIONS_SUMMARY,response_description=settings.QUESTIONS_DESCRIPTION, status_code=201)
-async def questions(questions: Questions,current_user: User=Depends(get_current_user_from_token)):
+async def questions(questions: Questions):
     result = await create_question(questions)
     return result
 
 @router.put("/",summary=settings.QUESTION_UPDATE_SUMMARY, response_description=settings.QUESTION_UPDATE_DESCRIPTION)
-async def update_questions(questions: UpdateQuestions,current_user: User=Depends(get_current_user_from_token)):
+async def update_questions(questions: UpdateQuestions):
     return {"questions": "questions"}
 
 @router.post("/check/xlsx")
-async def check_form(name:str,type:str, file : UploadFile = File(...),current_user: User=Depends(get_current_user_from_token)):
+async def check_form(name:str,type:str, file : UploadFile = File(...)):
     df = pd.read_excel(file.file.read())
     df = df[:1]
     __df_col = df.transpose()
