@@ -2,12 +2,17 @@
 from typing import List
 from db import db
 from models.form import Form
-
+from bson.objectid import ObjectId
 form_collection = db.forms
 async def retrieveForm(name:str,type:str)->Form:
     __form = await form_collection.find_one({"$and":[{"name":name},{"type":type}]})
     if __form:
         return __form
+async def get_form_by_id(id:str):
+    if (form := await form_collection.find_one({"_id":ObjectId(id)})) is not None:
+        return form
+    else:
+        raise Exception("Form not found")
 async def retrieveForms()->List[Form]:
     __forms = await form_collection.find().to_list(100000)
     # __forms = [Form(f) for f in __forms]
@@ -24,46 +29,24 @@ async def createForms(forms:List[Form])->List[Form]:
     if result:
         return {"numer_forms_saved":len(result.inserted_ids)}
 
-async def updateForm(form:Form)->Form:
-    """
-    ### Example:
-
-        form = Form {
-            "name": "form_name",
-            "type": "form_type",
-            "format_in": {
-                {
-                    "codeEcole": "site_identifier_12",
-                    "directeurDtos": [
-                        {
-                        "directeurDto": {
-                            "nomComplet": "string",
-                            "nif": "string",
-                            "nin": "string",
-                            "tel": "telephone_directeur",
-                            "code": "string"
-                        },
-                        "questionReponse": [
-                            "repeat":"questions",
-                            {
-                            "uuidQuestion": "code",
-                            "reponse": "form.data_in[code]"
-                            }
-                        ]
-                        }
-                    ]
-                    }
-            },
-        }
-    """
-    result = await form_collection.update_one({"name":form.name,"type":form.type},{"$set":form.dict()})
-    if result:
-        return form
+async def update_form(id:str,form:Form):
+    __form = {k:v for k,v in form.dict().items() if v is not None}
+    if len(__form)>0:
+        update_result = await form_collection.update_one({"_id":ObjectId(id)},{"$set":__form})
+        if update_result.modified_count == 1:
+            if(
+                update_form := await form_collection.find_one({"_id":ObjectId(id)})
+            ) is not None:
+                return update_form
+    if (existing_form := await form_collection.find_one({"_id":ObjectId(id)})) is not None:
+        return existing_form
+    else:
+        raise Exception("Form not found")
 
 async def updateForms(forms:List[Form])->List[Form]:
     result = await form_collection.insert_many(forms)
     if result:
-        return forms
+        return Form(result)
 
 async def deleteForm(name:str,type:str)->Form:
     result = await form_collection.delete_one({"name":name,"type":type})

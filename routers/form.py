@@ -1,7 +1,8 @@
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException
-from db.form import createForm, retrieveForm,updateForm,deleteForm, createForms, retrieveForms
-from models.form import Form
+from fastapi.params import Body
+from db.form import createForm, retrieveForm,update_form,deleteForm, createForms, retrieveForms, get_form_by_id, updateForms
+from models.form import Form, UpdateFormModel
 from dependencies import get_current_user_from_token
 from core.config import settings
 from utils.data import dataInToDataOut
@@ -14,16 +15,31 @@ router = APIRouter(
 )
 
 
+@router.get("/{id}", response_model=Form)
+async def form_by_id(id: str):
+    try:
+        if (form := await get_form_by_id(id)) is not None:
+            return form
+        else:
+            raise HTTPException(status_code=404, detail="Form not found")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/")
 async def create_form(form_data: Form):
     result = await createForm(form_data)
     return JSONResponse(content=result.dict())
 
-@router.put("/{id}")
-async def update_form(form_data: Form):
-    result = await updateForm(form_data)
-    return JSONResponse(content=result.dict())
+@router.put("/{id}", response_description="Update a Form", response_model=Form)
+async def update_a_form(id:str,form: UpdateFormModel = Body(...)):
+    try:
+        result = await update_form(id,form)
+        if result is not None:
+            return result
+        else:
+            raise HTTPException(status_code=404, detail="Form {id} not found")
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 @router.post("s/")
 async def create_forms(forms: List[Form]):
