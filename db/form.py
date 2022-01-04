@@ -25,6 +25,37 @@ async def createForms(forms:List[Form])->List[Form]:
         return {"numer_forms_saved":len(result.inserted_ids)}
 
 async def updateForm(form:Form)->Form:
+    """
+    ### Example:
+
+        form = Form {
+            "name": "form_name",
+            "type": "form_type",
+            "format_in": {
+                {
+                    "codeEcole": "site_identifier_12",
+                    "directeurDtos": [
+                        {
+                        "directeurDto": {
+                            "nomComplet": "string",
+                            "nif": "string",
+                            "nin": "string",
+                            "tel": "telephone_directeur",
+                            "code": "string"
+                        },
+                        "questionReponse": [
+                            "repeat":"questions",
+                            {
+                            "uuidQuestion": "code",
+                            "reponse": "form.data_in[code]"
+                            }
+                        ]
+                        }
+                    ]
+                    }
+            },
+        }
+    """
     result = await form_collection.update_one({"name":form.name,"type":form.type},{"$set":form.dict()})
     if result:
         return form
@@ -38,3 +69,8 @@ async def deleteForm(name:str,type:str)->Form:
     result = await form_collection.delete_one({"name":name,"type":type})
     if result:
         return {"deleted":True}
+
+async def updateForm(id:str,form:Form)->Form:
+    result = await form_collection.update_one({"name":form.name,"type":form.type},{"$set":form.dict()})
+    if result:
+        return form
