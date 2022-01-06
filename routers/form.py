@@ -1,7 +1,9 @@
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.params import Body
+from db.data import retrieveDataByFormId
 from db.form import createForm, retrieveForm,update_form,deleteForm, createForms, retrieveForms, get_form_by_id, updateForms
+from db.question import get_questions_by_form_id
 from models.form import Form, UpdateFormModel
 from dependencies import get_current_user_from_token
 from core.config import settings
@@ -51,8 +53,19 @@ async def retrieve_forms():
     result = await retrieveForms()
     return result
 
-@router.put("/tsform", tags=['Form'])
-async def transform_data_in_to_data_out(name:str,type:str):
-    result = await retrieveForm(name,type)
-    result_1 = dataInToDataOut(result.get("data_in"),result.get('format_in'),result.get("format_out"))
-    return JSONResponse(content=result_1)
+@router.get("/tsform/")
+async def transform_data_in_to_data_out(form_name:str,form_type:str):
+    try:
+        result = await retrieveForm(form_name,form_type)
+        questions = await get_questions_by_form_id(result["_id"])
+        if result is not None:
+            __res = await retrieveDataByFormId(result["_id"])
+            if __res is not None:
+                __res_0 = __res[0]["data_in"]
+                result_1 = dataInToDataOut(__res_0,{},result["format_out"],questions)
+                print(result_1)
+                return JSONResponse(content=result_1)
+            raise HTTPException(status_code=404, detail="Form data not found")
+        raise HTTPException(status_code=404, detail="Form not found")
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e)+type(e).__name__)
