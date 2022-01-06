@@ -1,3 +1,4 @@
+from bson import objectid
 from db import db
 from models.question import Questions, UpdateQuestions, Question, UpadateQuestion
 from db.form import retrieveForm
@@ -30,5 +31,15 @@ async def get_questions_by_form(form_name:str,form_type:str):
             return result
         else:
             return {"message": "Form not found"}
+    except Exception as e:
+        return {"message": str(e)}
+
+async def get_questions_by_form_id(form_id:objectid):
+    """
+    Get all questions by form id
+    """
+    try:
+        result = await __questions.find({"form":form_id},{"form":0,"_id":0}).to_list(100000)
+        return result
     except Exception as e:
         return {"message": str(e)}

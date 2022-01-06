@@ -4,7 +4,7 @@ from db import db
 from models.form import Form
 from bson.objectid import ObjectId
 form_collection = db.forms
-async def retrieveForm(name:str,type:str)->Form:
+async def retrieveForm(name:str,type:str):
     __form = await form_collection.find_one({"$and":[{"name":name},{"type":type}]})
     if __form:
         return __form

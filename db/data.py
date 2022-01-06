@@ -41,3 +41,9 @@ async def createData(data:list[dict]):
 async def retrieveData(form_id:ObjectId, limit:int=50, skip:int=0)->list[dict]:
     data = await data_collection.find({"form_id":form_id},{"form_id":0,"_id":0}).limit(limit).skip(skip).to_list(length=100)
     return data
+async def retrieveDataById(id:ObjectId)->dict:
+    data = await data_collection.find_one({"_id":id},{"form_id":0,"_id":0})
+    return data
+async def retrieveDataByFormId(form_id:ObjectId)->list[dict]:
+    data = await data_collection.find({"form_id":form_id},{"form_id":0,"_id":0}).to_list(length=10000)
+    return data
