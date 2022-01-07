@@ -11,3 +11,7 @@ class TokenData(BaseModel):
     #email: EmailStr
     #is_active: Optional[bool]
     #is_superUser: Optional[bool]
+    
+    
+class TokenAdminData(BaseModel):
+    pass

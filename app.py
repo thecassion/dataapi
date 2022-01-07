@@ -37,6 +37,8 @@ from core.hashing import Hasher
 from routers.form_data import router as data_router
 from routers.questions import router as questions_router
 from routers.form import router as form_router
+from dependencies import oauth2_scheme, get_current_user_from_token, authenticate_user,create_access_token
+
 
 app = FastAPI(title=settings.PROJECT_TITLE, description=settings.PORJECT_DESCRIPTION, version=settings.PROJECT_VERSION, docs_url=settings.DOCS_URL)
 
@@ -46,7 +48,7 @@ app.include_router(form_router)
 _forms = db["forms"]
 _forms.create_index([("type",pm.ASCENDING),("name",pm.ASCENDING)], unique=True,name="form_index")
 
-from dependencies import oauth2_scheme, get_current_user_from_token, authenticate_user,create_access_token
+
 # @app.get("/", tags=['Home'])
 # async def root():
 #     return {"message": "Please write /docs into the browser path to enter to openapi"}
@@ -131,7 +133,7 @@ async def delete_userByUsername(username:str)->dict:
 
 
 
-############### Registration
+
 
 
 @app.post('/register', response_model=RegisterUser, response_description=settings.REGISTRATION_DESCRIPTION, summary=settings.REGISTRATION_SUMMARY, status_code=status.HTTP_201_CREATED, tags=['Register'])
@@ -153,18 +155,8 @@ async def register_admin(admin: RegisterAdmin)->RegisterAdmin:
     raise HTTPException(status.HTTP_404_NOT_FOUND, "Something went wrong")
 
 
-##################### helper
 
 
-################# /login/token
 
-@app.post("/token" , response_description=settings.LOGIN_DESCRIPTION, summary=settings.LOGIN_SUMMARY, response_model=Token, status_code=status.HTTP_201_CREATED, tags=['LOGIN'])
-async def login(form_data: OAuth2PasswordRequestForm = Depends()):
-    username = form_data.username
-    password = form_data.password
-    _user = await authenticate_user(username, password)
-    if not _user:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Incorrect username or password")
-    access_token = create_access_token(data={"sub": username}, expires_delta=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES))
-    return {"access_token": access_token, "token_type": "bearer"}
+
+
