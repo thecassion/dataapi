@@ -16,7 +16,7 @@ router = APIRouter(
 
 
 
-@router.post('/', response_model=RegisterUser, response_description=settings.REGISTRATION_DESCRIPTION, summary=settings.REGISTRATION_SUMMARY, status_code=status.HTTP_201_CREATED, tags=['Register'])
+@router.post('/', response_model=RegisterUser, response_description=settings.REGISTRATION_DESCRIPTION, summary=settings.REGISTRATION_SUMMARY, status_code=status.HTTP_201_CREATED)
 async def register(user: RegisterUser)->RegisterUser:
     _user = user.dict()
     _resUser = await registerUser(_user)
@@ -26,7 +26,7 @@ async def register(user: RegisterUser)->RegisterUser:
 
 
 
-@router.post('/admin', response_model=RegisterAdmin, response_description=settings.REGISTER_ADMIN_DESCRIPTION, summary=settings.REGISTER_ADMIN_SUMMARY, status_code=status.HTTP_201_CREATED, tags=['Register'])
+@router.post('/admin', response_model=RegisterAdmin, response_description=settings.REGISTER_ADMIN_DESCRIPTION, summary=settings.REGISTER_ADMIN_SUMMARY, status_code=status.HTTP_201_CREATED)
 async def register_admin(admin: RegisterAdmin)->RegisterAdmin:
     _user = admin.dict()
     _resUser = await registerAdmin(_user)

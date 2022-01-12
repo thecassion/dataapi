@@ -13,5 +13,6 @@ class TokenData(BaseModel):
     #is_superUser: Optional[bool]
     
     
-class TokenAdminData(BaseModel):
-    pass
+#class TokenAdminData(BaseModel):
+#    username: Optional[str]
+#    is_superUser: Optional[bool]

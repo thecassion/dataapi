@@ -9,25 +9,11 @@ from fastapi import (
 from fastapi.responses import JSONResponse, FileResponse
 import pandas as pd
 import json
-from pydantic import EmailStr
 from typing import Optional
 from models.user import User, RegisterUser, RegisterAdmin
 from models.token import Token, TokenData
-from typing import  List
 import pymongo as pm
 from db import db
-from db.user import (
-    createUser,
-    getUsers,
-    getUserByEmail,
-    getUserByUsername,
-    updateUser,
-    updateUser_byEmail,
-    delUserByEmail,
-    delUserByUsername,
-    registerUser,
-    registerAdmin
-)
 from utils.data import dataInToDataOut
 from datetime import datetime, timedelta
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
@@ -39,6 +25,7 @@ from routers.questions import router as questions_router
 from routers.form import router as form_router
 from routers.login import router as login_router
 from routers.register import router as register_router
+from routers.admin import router as admin_router
 from dependencies import oauth2_scheme, get_current_user_from_token, authenticate_user,create_access_token
 
 
@@ -49,6 +36,9 @@ app.include_router(questions_router)
 app.include_router(form_router)
 app.include_router(login_router)
 app.include_router(register_router)
+app.include_router(admin_router)
+
+
 _forms = db["forms"]
 _forms.create_index([("type",pm.ASCENDING),("name",pm.ASCENDING)], unique=True,name="form_index")
 
@@ -59,81 +49,6 @@ _forms.create_index([("type",pm.ASCENDING),("name",pm.ASCENDING)], unique=True,n
 
 
 
-
-################ Admin
-
-
-@app.get("/admin/user/{username}", response_model=User,response_description=settings.GET_USER_DESCRIPTION, summary=settings.GET_USER_SUMMARY, status_code=status.HTTP_201_CREATED, tags=['USER'])
-async def get_userByUsername(username:str)->User:
-    _user = await getUserByUsername(username)
-    if _user:
-        return _user
-    raise HTTPException(status.HTTP_404_NOT_FOUND, f"Something went wrong wwith {username}")
-
-
-
-
-
-@app.post("/admin/createUser", response_model=User ,response_description=settings.CREATE_USER_DESCRIPTION, summary=settings.CREATE_USER_SUMMARY, status_code=status.HTTP_201_CREATED, tags=['USER'])
-async def post_user(user:User)->User:
-    _user = user.dict()
-    _resUser = await createUser(_user)
-    if _resUser:
-        return _resUser
-    raise HTTPException(status.HTTP_404_NOT_FOUND, "Something went wrong")
-
-
-
-@app.get("/admin/user/{email}/", response_model=User, response_description=settings.GET_USER_DESCRIPTION, summary=settings.GET_USER_SUMMARY,status_code=status.HTTP_201_CREATED, tags=['USER'])
-async def get_userByEmail(email: EmailStr)->User:
-    _user = await getUserByEmail(email)
-    if _user:
-        return _user
-    raise HTTPException(status.HTTP_404_NOT_FOUND, f"Something went wrong wwith {email}")
-
-
-
-@app.get('/admin/users', response_model=List[User], response_description=settings.GET_USERS_DESCRIPTION, summary=settings.GET_USERS_SUMMARY,status_code=status.HTTP_201_CREATED, tags=['USER'])
-async def get_users()->List[User]:
-    _users = await getUsers()
-    if _users:
-        return _users
-    raise HTTPException(status.HTTP_404_NOT_FOUND, "Something went wrong")
-
-
-
-@app.put("/admin/update_user/{username}", response_model=User,response_description=settings.UPDATE_USER_DESCRIPTION, summary=settings.UPDATE_USER_SUMMARY, status_code=status.HTTP_201_CREATED,  tags=['USER'])
-async def put_user(username:str,email:EmailStr,password:str, is_active:Optional[bool], is_superUser:Optional[bool])->User:
-    _user = await updateUser(username,email,password,is_active,is_superUser)
-    if _user:
-        return _user
-    raise HTTPException(status.HTTP_404_NOT_FOUND, f"Something went wrong with {username}")
-
-
-@app.put("/admin/update_user/{email}/", response_model=User,response_description=settings.UPDATE_USER_DESCRIPTION, summary=settings.UPDATE_USER_SUMMARY, status_code=status.HTTP_201_CREATED,  tags=['USER'])
-async def update_user(username:str,email:EmailStr,password:str, is_active:Optional[bool], is_superUser:Optional[bool])->User:
-    _user = await updateUser_byEmail(username,email,password,is_active,is_superUser)
-    if _user:
-        return _user
-    raise HTTPException(status.HTTP_404_NOT_FOUND, f"Something went wrong with {email}")
-
-
-
-@app.delete("/admin/delete_user/{email}/", response_description=settings.DELETE_USER_DESCRIPTION, summary=settings.DELETE_USER_SUMMARY, status_code=status.HTTP_201_CREATED, tags=['USER'])
-async def delete_userByEmail(email:EmailStr)-> dict:
-    _userdeleted = await delUserByEmail(email)
-    if _userdeleted:
-        return {"Message": f"the user with the {email} has been deleted" }
-    raise HTTPException(status.HTTP_404_NOT_FOUND, f"Something went wrong with {email}")
-
-
-
-@app.delete("/admin/delete_user/{username}", response_description=settings.DELETE_USER_DESCRIPTION, summary=settings.DELETE_USER_SUMMARY, status_code=status.HTTP_201_CREATED, tags=['USER'])
-async def delete_userByUsername(username:str)->dict:
-    _userdeleted = await delUserByUsername(username)
-    if _userdeleted:
-        return {"Message": f"the user with the {username} has been deleted" }
-    raise HTTPException(status.HTTP_404_NOT_FOUND, f"Something went wrong with {username}")
 
 
 
