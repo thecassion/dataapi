@@ -37,6 +37,7 @@ from core.hashing import Hasher
 from routers.form_data import router as data_router
 from routers.questions import router as questions_router
 from routers.form import router as form_router
+from routers.login import router as login_router
 from dependencies import oauth2_scheme, get_current_user_from_token, authenticate_user,create_access_token
 
 
@@ -45,6 +46,7 @@ app = FastAPI(title=settings.PROJECT_TITLE, description=settings.PORJECT_DESCRIP
 app.include_router(data_router)
 app.include_router(questions_router)
 app.include_router(form_router)
+app.include_router(login_router)
 _forms = db["forms"]
 _forms.create_index([("type",pm.ASCENDING),("name",pm.ASCENDING)], unique=True,name="form_index")
 
