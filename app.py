@@ -38,6 +38,7 @@ from routers.form_data import router as data_router
 from routers.questions import router as questions_router
 from routers.form import router as form_router
 from routers.login import router as login_router
+from routers.register import router as register_router
 from dependencies import oauth2_scheme, get_current_user_from_token, authenticate_user,create_access_token
 
 
@@ -47,6 +48,7 @@ app.include_router(data_router)
 app.include_router(questions_router)
 app.include_router(form_router)
 app.include_router(login_router)
+app.include_router(register_router)
 _forms = db["forms"]
 _forms.create_index([("type",pm.ASCENDING),("name",pm.ASCENDING)], unique=True,name="form_index")
 
@@ -136,25 +138,6 @@ async def delete_userByUsername(username:str)->dict:
 
 
 
-
-
-@app.post('/register', response_model=RegisterUser, response_description=settings.REGISTRATION_DESCRIPTION, summary=settings.REGISTRATION_SUMMARY, status_code=status.HTTP_201_CREATED, tags=['Register'])
-async def register(user: RegisterUser)->RegisterUser:
-    _user = user.dict()
-    _resUser = await registerUser(_user)
-    if _resUser:
-        return _resUser
-    raise HTTPException(status.HTTP_404_NOT_FOUND, "Something went wrong")
-
-
-
-@app.post('/admin/register', response_model=RegisterAdmin, response_description=settings.REGISTER_ADMIN_DESCRIPTION, summary=settings.REGISTER_ADMIN_SUMMARY, status_code=status.HTTP_201_CREATED, tags=['Register'])
-async def register_admin(admin: RegisterAdmin)->RegisterAdmin:
-    _user = admin.dict()
-    _resUser = await registerAdmin(_user)
-    if _resUser:
-        return _resUser
-    raise HTTPException(status.HTTP_404_NOT_FOUND, "Something went wrong")
 
 
 
