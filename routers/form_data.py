@@ -1,11 +1,13 @@
+from bson.objectid import ObjectId
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
-from db.data import createData, retrieveData
+from db.data import createData, retrieveData, retrieveDataByFormId, update_data
 from db.form import retrieveForm
 from dependencies import get_current_user_from_token
 from models.form_data import FormData
 import pandas as pd
 import numpy as np
 import json
+import requests
 router = APIRouter(
     prefix="/form/data",
     tags=["Data Processing"],
@@ -62,5 +64,33 @@ async def get_form_data(form_name: str, form_type: str,limit:int=50, skip:int=0)
             return __list
         else:
             raise HTTPException(status_code=404,detail="Form not found") # {"message":"Form not found"}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@router.get("{form_id}/transfer")
+async def transfer_form_data(form_id: str):
+    """
+    Transfer data.
+    """
+    headers={'Content-type':'application/json', 'Accept':'application/json'}
+    try:
+        form = await retrieveForm(ObjectId(form_id))
+        if form:
+            if "url_out" in form:
+                if form["url_out"] is not None:
+                    result = await retrieveDataByFormId(ObjectId(form_id))
+                    if result:
+                        for r in result:
+                            r["form"] = form["_id"]
+                            if r["data_out"] is not None:
+                                res = await requests.post(form["url_out"],json=r["data_out"],headers=headers)
+                                if res.status_code == 200:
+                                    update_data({"_id":r["_id"]},{"$set":{"response":res.json(),"status":"sent"}})
+                                else:
+                                    update_data({"_id":r["_id"]},{"$set":{"response":res.json(),"status":"error"}})
+                        return result
+                    raise HTTPException(status_code=404,detail="Data not found") # {"message":"Data not found"}
+            raise HTTPException(status_code=404,detail="Url Out not found in form") # {"message":"Url not found"}
+        raise HTTPException(status_code=404,detail="Form not found") # {"message":"Form not found"}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
