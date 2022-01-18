@@ -17,4 +17,5 @@ python-decouple
 python-dotenv
 #for jwt tokens
 python-jose
+requests
 
