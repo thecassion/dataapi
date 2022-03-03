@@ -6,4 +6,5 @@ class MusoGroupes:
         self.hi_groupes = hi_groupes
         pass
     def groups_not_on_hiv(self):
-        return [group for group in self.cc_groupes if  not(group.office==self.hi_groupes.office and group.code==self.hi_groupes.code) ]
+        return self.hi_groupes
+        # return [group for group in self.cc_groupes if  not(group.office==self.hi_groupes.office and group.code==self.hi_groupes.code) ]
