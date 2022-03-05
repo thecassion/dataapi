@@ -6,7 +6,12 @@ EXPOSE 8000
 
 #
 WORKDIR /code
-
+ARG openjdk_version="11"
+RUN apt-get update --yes && \
+    apt-get install --yes --no-install-recommends \
+    "openjdk-${openjdk_version}-jre-headless" \
+    ca-certificates-java && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 #
 COPY ./requirements.txt /code/requirements.txt
 

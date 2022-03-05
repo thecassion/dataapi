@@ -1,6 +1,8 @@
+from datetime import date
 import os
 import pymysql
 import pymysql.cursors
+from sqlalchemy import create_engine
 
 def engine():
     try:
@@ -10,9 +12,17 @@ def engine():
                                     user=os.environ["MYSQL_USERNAME"],
                                     password=os.environ["MYSQL_PASSWORD"],
                                     database=os.environ["MYSQL_DATABASE"],
-                                    cursorclass=pymysql.cursors.DictCursor)
+                                    cursorclass=pymysql.cursors.DictCursor
+                                    )
         return connection
         # engine = create_engine('mysql+pymysql://'+os.environ["MYSQL_USERNAME"]+':'+os.environ["MYSQL_PASSWORD"]+'@'+os.environ['MYSQL_HOST']+':'+os.environ['MYSQL_PORT']+'/'+os.environ["MYSQL_DATABASE"]+'?charset=UTF8MB4', echo=True, encoding='utf8')
+        return engine
+    except Exception as e:
+        raise Exception("Could not connect to database",e)
+
+def sql_achemy_engine():
+    try:
+        engine = create_engine('mysql+pymysql://'+os.environ["MYSQL_USERNAME"]+':'+os.environ["MYSQL_PASSWORD"]+'@'+os.environ['MYSQL_HOST']+':'+os.environ['MYSQL_PORT']+'/'+os.environ["MYSQL_DATABASE"]+'?charset=UTF8MB4', echo=True, encoding='utf8')
         return engine
     except Exception as e:
         raise Exception("Could not connect to database",e)

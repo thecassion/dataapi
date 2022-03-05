@@ -1,5 +1,7 @@
-from db.mysql import engine
+from db.mysql import engine, sql_achemy_engine
 from sqlalchemy import text
+import  pandas as pd
+
 class MusoGroup:
     def __init__(self) -> None:
         pass
@@ -8,7 +10,7 @@ class MusoGroup:
         with e as conn:
             try:
                 cursor = conn.cursor()
-                cursor.execute("SELECT * FROM muso_group")
+                cursor.execute("SELECT office,code,id FROM muso_group")
                 return cursor.fetchall()
             except Exception as e:
                 print(e)
@@ -19,3 +21,6 @@ class MusoGroup:
             cursor = conn.cursor()
             cursor.execute("SELECT * FROM muso_group WHERE id=%s",(muso_group_id))
             return cursor.fetchone()
+    def get_muso_groupes_df(self):
+        e = sql_achemy_engine()
+        return pd.read_sql_table('muso_group',e)
