@@ -40,13 +40,13 @@ class MusoGroup:
                     print(e)
                     return False
             return True
-    def update_groupes(self,groupes):
+    def update_groupes_case_id(self,groupes):
         if isinstance(groupes,list):
             e = engine()
             with e as conn:
                 try:
                     cursor = conn.cursor()
-                    cursor.executemany("UPDATE muso_group SET name=%s,external_id=%s WHERE id=%s",groupes)
+                    cursor.executemany("UPDATE muso_group SET case_id=%s,external_id=%s WHERE ex=%s",groupes)
                     conn.commit()
                 except Exception as e:
                     print(e)
@@ -54,3 +54,14 @@ class MusoGroup:
             return True
         else:
             raise Exception("groupes must be a list")
+
+    def groupes_without_case_id(self):
+        e = engine()
+        with e as conn:
+            try:
+                cursor = conn.cursor()
+                cursor.execute("SELECT * FROM muso_group WHERE case_id IS NULL")
+                return cursor.fetchall()
+            except Exception as e:
+                print(e)
+                return []

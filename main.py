@@ -1,3 +1,4 @@
+import re
 from typing import Optional
 
 from fastapi import FastAPI
@@ -68,4 +69,25 @@ def sync_muso_groups():
     cc_groups = MusoGroupesCase().get()
     muso_groupes = MusoGroupes(cc_groups, hiv_groups)
     muso_groupes.insert_groupes_cc()
+    return {"message":"muso groups synced"}
+
+@app.get("/muso/groups/sync/code")
+def sync_muso_groups_code():
+    hiv_groups = MusoGroup().get_muso_groups()
+    cc_groups = MusoGroupesCase().get()
+    muso_groupes = MusoGroupes(cc_groups, hiv_groups)
+    groupes = muso_groupes.generate_code_for_group_without_code()
+    groupes_with_new_code = [{"case_id":group["case_id"],"code":group["code"]} for group in groupes]
+    buffer = io.BytesIO()
+    with pd.ExcelWriter(buffer) as writer:
+        pd.DataFrame(groupes_with_new_code).to_excel(writer, sheet_name="groupes_with_new_code",index=False)
+        writer.save()
+    buffer.seek(0)
+    data = {
+        "file": ("muso_group_to_update_code.xlsx",buffer),
+        "case_type": "muso_groupes",
+    }
+    cc = CommCareAPI("caris-test", "0.5")
+    response = cc.bulkupload(data)
+    print(response.text)
     return {"message":"muso groups synced"}

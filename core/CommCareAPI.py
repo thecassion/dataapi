@@ -5,6 +5,7 @@ class CommCareAPI:
         self.domain = domain
         self.version = version
         self.base_url = f"https://www.commcarehq.org/a/{domain}/api/v{version}/"
+        self.bbase_url = f"https://www.commcarehq.org/a/{domain}/"
         self.auth = (os.environ["COMMCARE_USERNAME"], os.environ["COMMCARE_PASSWORD"])
     def get_cases(self,type,limit):
         url = self.base_url + "case/"
@@ -38,4 +39,10 @@ class CommCareAPI:
     def get_form(self,form_id):
         url = self.base_url + f"form/{form_id}"
         response = requests.get(url, auth = self.auth).json()
+        return response
+
+    def bulkupload(self,data):
+        url = self.bbase_url + "importer/excel/bulk_upload_api/"
+        print(url)
+        response = requests.post(url, auth = self.auth,data={"case_type":data["case_type"]},files={"file":data["file"]})
         return response
