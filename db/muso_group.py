@@ -10,7 +10,21 @@ class MusoGroup:
         with e as conn:
             try:
                 cursor = conn.cursor()
-                cursor.execute("SELECT office,code,id FROM muso_group")
+                cursor.execute("SELECT id,\
+                                name,\
+                                code,\
+                                office,\
+                                localite,\
+                                localite_name,\
+                                commune,\
+                                section,\
+                                is_inactive,\
+                                meeting_day,\
+                                officer_name,\
+                                is_graduated,\
+                                formed_by_members_from,\
+                                actual_cycle,\
+                                office FROM muso_group")
                 return cursor.fetchall()
             except Exception as e:
                 print(e)
