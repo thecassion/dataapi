@@ -21,9 +21,9 @@ class MusoGroupes:
         # print(df.show())
         # return df.toPandas().to_dict("records")
         df = pd.DataFrame(self.cc_groupes)
-        df = df[df["extern_id"]==None]
+        df = df[df["external_id"]==None]
         return df.to_dict("records")
     def groups_not_on_hiv_df(self):
         df = pd.DataFrame(self.cc_groupes)
-        df = df[df["extern_id"]==None]
+        df = df[df["external_id"]==None]
         return df
