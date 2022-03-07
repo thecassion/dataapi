@@ -68,7 +68,9 @@ def sync_muso_groups():
     hiv_groups = MusoGroup().get_muso_groups()
     cc_groups = MusoGroupesCase().get()
     muso_groupes = MusoGroupes(cc_groups, hiv_groups)
-    muso_groupes.insert_groupes_cc()
+    muso_groupes.insert_groupes_without_code_cc()
+    muso_groupes.insert_groupes_duplicated_on_cc()
+    muso_groupes.insert_groupes_not_on_hiv()
     return {"message":"muso groups synced"}
 
 @app.get("/muso/groups/sync/code")
@@ -77,6 +79,14 @@ def sync_muso_groups_code():
     cc_groups = MusoGroupesCase().get()
     muso_groupes = MusoGroupes(cc_groups, hiv_groups)
     groupes = muso_groupes.generate_code_for_group_without_code()
+    response = update_code_on_cc(groupes)
+    print(response.text)
+    groupes_dup_with_code = muso_groupes.generate_code_for_groupes_duplicated_on_cc()
+    response_dup = update_code_on_cc(groupes_dup_with_code)
+    print(response_dup.text)
+    return {"message":"muso groups synced"}
+
+def update_code_on_cc(groupes):
     groupes_with_new_code = [{"case_id":group["case_id"],"code":group["code"]} for group in groupes]
     buffer = io.BytesIO()
     with pd.ExcelWriter(buffer) as writer:
@@ -84,10 +94,9 @@ def sync_muso_groups_code():
         writer.save()
     buffer.seek(0)
     data = {
-        "file": ("muso_group_to_update_code.xlsx",buffer),
+        "file": ("muso_group_to_update_code_with_api.xlsx",buffer),
         "case_type": "muso_groupes",
     }
     cc = CommCareAPI("caris-test", "0.5")
     response = cc.bulkupload(data)
-    print(response.text)
-    return {"message":"muso groups synced"}
+    return response
