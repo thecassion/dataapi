@@ -12,6 +12,7 @@ def engine():
                                     user=os.environ["MYSQL_USERNAME"],
                                     password=os.environ["MYSQL_PASSWORD"],
                                     database=os.environ["MYSQL_DATABASE"],
+                                    port=os.environ["MYSQL_PORT"],
                                     cursorclass=pymysql.cursors.DictCursor
                                     )
         return connection
