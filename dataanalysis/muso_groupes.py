@@ -118,27 +118,32 @@ class MusoGroupes:
         df_groupes = pd.DataFrame(groupes)
         print(df_groupes.head())
         df_hi_groupes = pd.DataFrame(self.hi_groupes)
-        df_hi_groupes = df_hi_groupes[["office","code"]]
+        df_hi_groupes = df_hi_groupes[["office","code","name","id"]]
         # df_groupes.drop(columns=["office"],inplace=True)
         df_groupes["office"]=df_groupes["office_name"]
         df_groupes["name"]=df_groupes["case_name"]
+        df_groupes["section"]= pd.to_numeric(df_groupes["section"],errors="coerce")
         df_groupes["localite"]=df_groupes["section"]
         df_groupes["localite_name"]=df_groupes["section_name"]
         df_groupes.drop(columns=["office_name"],inplace=True)
         df_groupes["code"]=pd.to_numeric(df_groupes["code"],errors="coerce")
+
         print(df_hi_groupes.head())
-        df_groupes = pd.merge(df_groupes,df_hi_groupes,on=["office","code"],how="left",suffixes=("","_hi"))
-        print(df_groupes.head())
-        df_groupes["code_hi"] = pd.to_numeric(df_groupes["code_hi"],errors="coerce")
-        df_groupes = df_groupes[df_groupes["code_hi"].isna()]
+        df_hi_groupes.to_excel("hi_groupes.xlsx")
+        df_g = pd.merge(df_groupes,df_hi_groupes,on=["office","code"],how="left",suffixes=(None,"_hi"))
+        df_g.to_excel("groupes_cc_to_hiv.xlsx")
+        print(df_g.head())
+        df_g["id"] = pd.to_numeric(df_g["id"],errors="coerce")
+        df_g = df_g[df_g["id"].isna()]
+        df_g = df_g[df_g["code"].notna()]
         __columns = list(pd.DataFrame(self.hi_groupes).columns)
         __columns.remove("id")
         __columns.remove("created_at")
         __columns.remove("updated_at")
         __columns.remove("created_by")
         __columns.remove("updated_by")
-        df = df_groupes[__columns]
-        df["case_id"]=df_groupes["case_id"]
+        df = df_g[__columns]
+        df["case_id"]=df_g["case_id"]
         muso_group = MusoGroup()
         muso_group.insert_groupes(df)
 
