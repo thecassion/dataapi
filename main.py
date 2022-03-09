@@ -73,6 +73,13 @@ def sync_muso_groups():
     muso_groupes.insert_groupes_not_on_hiv()
     return {"message":"muso groups synced"}
 
+@app.get("/muso/groups/hiv_case_id")
+def get_hiv_case_id():
+    hiv_groups = MusoGroup().get_muso_groups()
+    cc_groups = MusoGroupesCase().get()
+    muso_groupes = MusoGroupes(cc_groups, hiv_groups)
+    muso_groupes.update_groupes_case_id()
+
 @app.get("/muso/groups/sync/code")
 def sync_muso_groups_code():
     hiv_groups = MusoGroup().get_muso_groups()

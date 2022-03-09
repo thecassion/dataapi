@@ -46,7 +46,8 @@ class MusoGroup:
             with e as conn:
                 try:
                     cursor = conn.cursor()
-                    cursor.executemany("UPDATE muso_group SET case_id=%s,external_id=%s WHERE ex=%s",groupes)
+                    for group in groupes:
+                        cursor.execute("UPDATE muso_group SET case_id=%s WHERE id=%s",(group['case_id'],group['external_id']))
                     conn.commit()
                 except Exception as e:
                     print(e)
@@ -60,7 +61,7 @@ class MusoGroup:
         with e as conn:
             try:
                 cursor = conn.cursor()
-                cursor.execute("SELECT * FROM muso_group WHERE case_id IS NULL")
+                cursor.execute("SELECT id,name,code,office, case_id,commune FROM muso_group WHERE case_id IS NULL")
                 return cursor.fetchall()
             except Exception as e:
                 print(e)
