@@ -35,6 +35,12 @@ class MusoGroupes:
         df["external_id"] = pd.to_numeric(df["external_id"],errors="coerce")
         df = df[df["external_id"].notna()]
         return df.to_dict("records")
+    def groups_with_external_id_on_cc(self):
+        df = pd.DataFrame(self.cc_groupes)
+        df["external_id"] = pd.to_numeric(df["external_id"],errors="coerce")
+        df = df[df["external_id"].notna()]
+        return df.to_dict("records")
+
     def groups_duplicated_on_cc(self):
         df = pd.DataFrame(self.cc_groupes)
         df["external_id"] = pd.to_numeric(df["external_id"],errors="coerce")
@@ -127,11 +133,7 @@ class MusoGroupes:
         df_groupes["localite_name"]=df_groupes["section_name"]
         df_groupes.drop(columns=["office_name"],inplace=True)
         df_groupes["code"]=pd.to_numeric(df_groupes["code"],errors="coerce")
-
-        print(df_hi_groupes.head())
-        df_hi_groupes.to_excel("hi_groupes.xlsx")
         df_g = pd.merge(df_groupes,df_hi_groupes,on=["office","code"],how="left",suffixes=(None,"_hi"))
-        df_g.to_excel("groupes_cc_to_hiv.xlsx")
         print(df_g.head())
         df_g["id"] = pd.to_numeric(df_g["id"],errors="coerce")
         df_g = df_g[df_g["id"].isna()]
@@ -150,13 +152,23 @@ class MusoGroupes:
 
     def get_hi_groupes_without_case_id(self):
         muso_group = MusoGroup()
-        df = pd.DataFrame(muso_group.get_groupes_without_case_id())
+        df = pd.DataFrame(muso_group.groupes_without_case_id())
+        return df.to_dict("records")
 
 
     def update_groupes_case_id(self):
-        groupes = self.groups_on_hiv()
+        groupes = self.groups_with_external_id_on_cc()
+        groupes_without_case_id = self.get_hi_groupes_without_case_id()
+        df_groupes = pd.DataFrame(groupes)
+        df_groupes_without_case_id = pd.DataFrame(groupes_without_case_id)
+        df = pd.merge(df_groupes,df_groupes_without_case_id, on="case_id", how="left",suffixes=(None,"_without_case_id"))
+        df = df[df["commune_without_case_id"].isnull()]
+        df["external_id"]=df["external_id"].astype(int)
+        df = df[["case_id","external_id"]]
+        g = df.to_dict("records")
+        print(g[1])
         try:
             muso_group = MusoGroup()
-            muso_group.update_groupes_case_id(groupes)
+            muso_group.update_groupes_case_id(g)
         except Exception as e:
             print(e)
