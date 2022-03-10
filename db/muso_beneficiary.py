@@ -13,3 +13,19 @@ class MusoBeneficiary:
             except Exception as e:
                 print(e)
                 return []
+
+    def update_muso_beneficiaries_case_id(self,beneficiaries):
+        if isinstance(beneficiaries,list):
+            e = engine()
+            with e as conn:
+                try:
+                    cursor = conn.cursor()
+                    for beneficiary in beneficiaries:
+                        cursor.execute("UPDATE patient SET case_id=%s WHERE id=%s",(beneficiary['case_id'],beneficiary['id']))
+                    conn.commit()
+                except Exception as e:
+                    print(e)
+                    return False
+            return True
+        else:
+            raise Exception("beneficiaries must be a list")

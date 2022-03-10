@@ -8,7 +8,10 @@ import io
 from starlette.responses import StreamingResponse
 from dataanalysis.muso_groupes import MusoGroupes
 from db.muso_group import MusoGroup
+from db.muso_beneficiary import MusoBeneficiary
 from CommCare.MusoGroupesCase import MusoGroupesCase
+from CommCare.MusoBeneficiariesCase import MusoBeneficiariesCase
+from dataanalysis.muso_beneficiaries import MusoBeneficiaries
 
 app = FastAPI()
 
@@ -107,3 +110,27 @@ def update_code_on_cc(groupes):
     cc = CommCareAPI("caris-test", "0.5")
     response = cc.bulkupload(data)
     return response
+
+@app.get("/muso/beneficiaries/xlsx")
+def beneficiaries_to_excel():
+    hiv_beneficiaries = MusoBeneficiary().get_muso_beneficiaries()
+    cc_beneficiaries = MusoBeneficiariesCase().get()
+    analysis_muso_beneficiaries = MusoBeneficiaries({"cc_beneficiaries":cc_beneficiaries, "hiv_beneficiaries":hiv_beneficiaries})
+    cc_beneficiaries_with_external_id = analysis_muso_beneficiaries.get_cc_beneficiairies_with_external_id()
+    buffer = io.BytesIO()
+    with pd.ExcelWriter(buffer) as writer:
+        pd.DataFrame(hiv_beneficiaries).to_excel(writer, sheet_name="hiv_beneficiaries", index=False)
+        pd.DataFrame(cc_beneficiaries).to_excel(writer, sheet_name="beneficiaries_cc", index=False)
+        pd.DataFrame(cc_beneficiaries_with_external_id).to_excel(writer, sheet_name="beneficiaries_cc_with_external_id", index=False)
+        writer.save()
+    buffer.seek(0)
+    headers = {"Content-Disposition": "attachment; filename=beneficiaries.xlsx"}
+    return StreamingResponse(buffer, headers=headers)
+
+@app.get("/muso/beneficiaries/sync_to_hivhaiti/case_id")
+def sync_beneficiaries_case_id():
+    hiv_beneficiaries = MusoBeneficiary().get_muso_beneficiaries()
+    cc_beneficiaries = MusoBeneficiariesCase().get()
+    analysis_muso_beneficiaries = MusoBeneficiaries({"cc_beneficiaries":cc_beneficiaries, "hiv_beneficiaries":hiv_beneficiaries})
+    analysis_muso_beneficiaries.update_beneficiaries_case_id()
+    return {"message":"beneficiaries synced"}
