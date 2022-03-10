@@ -113,15 +113,20 @@ def update_code_on_cc(groupes):
 
 @app.get("/muso/beneficiaries/xlsx")
 def beneficiaries_to_excel():
-    hiv_beneficiaries = MusoBeneficiary().get_muso_beneficiaries()
+    muso_beneficiary = MusoBeneficiary()
+    hiv_beneficiaries = muso_beneficiary.get_muso_beneficiaries()
     cc_beneficiaries = MusoBeneficiariesCase().get()
-    analysis_muso_beneficiaries = MusoBeneficiaries({"cc_beneficiaries":cc_beneficiaries, "hiv_beneficiaries":hiv_beneficiaries})
+    max_rank_beneficiaries_by_groups = muso_beneficiary.get_max_rank_beneficiaries_by_groups()
+    analysis_muso_beneficiaries = MusoBeneficiaries({"cc_beneficiaries":cc_beneficiaries, "hiv_beneficiaries":hiv_beneficiaries,"max_rank_beneficiaries_by_groups":max_rank_beneficiaries_by_groups})
     cc_beneficiaries_with_external_id = analysis_muso_beneficiaries.get_cc_beneficiairies_with_external_id()
+    cc_beneficiaries_with_rank_generated = analysis_muso_beneficiaries.generate_rank_by_groups()
     buffer = io.BytesIO()
     with pd.ExcelWriter(buffer) as writer:
         pd.DataFrame(hiv_beneficiaries).to_excel(writer, sheet_name="hiv_beneficiaries", index=False)
         pd.DataFrame(cc_beneficiaries).to_excel(writer, sheet_name="beneficiaries_cc", index=False)
         pd.DataFrame(cc_beneficiaries_with_external_id).to_excel(writer, sheet_name="beneficiaries_cc_with_external_id", index=False)
+        pd.DataFrame(max_rank_beneficiaries_by_groups).to_excel(writer, sheet_name="max_rank_beneficiaries_by_groups", index=False)
+        pd.DataFrame(cc_beneficiaries_with_rank_generated).to_excel(writer, sheet_name="beneficiaries_cc_with_rank_generated", index=False)
         writer.save()
     buffer.seek(0)
     headers = {"Content-Disposition": "attachment; filename=beneficiaries.xlsx"}
@@ -129,8 +134,10 @@ def beneficiaries_to_excel():
 
 @app.get("/muso/beneficiaries/sync_to_hivhaiti/case_id")
 def sync_beneficiaries_case_id():
-    hiv_beneficiaries = MusoBeneficiary().get_muso_beneficiaries()
+    muso_beneficiary = MusoBeneficiary()
+    hiv_beneficiaries = muso_beneficiary.get_muso_beneficiaries()
     cc_beneficiaries = MusoBeneficiariesCase().get()
-    analysis_muso_beneficiaries = MusoBeneficiaries({"cc_beneficiaries":cc_beneficiaries, "hiv_beneficiaries":hiv_beneficiaries})
+    max_rank_beneficiaries_by_groups = muso_beneficiary.get_max_rank_beneficiaries_by_groups()
+    analysis_muso_beneficiaries = MusoBeneficiaries({"cc_beneficiaries":cc_beneficiaries, "hiv_beneficiaries":hiv_beneficiaries,"max_rank_beneficiaries_by_groups":max_rank_beneficiaries_by_groups})
     analysis_muso_beneficiaries.update_beneficiaries_case_id()
     return {"message":"beneficiaries synced"}

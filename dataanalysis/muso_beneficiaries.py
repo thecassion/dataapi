@@ -16,6 +16,10 @@ class MusoBeneficiaries:
                 self.cc_beneficiaries = data["cc_beneficiaries"]
             else:
                 Exception("cc_beneficiaries not found in data")
+            if "max_rank_beneficiaries_by_groups" in data:
+                self.max_rank_beneficiaries_by_groups = data["max_rank_beneficiaries_by_groups"]
+            else:
+                Exception("max_rank_beneficiaries_by__groups not found in data")
 
     def get_beneficiaries_count(self):
         """
@@ -47,3 +51,25 @@ class MusoBeneficiaries:
         g = df.to_dict("records")
         muso_beneficiaries = MusoBeneficiary()
         muso_beneficiaries.update_muso_beneficiaries_case_id(g)
+
+    def cc_beneficiaries_without_external_id(self):
+        """
+        Get the number of beneficiaries on CommCare but not on HIV/Haiti
+        """
+        df = pd.DataFrame(self.cc_beneficiaries)
+        df = df[df["external_id"].isna()]
+        return df.to_dict("records")
+
+    def generate_rank_by_groups(self):
+        """
+        Generate the rank of each beneficiary by groups
+        """
+        beneficiaries=[]
+        __cc_benificiary_without_external_id = self.cc_beneficiaries_without_external_id()
+        for group in self.max_rank_beneficiaries_by_groups:
+            i=1
+            for cc_benificiary in __cc_benificiary_without_external_id:
+                if cc_benificiary["parent_id"] == group["group_case_id"]:
+                    cc_benificiary["rank"] = group["max_rank"] + i
+                    beneficiaries.append(cc_benificiary)
+                    i+=1

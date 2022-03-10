@@ -29,3 +29,23 @@ class MusoBeneficiary:
             return True
         else:
             raise Exception("beneficiaries must be a list")
+
+    def get_max_rank_beneficiaries_by_groups(self):
+        e = engine()
+        with e as conn:
+            try:
+                cursor = conn.cursor()
+                query = ''' SELECT
+                    coalesce(max(a.rank),0) AS max_rank, b.case_id as group_case_id
+                FROM
+                    caris_db.muso_group_members  as a
+                        RIGHT JOIN
+                    muso_group as b ON a.id_group = b.id
+                WHERE
+                    b.case_id IS NOT NULL
+                GROUP BY b.case_id '''
+                cursor.execute(query)
+                return cursor.fetchall()
+            except Exception as e:
+                print(e)
+                return []
