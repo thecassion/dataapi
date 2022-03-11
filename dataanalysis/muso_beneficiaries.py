@@ -68,7 +68,7 @@ class MusoBeneficiaries:
         df = df[df["external_id"].isna()]
         df = df[df["patient_code"].isna()]
         df[["is_inactive","graduated","is_abandoned","is_pvvih"]] = df[["is_inactive","graduated","is_abandoned","is_pvvih"]].fillna(0)
-        df[["inactive_date","abandoned_date","graduation_date"]] = df[["inactive_date","abandoned_date","graduation_date"]].fillna(value=None)
+        df[["inactive_date","abandoned_date","graduation_date"]] = df[["inactive_date","abandoned_date","graduation_date"]].fillna(value=null)
         df.fillna('', inplace=True)
         return df.to_dict("records")
 
@@ -96,13 +96,14 @@ class MusoBeneficiaries:
 
                     l_dates = ["inactive_date","abandoned_date","graduation_date"]
                     for l_date in l_dates:
-                        if cc_benificiary[l_date] =="":
+                        if cc_benificiary[l_date] ==null:
                             cc_benificiary[l_date] = None
 
                     # cc_benificiary["gender"]=int(cc_benificiary["gender"])
                     if "pvih" in cc_benificiary:
                         if cc_benificiary["pvih"] !=None:
                             cc_benificiary["pvvih"] = cc_benificiary["pvih"]
+                    cc_benificiary["pvvih"] = int(cc_benificiary["pvvih"])
                     # if(cc_benificiary["patient_code"]==None):
                     cc_benificiary["city_code"] = group["office"]
                     cc_benificiary["hospital_code"] = "MUSO"
