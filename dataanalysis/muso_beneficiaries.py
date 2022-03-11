@@ -71,6 +71,11 @@ class MusoBeneficiaries:
             for cc_benificiary in __cc_benificiary_without_external_id:
                 if cc_benificiary["parent_id"] == group["group_case_id"]:
                     cc_benificiary["rank"] = group["max_rank"] + i
+                    cc_benificiary["city_code"] = group["office"]
+                    cc_benificiary["hospital_code"] = "MUSO"
+                    cc_benificiary["which_program"] = "MUSO"
+                    cc_benificiary["patient_number"]= "{:05d}".format(int(group["code"]))+"{:03d}".format(cc_benificiary["rank"])
+                    cc_benificiary["patient_code"] = cc_benificiary["city_code"]+"/"+cc_benificiary["hospital_code"]+"/"+cc_benificiary["patient_number"]
                     beneficiaries.append(cc_benificiary)
                     i+=1
         return beneficiaries
