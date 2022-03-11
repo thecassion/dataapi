@@ -59,13 +59,21 @@ class MusoBeneficiaries:
         df = pd.DataFrame(self.cc_beneficiaries)
         df = df[df["external_id"].isna()]
         return df.to_dict("records")
+    def cc_beneficiaries_without_external_id_and_patient_code(self):
+        """
+        Get the number of beneficiaries on CommCare but not on HIV/Haiti
+        """
+        df = pd.DataFrame(self.cc_beneficiaries)
+        df = df[df["external_id"].isna()]
+        df = df[df["patient_code"].isna()]
+        return df.to_dict("records")
 
     def generate_rank_by_groups(self):
         """
         Generate the rank of each beneficiary by groups
         """
         beneficiaries=[]
-        __cc_benificiary_without_external_id = self.cc_beneficiaries_without_external_id()
+        __cc_benificiary_without_external_id = self.cc_beneficiaries_without_external_id_and_patient_code()
         for group in self.max_rank_beneficiaries_by_groups:
             i=1
             for cc_benificiary in __cc_benificiary_without_external_id:
