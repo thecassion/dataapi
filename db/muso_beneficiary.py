@@ -44,7 +44,7 @@ class MusoBeneficiary:
                     muso_group as b ON a.id_group = b.id
                 WHERE
                     b.case_id IS NOT NULL
-                GROUP BY b.case_id '''
+                GROUP BY b.case_id  HAVING id_group is not null'''
                 cursor.execute(query)
                 return cursor.fetchall()
             except Exception as e:
@@ -62,9 +62,10 @@ class MusoBeneficiary:
                                 `patient_code`,\
                                 `linked_to_id_patient`,\
                                 `which_program`,\
-                                `muso_case_id`,\
+                                `muso_case_id`)\
                                 VALUES (%s,%s,%s,%s,%s,%s,%s)",(beneficiary['city_code'],beneficiary['hospital_code'],beneficiary['patient_number'],beneficiary['patient_code'],beneficiary['linked_to_id_patient'],beneficiary['which_program'],beneficiary['case_id']))
                 id_patient = cursor.lastrowid
+                print("id_patient:",id_patient)
                 cursor.execute("INSERT INTO `caris_db`.`beneficiary`\
                                 (`id_patient`,\
                                 `first_name`,\
@@ -72,12 +73,11 @@ class MusoBeneficiary:
                                 `dob`,\
                                 `gender`,\
                                 `phone`,\
-                                `second_phone`,\
                                 `address`,\
                                 `is_pvvih`,\
-                                `created_by`,\
-                                VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
-                                (id_patient,beneficiary['first_name'],beneficiary['last_name'],beneficiary['dob'],beneficiary['gender'],beneficiary["phone"],beneficiary["second_phone"],beneficiary["address"],beneficiary["is_pvvih"],beneficiary["created_by"]))
+                                `created_by`)\
+                                VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+                                (id_patient,beneficiary['first_name'],beneficiary['last_name'],beneficiary['dob'],beneficiary['gender'],beneficiary["phone"],beneficiary["address"],beneficiary["is_pvvih"],beneficiary["created_by"]))
                 cursor.execute("INSERT INTO `caris_db`.`muso_group_members`\
                                 (`id_patient`,\
                                 `id_group`,\
@@ -92,8 +92,8 @@ class MusoBeneficiary:
                                 VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",(id_patient,beneficiary['id_group'],beneficiary['is_inactive'],beneficiary['inactive_date'],beneficiary['is_abandoned'],beneficiary['abandoned_date'],beneficiary['rank'],beneficiary['graduated'],beneficiary['graduation_date'],beneficiary['created_by']))
 
 
-
                 conn.commit()
             except Exception as e:
-                print(e)
+                print(beneficiary)
+                raise Exception(e)
                 return False
