@@ -59,29 +59,41 @@ class MusoBeneficiaries:
         df = pd.DataFrame(self.cc_beneficiaries)
         df = df[df["external_id"].isna()]
         return df.to_dict("records")
+    def cc_beneficiaries_without_external_id_and_patient_code(self):
+        """
+        Get the number of beneficiaries on CommCare but not on HIV/Haiti
+        """
+        df = pd.DataFrame(self.cc_beneficiaries)
+        df = df[df["external_id"].isna()]
+        df = df[df["patient_code"].isna()]
+        return df.to_dict("records")
 
     def generate_rank_by_groups(self):
         """
         Generate the rank of each beneficiary by groups
         """
         beneficiaries=[]
-        __cc_benificiary_without_external_id = self.cc_beneficiaries_without_external_id()
+        __cc_benificiary_without_external_id = self.cc_beneficiaries_without_external_id_and_patient_code()
         for group in self.max_rank_beneficiaries_by_groups:
             i=1
             for cc_benificiary in __cc_benificiary_without_external_id:
                 if cc_benificiary["parent_id"] == group["group_case_id"]:
                     cc_benificiary["rank"] = group["max_rank"] + i
                     cc_benificiary["which_program"] = "MUSO"
-                    if(cc_benificiary["patient_code"]==None):
-                        cc_benificiary["city_code"] = group["office"]
-                        cc_benificiary["hospital_code"] = "MUSO"
-                        cc_benificiary["patient_number"]= "{:05d}".format(int(group["code"]))+"{:03d}".format(cc_benificiary["rank"])
-                        cc_benificiary["patient_code"] = cc_benificiary["city_code"]+"/"+cc_benificiary["hospital_code"]+"/"+cc_benificiary["patient_number"]
-                    else:
-                        patient_codes = cc_benificiary["patient_code"].split("/")
-                        cc_benificiary["city_code"] = patient_codes[0]
-                        cc_benificiary["hospital_code"] = patient_codes[1]
-                        cc_benificiary["patient_number"] = patient_codes[2]
+                    cc_benificiary["linked_to_id_patient"] = 0
+                    if "pvih" in cc_benificiary:
+                        if cc_benificiary["pvih"] !=None:
+                            cc_benificiary["pvvih"] = cc_benificiary["pvih"]
+                    # if(cc_benificiary["patient_code"]==None):
+                    cc_benificiary["city_code"] = group["office"]
+                    cc_benificiary["hospital_code"] = "MUSO"
+                    cc_benificiary["patient_number"]= "{:05d}".format(int(group["code"]))+"{:03d}".format(cc_benificiary["rank"])
+                    cc_benificiary["patient_code"] = cc_benificiary["city_code"]+"/"+cc_benificiary["hospital_code"]+"/"+cc_benificiary["patient_number"]
+                    # else:
+                    #     patient_codes = cc_benificiary["patient_code"].split("/")
+                    #     cc_benificiary["city_code"] = patient_codes[0]
+                    #     cc_benificiary["hospital_code"] = patient_codes[1]
+                    #     cc_benificiary["patient_number"] = patient_codes[2]
                     beneficiaries.append(cc_benificiary)
                     i+=1
         return beneficiaries
