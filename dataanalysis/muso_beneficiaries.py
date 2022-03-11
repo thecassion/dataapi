@@ -73,3 +73,4 @@ class MusoBeneficiaries:
                     cc_benificiary["rank"] = group["max_rank"] + i
                     beneficiaries.append(cc_benificiary)
                     i+=1
+        return beneficiaries
