@@ -156,4 +156,5 @@ def sync_beneficiaries_to_hivhaiti():
         muso_beneficiary.insert_beneficiary(beneficiary)
         print(f"{i}/{l}")
         print("case_id:"+beneficiary["case_id"]+"  i: "+str((i/l)*100)+"%  "+"i:"+str(i))
+        i+=1
     return {"message":"beneficiaries synced"}
