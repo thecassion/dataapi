@@ -1,4 +1,5 @@
 import pandas as pd
+from sqlalchemy import null
 
 from db.muso_beneficiary import MusoBeneficiary
 
@@ -66,6 +67,9 @@ class MusoBeneficiaries:
         df = pd.DataFrame(self.cc_beneficiaries)
         df = df[df["external_id"].isna()]
         df = df[df["patient_code"].isna()]
+        df[["is_inactive","graduated","is_abandoned","is_pvvih"]] = df[["is_inactive","graduated","is_abandoned","is_pvvih"]].fillna(0)
+        df[["inactive_date","abandoned_date","graduation_date"]] = df[["inactive_date","abandoned_date","graduation_date"]].fillna(value=None)
+        df.fillna('', inplace=True)
         return df.to_dict("records")
 
     def generate_rank_by_groups(self):
@@ -83,6 +87,19 @@ class MusoBeneficiaries:
                     cc_benificiary["linked_to_id_patient"] = 0
                     cc_benificiary["created_by"] = 120
                     cc_benificiary["id_group"] = group["id_group"]
+                    if cc_benificiary["gender"].lower()=="m":
+                        cc_benificiary["gender"]=1
+                    elif cc_benificiary["gender"].lower()=="f":
+                        cc_benificiary["gender"]=2
+                    elif cc_benificiary["gender"]=="":
+                        cc_benificiary["gender"]=0
+
+                    l_dates = ["inactive_date","abandoned_date","graduation_date"]
+                    for l_date in l_dates:
+                        if cc_benificiary[l_date] =="":
+                            cc_benificiary[l_date] = None
+
+                    # cc_benificiary["gender"]=int(cc_benificiary["gender"])
                     if "pvih" in cc_benificiary:
                         if cc_benificiary["pvih"] !=None:
                             cc_benificiary["pvvih"] = cc_benificiary["pvih"]

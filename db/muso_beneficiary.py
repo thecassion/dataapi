@@ -44,7 +44,7 @@ class MusoBeneficiary:
                     muso_group as b ON a.id_group = b.id
                 WHERE
                     b.case_id IS NOT NULL
-                GROUP BY b.case_id '''
+                GROUP BY b.case_id  HAVING id_group is not null'''
                 cursor.execute(query)
                 return cursor.fetchall()
             except Exception as e:
@@ -94,5 +94,6 @@ class MusoBeneficiary:
 
                 conn.commit()
             except Exception as e:
-                print(e)
+                print(beneficiary)
+                raise Exception(e)
                 return False
