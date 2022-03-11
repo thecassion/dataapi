@@ -82,6 +82,7 @@ class MusoBeneficiaries:
                     cc_benificiary["which_program"] = "MUSO"
                     cc_benificiary["linked_to_id_patient"] = 0
                     cc_benificiary["created_by"] = 120
+                    cc_benificiary["id_group"] = group["id_group"]
                     if "pvih" in cc_benificiary:
                         if cc_benificiary["pvih"] !=None:
                             cc_benificiary["pvvih"] = cc_benificiary["pvih"]
