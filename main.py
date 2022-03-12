@@ -1,7 +1,8 @@
 import re
 from typing import Optional
+import time
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from core.CommCareAPI import CommCareAPI
 import  pandas as pd
 import io
@@ -144,17 +145,24 @@ def sync_beneficiaries_case_id():
 
 @app.get("/muso/beneficiaries/sync_to_hivhaiti")
 def sync_beneficiaries_to_hivhaiti():
-    muso_beneficiary = MusoBeneficiary()
-    hiv_beneficiaries = muso_beneficiary.get_muso_beneficiaries()
-    cc_beneficiaries = MusoBeneficiariesCase().get()
-    max_rank_beneficiaries_by_groups = muso_beneficiary.get_max_rank_beneficiaries_by_groups()
-    analysis_muso_beneficiaries = MusoBeneficiaries({"cc_beneficiaries":cc_beneficiaries, "hiv_beneficiaries":hiv_beneficiaries,"max_rank_beneficiaries_by_groups":max_rank_beneficiaries_by_groups})
-    beneficiaries_to_insert = analysis_muso_beneficiaries.generate_rank_by_groups()
-    i = 1
-    l = len(beneficiaries_to_insert)
-    for beneficiary in beneficiaries_to_insert:
-        muso_beneficiary.insert_beneficiary(beneficiary)
-        print(f"{i}/{l}")
-        print("case_id:"+beneficiary["case_id"]+"  i: "+str((i/l)*100)+"%  "+"i:"+str(i))
-        i+=1
-    return {"message":"beneficiaries synced"}
+    try:
+        muso_beneficiary = MusoBeneficiary()
+        hiv_beneficiaries = muso_beneficiary.get_muso_beneficiaries()
+        cc_beneficiaries = MusoBeneficiariesCase().get()
+        max_rank_beneficiaries_by_groups = muso_beneficiary.get_max_rank_beneficiaries_by_groups()
+        analysis_muso_beneficiaries = MusoBeneficiaries({"cc_beneficiaries":cc_beneficiaries, "hiv_beneficiaries":hiv_beneficiaries,"max_rank_beneficiaries_by_groups":max_rank_beneficiaries_by_groups})
+        beneficiaries_to_insert = analysis_muso_beneficiaries.generate_rank_by_groups()
+        i = 1
+        l = len(beneficiaries_to_insert)
+        main_start_time = time.time()
+        for beneficiary in beneficiaries_to_insert:
+            start_time = time.time()
+            muso_beneficiary.insert_beneficiary(beneficiary)
+            print("beneficiary {}/{} inserted in {}".format(i,l,time.time()-start_time))
+            print("{} beneficiaries inserted in {}".format(i,time.time()-main_start_time))
+            print("Time left to execute {}".format((time.time()-main_start_time)/i*(l-i)))
+            print("case_id:"+beneficiary["case_id"]+"  i: "+str((i/l)*100)+"%  "+"i:"+str(i))
+            i+=1
+        return {"message":"beneficiaries synced"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
