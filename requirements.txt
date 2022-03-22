@@ -6,7 +6,7 @@ pandas
 python-multipart
 openpyxl
 pymongo[srv]
-motor
+motor>=2.0.0,<3.0.0
 aiofiles
 #for email validation
 pydantic[email]
@@ -18,4 +18,5 @@ python-dotenv
 #for jwt tokens
 python-jose
 requests
+aiohttp
 

@@ -40,7 +40,6 @@ app.include_router(admin_router)
 
 
 _forms = db["forms"]
-_forms.create_index([("type",pm.ASCENDING),("name",pm.ASCENDING)], unique=True,name="form_index")
 
 
 # @app.get("/", tags=['Home'])
