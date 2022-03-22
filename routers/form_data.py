@@ -83,7 +83,7 @@ async def transfer_form_data(form_id: str):
                         for r in result:
                             r["form"] = form["_id"]
                             if r["data_out"] is not None:
-                                res = await requests.post(form["url_out"],json=r["data_out"],headers=headers)
+                                res = requests.post(form["url_out"],json=r["data_out"],headers=headers)
                                 if res.status_code == 200:
                                     update_data({"_id":r["_id"]},{"$set":{"response":res.json(),"status":"sent"}})
                                 else:

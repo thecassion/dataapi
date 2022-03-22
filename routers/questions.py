@@ -1,13 +1,14 @@
+from ast import List
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
-from db.question import create_question, get_questions_by_form
+from db.question import create_question, get_questions_by_form, get_questions_without_uid_by_form_id
 from db.form import retrieveForm
 import pandas as pd
 from starlette.responses import StreamingResponse
 from models.question import UpdateQuestions, Questions
 from core.config import settings
 import io
-
+import requests
 from dependencies import get_current_user_from_token
 
 router = APIRouter(
@@ -104,3 +105,38 @@ async def check_form(name:str,type:str, file : UploadFile = File(...)):
     # Download the file
     headers = {"Content-Disposition": "attachment; filename="+type+"_"+name+"_"+str(datetime.now())+".xlsx"}
     return StreamingResponse(buffer,headers=headers)
+
+# @router.put("/form/{form_type}/{form_name}")
+
+# async def update_form_question(form_type: str, form_name: str):
+#     try:
+#         __questions = await get_questions_by_form(form_name, form_type)
+#         if len(__questions) > 0:
+#             return {"questions": __questions}
+#         else:
+#             raise HTTPException(status_code=404, detail="No questions found")
+#     except Exception as e:
+#         raise HTTPException(status_code=400, detail=str(e))
+
+@router.post("/form/{form_type}/{form_name}")
+async def sync_form_questions(form_type: str, form_name: str):
+    headers={'Content-type':'application/json', 'Accept':'application/json'}
+    def reformat_question(question):
+        question["code"] = form_type+"_"+form_name+"_"+question["code"]
+        return question
+    try:
+        __form = await retrieveForm(form_name, form_type)
+        if __form:
+            __questions = await get_questions_without_uid_by_form_id(__form["_id"])
+            if len(__questions) > 0:
+                __questions = list(map(reformat_question,__questions))
+                # res = requests.post(__form["questions_url_out"], json=__questions,headers=headers)
+                # return res.json()
+                return __questions
+            else:
+                raise HTTPException(status_code=404, detail="No questions found")
+        else:
+            raise HTTPException(status_code=404, detail="Form not found")
+
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
