@@ -13,7 +13,7 @@ class Form(BaseModel):
     questions_url_out: str = Field(..., title="questions_url_out: Url to forward the questions")
     format_out :Optional[dict] = Field(None ,title="The format of the output data to url_out")
     format_in :Optional[dict] = Field(None, title="The format of the input data to the form")
-    unique_fields :List[str] = Field(..., title="unique_fields: The unique fields of the form")
+    unique_fields :Optional[List[str]] = Field(None, title="unique_fields: The unique fields of the form")
 
     class Config:
         allow_population_by_field_name = True

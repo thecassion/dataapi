@@ -50,8 +50,9 @@ async def create_forms(forms: List[Form]):
 
 @router.get("s/", response_model=List[Form],response_description=settings.FORMS_DESCRIPTION, status_code=201, summary=settings.FORMS_SUMMARY, tags=['Form'])
 async def retrieve_forms():
-    result = await retrieveForms()
-    return result
+    results = await retrieveForms()
+    results = [ Form.parse_obj(result) for result in results]
+    return results
 
 @router.get("/tsform/")
 async def transform_data_in_to_data_out(form_name:str,form_type:str):
