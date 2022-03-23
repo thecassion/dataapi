@@ -1,3 +1,4 @@
+from tkinter import INSERT
 from db.mysql import engine, sql_achemy_engine
 import pandas as pd
 
@@ -39,3 +40,25 @@ class MusoHousehold2022:
             except Exception as e:
                 print(e)
                 return []
+
+    def insert_household2022(ben):
+        e = engine()
+        with e as conn:
+            try:
+                cursor=conn.cursor()
+                cursor.execute(" INSERT INTO `caris_db`.`muso_household_2022`(\
+                    `pos`,\
+                    `age`,\
+                    `id_patient`,\
+                    `sexe`,\
+                    `arv`,\
+                    `test`,\
+                    `often_sick`,\
+                    `case_id`,\
+                    `user_id`)\
+                    VALUES (%s, %s, %s, %s, %s, %s,%s,%s,%s)",
+                    (ben["pos"], ben["age"],ben["id_patient"],ben["sexe"],ben["arv"],ben["test"],ben["often_sick"],ben["case_id"], ben["user_id"]))
+                conn.commit()
+            except Exception as e:
+                print(e)
+                raise Exception(e)
