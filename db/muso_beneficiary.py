@@ -37,7 +37,7 @@ class MusoBeneficiary:
             try:
                 cursor = conn.cursor()
                 query = ''' SELECT
-                    coalesce(max(a.rank),0) AS max_rank, b.case_id as group_case_id,office,code,id_group
+                    coalesce(max(a.rank),0) AS max_rank, b.case_id as group_case_id,office,code,b.id as id_group
                 FROM
                     caris_db.muso_group_members  as a
                         RIGHT JOIN

@@ -1,7 +1,8 @@
 import re
 from typing import Optional
+import time
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from core.CommCareAPI import CommCareAPI
 import  pandas as pd
 import io
@@ -12,6 +13,11 @@ from db.muso_beneficiary import MusoBeneficiary
 from CommCare.MusoGroupesCase import MusoGroupesCase
 from CommCare.MusoBeneficiariesCase import MusoBeneficiariesCase
 from dataanalysis.muso_beneficiaries import MusoBeneficiaries
+
+from CommCare.MusoHousehold2022Case import MusoHousehold2022Case
+from dataanalysis.muso_household_2022 import MusoHousehold2022
+from db.muso_household_2022 import MusoHousehold2022 as HivMusoHousehold2022
+
 
 app = FastAPI()
 
@@ -144,17 +150,47 @@ def sync_beneficiaries_case_id():
 
 @app.get("/muso/beneficiaries/sync_to_hivhaiti")
 def sync_beneficiaries_to_hivhaiti():
-    muso_beneficiary = MusoBeneficiary()
-    hiv_beneficiaries = muso_beneficiary.get_muso_beneficiaries()
-    cc_beneficiaries = MusoBeneficiariesCase().get()
-    max_rank_beneficiaries_by_groups = muso_beneficiary.get_max_rank_beneficiaries_by_groups()
-    analysis_muso_beneficiaries = MusoBeneficiaries({"cc_beneficiaries":cc_beneficiaries, "hiv_beneficiaries":hiv_beneficiaries,"max_rank_beneficiaries_by_groups":max_rank_beneficiaries_by_groups})
-    beneficiaries_to_insert = analysis_muso_beneficiaries.generate_rank_by_groups()
-    i = 1
-    l = len(beneficiaries_to_insert)
-    for beneficiary in beneficiaries_to_insert:
-        muso_beneficiary.insert_beneficiary(beneficiary)
-        print(f"{i}/{l}")
-        print("case_id:"+beneficiary["case_id"]+"  i: "+str((i/l)*100)+"%  "+"i:"+str(i))
-        i+=1
-    return {"message":"beneficiaries synced"}
+    try:
+        muso_beneficiary = MusoBeneficiary()
+        hiv_beneficiaries = muso_beneficiary.get_muso_beneficiaries()
+        cc_beneficiaries = MusoBeneficiariesCase().get()
+        max_rank_beneficiaries_by_groups = muso_beneficiary.get_max_rank_beneficiaries_by_groups()
+        analysis_muso_beneficiaries = MusoBeneficiaries({"cc_beneficiaries":cc_beneficiaries, "hiv_beneficiaries":hiv_beneficiaries,"max_rank_beneficiaries_by_groups":max_rank_beneficiaries_by_groups})
+        beneficiaries_to_insert = analysis_muso_beneficiaries.generate_rank_by_groups()
+        i = 1
+        l = len(beneficiaries_to_insert)
+        main_start_time = time.time()
+        for beneficiary in beneficiaries_to_insert:
+            start_time = time.time()
+            muso_beneficiary.insert_beneficiary(beneficiary)
+            print("beneficiary {}/{} inserted in {}".format(i,l,time.time()-start_time))
+            print("{} beneficiaries inserted in {}".format(i,time.time()-main_start_time))
+            print("Time left to execute {}".format((time.time()-main_start_time)/i*(l-i)))
+            print("case_id:"+beneficiary["case_id"]+"  i: "+str((i/l)*100)+"%  "+"i:"+str(i))
+            i+=1
+        return {"message":"beneficiaries synced"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/muso/households/xlsx")
+def households_to_excel():
+    # try:
+        cc_households = MusoHousehold2022Case().get()
+        hivmuso_houshold = HivMusoHousehold2022()
+        start_time = time.time()
+        max_pos_households_by_beneficiary = hivmuso_houshold.get_max_pos_by_beneficiaires()
+        print("time for max pos", start_time-time.time())
+        start_time = time.time()
+        hiv_households = hivmuso_houshold.get_muso_household2022()
+        print("time for hiv ", start_time-time.time())
+        analysis_muso_household2022 = MusoHousehold2022({"cc_households":cc_households,"hiv_households":hiv_households,"max_pos_households_by_beneficiary":max_pos_households_by_beneficiary})
+        cc_households_with_pos_generated = analysis_muso_household2022.generate_pos_by_beneficiary()
+        buffer = io.BytesIO()
+        with pd.ExcelWriter(buffer) as writer:
+            pd.DataFrame(cc_households_with_pos_generated).to_excel(writer, sheet_name="cc_hsholds_pos_gen")
+            writer.save()
+        buffer.seek(0)
+        headers = {"Content-Disposition": "attachment; filename=cc_households.xlsx"}
+        return StreamingResponse(buffer, headers=headers)
+    # except Exception as e:
+    #     raise HTTPException(status_code=500, detail=str(e))
