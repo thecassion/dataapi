@@ -14,6 +14,11 @@ from CommCare.MusoGroupesCase import MusoGroupesCase
 from CommCare.MusoBeneficiariesCase import MusoBeneficiariesCase
 from dataanalysis.muso_beneficiaries import MusoBeneficiaries
 
+from CommCare.MusoHousehold2022Case import MusoHousehold2022Case
+from dataanalysis.muso_household_2022 import MusoHousehold2022
+from db.muso_household_2022 import MusoHousehold2022 as HivMusoHousehold2022
+
+
 app = FastAPI()
 
 
@@ -166,3 +171,26 @@ def sync_beneficiaries_to_hivhaiti():
         return {"message":"beneficiaries synced"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/muso/households/xlsx")
+def households_to_excel():
+    # try:
+        cc_households = MusoHousehold2022Case().get()
+        hivmuso_houshold = HivMusoHousehold2022()
+        start_time = time.time()
+        max_pos_households_by_beneficiary = hivmuso_houshold.get_max_pos_by_beneficiaires()
+        print("time for max pos", start_time-time.time())
+        start_time = time.time()
+        hiv_households = hivmuso_houshold.get_muso_household2022()
+        print("time for hiv ", start_time-time.time())
+        analysis_muso_household2022 = MusoHousehold2022({"cc_households":cc_households,"hiv_households":hiv_households,"max_pos_households_by_beneficiary":max_pos_households_by_beneficiary})
+        cc_households_with_pos_generated = analysis_muso_household2022.generate_pos_by_beneficiary()
+        buffer = io.BytesIO()
+        with pd.ExcelWriter(buffer) as writer:
+            pd.DataFrame(cc_households_with_pos_generated).to_excel(writer, sheet_name="cc_hsholds_pos_gen")
+            writer.save()
+        buffer.seek(0)
+        headers = {"Content-Disposition": "attachment; filename=cc_households.xlsx"}
+        return StreamingResponse(buffer, headers=headers)
+    # except Exception as e:
+    #     raise HTTPException(status_code=500, detail=str(e))
