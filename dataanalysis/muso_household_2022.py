@@ -75,7 +75,11 @@ class MusoHousehold2022:
         Generate the max_pos household by_beneficiary
         """
         households =[]
-        for beneficiary in self.get_beneficiaries_max_pos_with_household():
+        __beneficiaries = self.get_beneficiaries_max_pos_with_household()
+        ln_ben = len(__beneficiaries)
+        j = 0
+        for beneficiary in __beneficiaries :
+            j+=1
             i = 1
             hs = filter(lambda x: x["parent_id"]==beneficiary["muso_case_id"], self.get_household_not_on_hiv() )
             if hs is None:
@@ -86,10 +90,14 @@ class MusoHousehold2022:
                     cc_household["sexe"]="M"
                 elif int(cc_household["sexe"])==2:
                     cc_household["sexe"]= "F"
+                cc_household["created_by"]=120
                 cc_household['id_patient']=int(beneficiary["id_patient"])
                 households.append(cc_household)
-                db_muso_household = MusoHousehold2022db()
-                db_muso_household.insert_household2022(cc_household)
+                # db_muso_household = MusoHousehold2022db()
+                # db_muso_household.insert_household2022(cc_household)
                 i+=1
-            print(" finish with beneficiary : ", beneficiary["id_patient"])
+            print(" finish with beneficiary : "+str(beneficiary["id_patient"]) +"  "+str(j)+"/"+str(ln_ben))
+        print("Save with pandas")
+        df_hs = pd.DataFrame(households)[['pos','age','id_patient','sexe','arv','test','often_sick','case_id','created_by','user_id']]
+        df_hs.to_sql("muso_household_2022", con=sql_achemy_engine(), if_exists="append", index=False)
         return households
