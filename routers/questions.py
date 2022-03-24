@@ -30,7 +30,7 @@ async def create_form_question_xlsx(form_type: str, form_name: str, file: Upload
         result = await create_question(questions)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
-    return {"number of questions":len(result.inserted_ids)}
+    return {"Success": "Questions created successfully"}
 @router.get("/xlsx")
 async def get_form_question_xlsx(form_name: str, form_type: str):
     """
