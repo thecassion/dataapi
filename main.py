@@ -194,3 +194,20 @@ def households_to_excel():
         return StreamingResponse(buffer, headers=headers)
     # except Exception as e:
     #     raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/muso/households/sync")
+def insert_household():
+    try:
+        cc_households = MusoHousehold2022Case().get()
+        hivmuso_houshold = HivMusoHousehold2022()
+        start_time = time.time()
+        max_pos_households_by_beneficiary = hivmuso_houshold.get_max_pos_by_beneficiaires()
+        print("time for max pos", start_time-time.time())
+        start_time = time.time()
+        hiv_households = hivmuso_houshold.get_muso_household2022()
+        print("time for hiv ", start_time-time.time())
+        analysis_muso_household2022 = MusoHousehold2022({"cc_households":cc_households,"hiv_households":hiv_households,"max_pos_households_by_beneficiary":max_pos_households_by_beneficiary})
+        analysis_muso_household2022.insert_households_to_db()
+        return {"message":"success"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

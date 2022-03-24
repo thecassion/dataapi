@@ -41,7 +41,7 @@ class MusoHousehold2022:
                 print(e)
                 return []
 
-    def insert_household2022(ben):
+    def insert_household2022(self,ben):
         e = engine()
         with e as conn:
             try:
@@ -55,9 +55,11 @@ class MusoHousehold2022:
                     `test`,\
                     `often_sick`,\
                     `case_id`,\
+                    `created_by`,\
                     `user_id`)\
-                    VALUES (%s, %s, %s, %s, %s, %s,%s,%s,%s)",
-                    (ben["pos"], ben["age"],ben["id_patient"],ben["sexe"],ben["arv"],ben["test"],ben["often_sick"],ben["case_id"], ben["user_id"]))
+                    VALUES (%s, %s, %s, %s, %s, %s,%s,%s,%s,%s)",
+                    (ben["pos"], ben["age"],ben["id_patient"],ben["sexe"],ben["arv"],ben["test"],ben["often_sick"],ben["case_id"],120, ben["user_id"]))
+                print("insert :",ben["id_patient"])
                 conn.commit()
             except Exception as e:
                 print(e)
