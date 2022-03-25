@@ -17,7 +17,7 @@ async def add_question_indexes():
         __indexes_info =  await __questions.index_information()
         if __indexes_info:
             if "form_question_code_index" not in __indexes_info:
-                await __questions.create_index([("code",pm.ASCENDING)], unique=True,name="form_question_code_index")
+                await __questions.create_index([("code",1),("form",1)], unique=True,name="form_question_code_index")
             if "question_uid_index" not in __indexes_info:
                await  __questions.create_index([("uid",pm.ASCENDING)], unique=True,name="question_uid_index", partialFilterExpression={"uid": {"$exists": True}})
         return {"message":"Indexes added"}
