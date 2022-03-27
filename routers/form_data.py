@@ -44,7 +44,6 @@ async def create_form_data_xlsx(form_type: str, form_name: str, file: UploadFile
                     df = df.where((pd.notnull(df)) & pd.notna(df), None)
                     df = df.where(pd.notna(df), None)
                     __dict = df.to_dict(orient='records')
-                    print("Type of fields:",type(__dict[0]["nbre_gar_3afc"]))
                     result = await createData(__dict)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
