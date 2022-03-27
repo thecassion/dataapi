@@ -38,7 +38,7 @@ async def create_form_data_xlsx(form_type: str, form_name: str, file: UploadFile
             if 'unique_fields' in form:
                 unique_fields = list(form["unique_fields"])
                 if len(unique_fields) > 0:
-                    df["_id"] = df[unique_fields].apply(lambda x: '_'.join(x.map(str)), axis=1)
+                    df["_id"] = str(form["_id"])+"_"+df[unique_fields].apply(lambda x: '_'.join(x.map(str)), axis=1)
                     df["form_id"] = form["_id"]
                     df = df.drop_duplicates(subset=['_id'])
                     df = df.where((pd.notnull(df)) & pd.notna(df), None)
