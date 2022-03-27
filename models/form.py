@@ -8,6 +8,7 @@ from models.question import Question
 class Form(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId, title="The unique identifier of the form", description="The unique identifier of the form", alias="_id")
     name :str = Field(..., title="name of the form")
+    version :Optional[float] = Field(None , title="version of the form")
     type: str = Field(..., title="type of the form")
     url_out :str = Field(..., title="url_out: Url to forward the form")
     questions_url_out: str = Field(..., title="questions_url_out: Url to forward the questions")
@@ -23,6 +24,7 @@ class Form(BaseModel):
             "example": {
                 "name": "form_name",
                 "type": "form_type",
+                "version": 1.0,
                 "url_out": "http://url_out",
                 "questions_url_out": "http://questions_url_out",
                 "format_out": {
@@ -53,6 +55,7 @@ class Form(BaseModel):
 class UpdateFormModel(BaseModel):
     name :Optional[str]
     type: Optional[str]
+    version :Optional[float] = Field(None , title="version of the form")
     url_out :Optional[str]
     questions_url_out: Optional[str]
     format_out :Optional[dict]
@@ -67,6 +70,7 @@ class UpdateFormModel(BaseModel):
             "example": {
                 "name": "form_name",
                 "type": "form_type",
+                "version": 1.0,
                 "url_out": "http://url_out",
                 "questions_url_out": "http://questions_url_out",
                 "format_out": {
