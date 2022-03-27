@@ -1,4 +1,3 @@
-from ensurepip import version
 from typing import List,Optional
 from pydantic import BaseModel, Field, EmailStr
 from utils.typing import PyObjectId
@@ -25,6 +24,7 @@ class Form(BaseModel):
             "example": {
                 "name": "form_name",
                 "type": "form_type",
+                "version": 1.0,
                 "url_out": "http://url_out",
                 "questions_url_out": "http://questions_url_out",
                 "format_out": {
@@ -55,6 +55,7 @@ class Form(BaseModel):
 class UpdateFormModel(BaseModel):
     name :Optional[str]
     type: Optional[str]
+    version :Optional[float] = Field(None , title="version of the form")
     url_out :Optional[str]
     questions_url_out: Optional[str]
     format_out :Optional[dict]
@@ -69,6 +70,7 @@ class UpdateFormModel(BaseModel):
             "example": {
                 "name": "form_name",
                 "type": "form_type",
+                "version": 1.0,
                 "url_out": "http://url_out",
                 "questions_url_out": "http://questions_url_out",
                 "format_out": {
