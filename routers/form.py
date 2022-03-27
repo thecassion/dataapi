@@ -30,7 +30,7 @@ async def form_by_id(id: str):
 @router.post("/")
 async def create_form(form_data: Form):
     result = await createForm(form_data)
-    return JSONResponse(content=result.dict())
+    return JSONResponse(content=str(result.inserted_id), status_code=201)
 
 @router.put("/{id}", response_description="Update a Form", response_model=Form)
 async def update_a_form(id:str,form: UpdateFormModel = Body(...)):
