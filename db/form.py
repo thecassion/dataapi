@@ -8,7 +8,7 @@ import pymongo as pm
 
 
 async def add_form_indexes():
-    __list_indexes = await form_collection.list_indexes()
+    __list_indexes = [ index async for index in form_collection.list_indexes()]
     if "form_index" not in __list_indexes:
         await form_collection.create_index([("type",pm.ASCENDING),("name",pm.ASCENDING)], unique=True,name="form_index")
 
