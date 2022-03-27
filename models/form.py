@@ -1,3 +1,4 @@
+from ensurepip import version
 from typing import List,Optional
 from pydantic import BaseModel, Field, EmailStr
 from utils.typing import PyObjectId
@@ -8,6 +9,7 @@ from models.question import Question
 class Form(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId, title="The unique identifier of the form", description="The unique identifier of the form", alias="_id")
     name :str = Field(..., title="name of the form")
+    version :Optional[float] = Field(None , title="version of the form")
     type: str = Field(..., title="type of the form")
     url_out :str = Field(..., title="url_out: Url to forward the form")
     questions_url_out: str = Field(..., title="questions_url_out: Url to forward the questions")
