@@ -12,6 +12,7 @@ class Form(BaseModel):
     type: str = Field(..., title="type of the form")
     url_out :str = Field(..., title="url_out: Url to forward the form")
     questions_url_out: str = Field(..., title="questions_url_out: Url to forward the questions")
+    questions_url_in: str = Field(..., title="questions_url_in: Url to get from api the questions")
     format_out :Optional[dict] = Field(None ,title="The format of the output data to url_out")
     format_in :Optional[dict] = Field(None, title="The format of the input data to the form")
     unique_fields :Optional[List[str]] = Field(None, title="unique_fields: The unique fields of the form")
@@ -58,6 +59,7 @@ class UpdateFormModel(BaseModel):
     version :Optional[float] = Field(None , title="version of the form")
     url_out :Optional[str]
     questions_url_out: Optional[str]
+    questions_url_in: Optional[str]
     format_out :Optional[dict]
     format_in :Optional[dict]
     unique_fields :Optional[List[str]]
