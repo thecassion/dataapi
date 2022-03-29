@@ -73,3 +73,13 @@ async def get_questions_without_uid_by_form_id(form_id:objectid):
         return result
     except Exception as e:
         return {"message": str(e)}
+
+async def update_question_uid(ques):
+    """
+    Update question uid
+    """
+    try:
+        result = await __questions.update_one({"_id":ques["_id"]},{"$set":{"uid":ques["uid"]}})
+        return result
+    except Exception as e:
+        raise e
