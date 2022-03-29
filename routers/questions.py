@@ -169,10 +169,10 @@ async def sync_form_questions(form_type: str, form_name: str):
                         # requests.post(__form["questions_url_out"],json=__json,headers=headers)
                 elif not df_questions_db.empty:
                     # Join the two dataframes
-                    __df_questions_join = df_questions_db
+                    # __df_questions_join = df_questions_db
                     # Get the questions that are in the db without uid
-                    df_questions_db_without_uid = __df_questions_join[__df_questions_join["uid"].isnull()]
-                    __rows = df_questions_db_without_uid[__db_columns].to_dict(orient="records", index=False)
+                    # df_questions_db_without_uid = __df_questions_join[__df_questions_join["uid"].isnull()]
+                    __rows = df_questions_db[__db_columns].to_dict(orient="records", index=False)
                     __response["rows_to_insert"] = __rows
 
                 # res = requests.post(__form["questions_url_out"], json=__questions,headers=headers)
