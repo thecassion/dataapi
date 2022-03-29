@@ -1,7 +1,7 @@
 from ast import List
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
-from db.question import create_question, get_questions_by_form, get_questions_without_uid_by_form_id
+from db.question import create_question, get_questions_by_form, get_questions_without_uid_by_form_id, update_question_uid
 from db.form import retrieveForm
 import pandas as pd
 from starlette.responses import StreamingResponse
@@ -118,7 +118,7 @@ async def check_form(name:str,type:str, file : UploadFile = File(...)):
 #     except Exception as e:
 #         raise HTTPException(status_code=400, detail=str(e))
 
-@router.post("/form/{form_type}/{form_name}")
+@router.post("/sync/{form_type}/{form_name}")
 async def sync_form_questions(form_type: str, form_name: str):
     headers={'Content-type':'application/json', 'Accept':'application/json'}
     def reformat_question(question):
@@ -130,9 +130,51 @@ async def sync_form_questions(form_type: str, form_name: str):
             __questions = await get_questions_without_uid_by_form_id(__form["_id"])
             if len(__questions) > 0:
                 __questions = list(map(reformat_question,__questions))
+                df_questions_db = pd.DataFrame(__questions)
+                if __form["version"]:
+                    df_questions_db["version"] = __form["version"]
+                __db_columns = df_questions_db.columns
+
+                # Get questions from the api
+                __api_questions = requests.get(__form["questions_url_in"],headers=headers)
+                __api_questions = __api_questions.json()
+                df_questions_api = pd.DataFrame(__api_questions)
+                __api_columns = df_questions_api.columns
+                # filter questions from the api that are for this form
+                df_questions_api["form_type_name"] = df_questions_api["code"].apply(lambda x: x.split("_")[0]+"_"+x.split("_")[1])
+                df_questions_api = df_questions_api[df_questions_api["form_type_name"] == form_type+"_"+form_name]
+                df_questions_api = df_questions_api[__api_columns]
+                __response ={}
+                if not df_questions_api.empty:
+                    # Join the two dataframes
+                    df_questions_join = pd.merge(df_questions_db,df_questions_api,on="code",how="left", suffixes=(None,"_api"))
+                    # Get the questions that are in the db without uid
+                    df_questions_db_without_uid = df_questions_join[df_questions_join["uid"].isnull()]
+                    df_questions_db_without_uid_but_is_in_api = df_questions_db_without_uid[df_questions_db_without_uid["uid_api"].notnull()]
+                    # Get the questions that are in the db not on the api
+                    df_questions_db_without_uid_but_not_in_api = df_questions_db_without_uid[df_questions_db_without_uid["uid_api"].isnull()]
+
+                    if not df_questions_db_without_uid_but_is_in_api.empty:
+                        df_questions_db_without_uid_but_is_in_api["uid"]=df_questions_db_without_uid_but_is_in_api["uid_api"]
+                        rows_to_update_uid = df_questions_db_without_uid_but_is_in_api.to_dict(orient="records", index=False)
+                        __response["rows_to_update_uid"] = rows_to_update_uid
+                        for _row in  rows_to_update_uid:
+                            await update_question_uid(_row)
+                    if not df_questions_db_without_uid_but_not_in_api.empty:
+                        __json=df_questions_db_without_uid_but_not_in_api[__db_columns].to_dict(orient="records", index=False)
+                        __response["rows_to_insert"] = __json
+                        # requests.post(__form["questions_url_out"],json=__json,headers=headers)
+                elif not df_questions_db.empty:
+                    # Join the two dataframes
+                    df_questions_join = pd.merge(df_questions_db,df_questions_api,on="code",how="left", suffixes=(None,"_api"))
+                    # Get the questions that are in the db without uid
+                    df_questions_db_without_uid = df_questions_join[df_questions_join["uid"].isnull()]
+                    __rows = df_questions_db_without_uid[__db_columns].to_dict(orient="records", index=False)
+                    __response["rows_to_insert"] = __rows
+
                 # res = requests.post(__form["questions_url_out"], json=__questions,headers=headers)
                 # return res.json()
-                return __questions
+                return __response
             else:
                 raise HTTPException(status_code=404, detail="No questions found")
         else:
