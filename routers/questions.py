@@ -138,15 +138,15 @@ async def sync_form_questions(form_type: str, form_name: str):
                 # Get questions from the api
                 if "questions_url_in" in __form:
                     __api_questions = requests.get(__form["questions_url_in"],headers=headers)
+                    __api_questions = __api_questions.json()
+                    df_questions_api = pd.DataFrame(__api_questions)
+                    __api_columns = df_questions_api.columns
+                    # filter questions from the api that are for this form
+                    df_questions_api["form_type_name"] = df_questions_api["code"].apply(lambda x: x.split("_")[0]+"_"+x.split("_")[1])
+                    df_questions_api = df_questions_api[df_questions_api["form_type_name"] == form_type+"_"+form_name]
+                    df_questions_api = df_questions_api[__api_columns]
                 else:
                     raise HTTPException(status_code=404, detail="The form does not have a questions url in the db")
-                __api_questions = __api_questions.json()
-                df_questions_api = pd.DataFrame(__api_questions)
-                __api_columns = df_questions_api.columns
-                # filter questions from the api that are for this form
-                df_questions_api["form_type_name"] = df_questions_api["code"].apply(lambda x: x.split("_")[0]+"_"+x.split("_")[1])
-                df_questions_api = df_questions_api[df_questions_api["form_type_name"] == form_type+"_"+form_name]
-                df_questions_api = df_questions_api[__api_columns]
                 __response ={}
                 if not df_questions_api.empty:
                     # Join the two dataframes
