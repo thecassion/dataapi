@@ -136,7 +136,10 @@ async def sync_form_questions(form_type: str, form_name: str):
                 __db_columns = df_questions_db.columns
 
                 # Get questions from the api
-                __api_questions = requests.get(__form["questions_url_in"],headers=headers)
+                if "questions_url_in" in __form:
+                    __api_questions = requests.get(__form["questions_url_in"],headers=headers)
+                else:
+                    raise HTTPException(status_code=404, detail="The form does not have a questions url in the db")
                 __api_questions = __api_questions.json()
                 df_questions_api = pd.DataFrame(__api_questions)
                 __api_columns = df_questions_api.columns
