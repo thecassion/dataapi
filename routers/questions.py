@@ -131,7 +131,7 @@ async def sync_form_questions(form_type: str, form_name: str):
             if len(__questions) > 0:
                 __questions = list(map(reformat_question,__questions))
                 df_questions_db = pd.DataFrame(__questions)
-                if __form["version"]:
+                if "version" in __form:
                     df_questions_db["version"] = __form["version"]
                 __db_columns = df_questions_db.columns
 
