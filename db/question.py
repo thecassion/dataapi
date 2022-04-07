@@ -69,7 +69,7 @@ async def get_questions_without_uid_by_form_id(form_id:objectid):
     """
     await add_question_indexes()
     try:
-        result = await __questions.find({"$and":[{"form":form_id},{"uid":{ "$exists":False}}]},{"form":0,"path":0,"_id":0}).to_list(100000)
+        result = await __questions.find({"$and":[{"form":form_id},{"uid":{ "$exists":False}}]},{"form":0,"path":0}).to_list(100000)
         return result
     except Exception as e:
         return {"message": str(e)}
