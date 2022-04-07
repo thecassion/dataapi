@@ -152,7 +152,7 @@ async def sync_form_questions(form_type: str, form_name: str):
                     # Join the two dataframes
                     df_questions_join = pd.merge(df_questions_db,df_questions_api,on="code",how="left", suffixes=(None,"_api"))
                     # Get the questions that are in the db without uid
-                    if df_questions_db.columns.contains("uid"):
+                    if "uid" in df_questions_db.columns:
                         df_questions_db_without_uid = df_questions_join[df_questions_join["uid"].isna()]
                     else:
                         df_questions_db_without_uid = df_questions_join
@@ -161,7 +161,7 @@ async def sync_form_questions(form_type: str, form_name: str):
                     df_questions_db_without_uid_but_not_in_api = df_questions_db_without_uid[df_questions_db_without_uid["description_api"].isnull()]
 
                     if not df_questions_db_without_uid_but_is_in_api.empty:
-                        if df_questions_db.columns.contains("uid"):
+                        if "uid" in df_questions_db.columns:
                             df_questions_db_without_uid_but_is_in_api["uid"]=df_questions_db_without_uid_but_is_in_api["uid_api"]
                         rows_to_update_uid = df_questions_db_without_uid_but_is_in_api.to_dict(orient="records")
                         __response["rows_to_update_uid"] = rows_to_update_uid
