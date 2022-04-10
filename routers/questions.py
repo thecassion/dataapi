@@ -118,7 +118,7 @@ async def check_form(name:str,type:str, file : UploadFile = File(...)):
 #     except Exception as e:
 #         raise HTTPException(status_code=400, detail=str(e))
 
-@router.post("/sync/{form_type}/{form_name}")
+@router.post("/sync")
 async def sync_form_questions(form_type: str, form_name: str):
     headers={'Content-type':'application/json', 'Accept':'application/json'}
     def reformat_question(question):
