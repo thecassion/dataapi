@@ -168,9 +168,9 @@ async def sync_form_questions(form_type: str, form_name: str):
                     if "uid" in df_questions_db.columns:
                         df_questions_db_without_uid_but_is_in_api["uid"]=df_questions_db_without_uid_but_is_in_api["uid_api"]
                     rows_to_update_uid = df_questions_db_without_uid_but_is_in_api.to_dict(orient="records")
-                    __response["rows_to_update_uid"] = rows_to_update_uid
                     for _row in  rows_to_update_uid:
                         await update_question_uid(_row)
+                    __response["rows_to_update_uid"] = df_questions_db_without_uid_but_is_in_api.drop(columns=["_id"],inplace=True).to_dict(orient="records")
                 if not df_questions_db_without_uid_but_not_in_api.empty:
                     ### Remove _id from the dataframe
                     df_questions_db_without_uid_but_not_in_api = df_questions_db_without_uid_but_not_in_api.drop(columns=["_id"])
