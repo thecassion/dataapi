@@ -175,7 +175,7 @@ async def sync_form_questions(form_type: str, form_name: str):
                     ### Remove _id from the dataframe
 
                     ### Remove _id from the __db_columns
-                    __db_columns= __db_columns.to_list().remove("_id")
+                    __db_columns= __db_columns.tolist().remove("_id")
                     print(df_questions_db_without_uid_but_not_in_api.columns)
                     print("DB Columns :",__db_columns)
                     __json=df_questions_db_without_uid_but_not_in_api[__db_columns].to_dict(orient="records")
@@ -188,7 +188,7 @@ async def sync_form_questions(form_type: str, form_name: str):
                 # df_questions_db_without_uid = __df_questions_join[__df_questions_join["uid"].isnull()]
 
                 ### Remove _id from the __db_columns
-                __db_columns = __db_columns.to_list().remove("_id")
+                __db_columns = __db_columns.tolist().remove("_id")
                 __rows = df_questions_db[__db_columns].to_dict(orient="records")
                 __response["rows_to_insert"] = __rows
 
