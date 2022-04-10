@@ -195,4 +195,5 @@ async def sync_form_questions(form_type: str, form_name: str):
             raise HTTPException(status_code=404, detail="Form not found")
 
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        print(e.message, e.args)
+        raise HTTPException(status_code=400, detail=str(e.message))
