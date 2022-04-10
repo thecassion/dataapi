@@ -13,9 +13,9 @@ def repeat_question(data,format_out,questions, dataInToDataOut):
     """
     data_out = []
     for question in questions:
-        if question["code"] in data:
+        if question["code"] in data and "uid" in question:
             __data_out = {
-                "uid": question["code"],
+                "uid": question["uid"],
                 "response": data[question["code"]],
             }
             data_out.append(dataInToDataOut(__data_out, {}, format_out,questions))
