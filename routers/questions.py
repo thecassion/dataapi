@@ -149,6 +149,8 @@ async def sync_form_questions(form_type: str, form_name: str):
                     df_questions_api["form_type_name"] = df_questions_api["code"].apply(lambda x: x.split("_")[0]+"_"+x.split("_")[1])
                     df_questions_api = df_questions_api[df_questions_api["form_type_name"] == form_type+"_"+form_name]
                     df_questions_api = df_questions_api[__api_columns]
+                    df_questions_api["original_code"] = df_questions_api["code"]
+                    df_questions_db["code"] = df_questions_db["code"].apply(lambda x: form_type+"_"+form_name+"_"+x)
                     # Join the two dataframes
                     df_questions_join = pd.merge(df_questions_db,df_questions_api,on="code",how="left", suffixes=(None,"_api"))
                     # Get the questions that are in the db without uid
