@@ -196,8 +196,9 @@ async def sync_form_questions(form_type: str, form_name: str):
 
             # res = requests.post(__form["questions_url_out"], json=__questions,headers=headers)
             # return res.json()
-            re_resp = requests.post(__form["questions_url_out"], json=__response["rows_to_insert"],headers=headers)
-            __response["api_response"] = re_resp.json()
+            if "rows_to_insert" in __response:
+                re_resp = requests.post(__form["questions_url_out"], json=__response["rows_to_insert"],headers=headers)
+                __response["api_response"] = re_resp.json()
             return __response
         else:
             raise HTTPException(status_code=404, detail="No questions found")
