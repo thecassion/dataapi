@@ -170,10 +170,12 @@ async def sync_form_questions(form_type: str, form_name: str):
                     rows_to_update_uid = df_questions_db_without_uid_but_is_in_api.to_dict(orient="records")
                     for _row in  rows_to_update_uid:
                         await update_question_uid(_row)
-                    __response["rows_to_update_uid"] = df_questions_db_without_uid_but_is_in_api.drop(columns=["_id"],inplace=True).to_dict(orient="records")
+                    __response["rows_to_update_uid"] = df_questions_db_without_uid_but_is_in_api.to_dict(orient="records")
                 if not df_questions_db_without_uid_but_not_in_api.empty:
                     ### Remove _id from the dataframe
-                    df_questions_db_without_uid_but_not_in_api = df_questions_db_without_uid_but_not_in_api.drop(columns=["_id"])
+
+                    ### Remove _id from the __db_columns
+                    __db_columns.drop("_id")
                     __json=df_questions_db_without_uid_but_not_in_api[__db_columns].to_dict(orient="records")
                     __response["rows_to_insert"] = __json
                     # requests.post(__form["questions_url_out"],json=__json,headers=headers)
@@ -182,7 +184,9 @@ async def sync_form_questions(form_type: str, form_name: str):
                 # __df_questions_join = df_questions_db
                 # Get the questions that are in the db without uid
                 # df_questions_db_without_uid = __df_questions_join[__df_questions_join["uid"].isnull()]
-                df_questions_db.drop(columns=["_id"],inplace=True)
+
+                ### Remove _id from the __db_columns
+                __db_columns = __db_columns.drop("_id")
                 __rows = df_questions_db[__db_columns].to_dict(orient="records")
                 __response["rows_to_insert"] = __rows
 
