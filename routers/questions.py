@@ -134,7 +134,7 @@ async def sync_form_questions(form_type: str, form_name: str):
             df_questions_db = pd.DataFrame(__questions)
             print("convertion to dataframe")
             if "version" in __form:
-                df_questions_db["version"] = __form["version"]
+                df_questions_db["version"] = str(__form["version"])
             __db_columns = df_questions_db.columns
             df_questions_db["original_code"] = df_questions_db["code"]
             df_questions_db["code"] = df_questions_db["code"].apply(lambda x: form_type+"_"+form_name+"_"+x)
