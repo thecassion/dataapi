@@ -176,6 +176,7 @@ async def sync_form_questions(form_type: str, form_name: str):
 
                     ### Remove _id from the __db_columns
                     __db_columns.drop("_id")
+                    print(df_questions_db_without_uid_but_not_in_api.columns)
                     __json=df_questions_db_without_uid_but_not_in_api[__db_columns].to_dict(orient="records")
                     __response["rows_to_insert"] = __json
                     # requests.post(__form["questions_url_out"],json=__json,headers=headers)
