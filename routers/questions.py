@@ -130,8 +130,12 @@ async def sync_form_questions(form_type: str, form_name: str):
         if __form:
             __questions = await get_questions_without_uid_by_form_id(__form["_id"])
             if len(__questions) > 0:
-                __questions = list(map(reformat_question,__questions))
+                print("questions found")
                 df_questions_db = pd.DataFrame(__questions)
+                print("convertion to dataframe")
+                print(df_questions_db.head())
+                df_questions_db["original_code"] = df_questions_db["code"]
+                df_questions_db["code"] = df_questions_db["code"].apply(lambda x: form_type+"_"+form_name+"_"+x)
                 if "version" in __form:
                     df_questions_db["version"] = __form["version"]
                 __db_columns = df_questions_db.columns

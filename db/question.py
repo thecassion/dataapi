@@ -69,7 +69,7 @@ async def get_questions_without_uid_by_form_id(form_id:objectid):
     """
     await add_question_indexes()
     try:
-        result = await __questions.find({"$and":[{"form":form_id},{"uid":{ "$exists":False}}]},{"_id":0,"path":0}).to_list(100000)
+        result = await __questions.find({"$and":[{"form":form_id},{"uid":{ "$exists":False}}]},{"form":0,"path":0}).to_list(100000)
         return result
     except Exception as e:
         return {"message": str(e)}
@@ -79,7 +79,7 @@ async def update_question_uid(ques):
     Update question uid
     """
     try:
-        result = await __questions.update_one({"$and":[{"form":ques["form"]},{"code":ques["orginal_code"]}]},{"$set":{"uid":ques["uid"]}})
+        result = await __questions.update_one({"_id":ques["_id"]},{"$set":{"uid":ques["uid"]}})
         return result
     except Exception as e:
         raise e
