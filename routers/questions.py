@@ -133,12 +133,11 @@ async def sync_form_questions(form_type: str, form_name: str):
             print("questions found")
             df_questions_db = pd.DataFrame(__questions)
             print("convertion to dataframe")
-            print(df_questions_db.head())
-            df_questions_db["original_code"] = df_questions_db["code"]
-            df_questions_db["code"] = df_questions_db["code"].apply(lambda x: form_type+"_"+form_name+"_"+x)
             if "version" in __form:
                 df_questions_db["version"] = __form["version"]
             __db_columns = df_questions_db.columns
+            df_questions_db["original_code"] = df_questions_db["code"]
+            df_questions_db["code"] = df_questions_db["code"].apply(lambda x: form_type+"_"+form_name+"_"+x)
 
             # Get questions from the api
             if "questions_url_in" in __form:
@@ -173,6 +172,8 @@ async def sync_form_questions(form_type: str, form_name: str):
                     for _row in  rows_to_update_uid:
                         await update_question_uid(_row)
                 if not df_questions_db_without_uid_but_not_in_api.empty:
+                    ### Remove _id from the dataframe
+                    df_questions_db_without_uid_but_not_in_api = df_questions_db_without_uid_but_not_in_api.drop(columns=["_id"])
                     __json=df_questions_db_without_uid_but_not_in_api[__db_columns].to_dict(orient="records")
                     __response["rows_to_insert"] = __json
                     # requests.post(__form["questions_url_out"],json=__json,headers=headers)
@@ -181,6 +182,7 @@ async def sync_form_questions(form_type: str, form_name: str):
                 # __df_questions_join = df_questions_db
                 # Get the questions that are in the db without uid
                 # df_questions_db_without_uid = __df_questions_join[__df_questions_join["uid"].isnull()]
+                df_questions_db.drop(columns=["_id"],inplace=True)
                 __rows = df_questions_db[__db_columns].to_dict(orient="records")
                 __response["rows_to_insert"] = __rows
 
