@@ -85,13 +85,13 @@ async def transfer_form_data(form_name:str,form_type:str):
                             if ("data_out" in r) and (r["data_out"] is not None):
                                 if  ("response" in r and r["response"] is not None and r["response"]["succes"] == False):
                                     res = requests.post(form["url_out"],json=r["data_out"],headers=headers)
-                                    await update_data(r["_id"],res.json())
+                                    await update_data(r["_id"],{"response":res.json()})
                                     i = i + 1
                                     print(res.json())
                                     print(r)
                                 elif ("response" in r)==False:
                                     res = requests.post(form["url_out"],json=r["data_out"],headers=headers)
-                                    await update_data(r["_id"],res.json())
+                                    await update_data(r["_id"],{"response":res.json()})
                                     print(res.json())
                                     print(r)
                                     i = i + 1
