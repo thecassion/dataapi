@@ -236,3 +236,17 @@ class MusoGroupes:
             muso_group.update_groupes_case_id(g)
         except Exception as e:
             print(e)
+        
+    def update_groupes_sync_status(self):
+        muso_group = MusoGroup()
+        ## Get graduated groupes or inactive groupes
+        df = pd.DataFrame(self.cc_groupes)
+        df[["is_graduated","is_inactive"]] = df[["is_graduated","is_inactive"]].fillna(0)
+        df[["inactive_date","graduation_date"]] = df[["inactive_date","graduation_date"]].fillna("")
+        df["is_graduated"] = df["is_graduated"].astype(int)
+        df["is_inactive"] = df["is_inactive"].astype(int)
+        df = df[(df["is_graduated"]==1) | (df["is_inactive"]==1)]
+        rows = df.to_dict("records")
+        
+        return muso_group.update_groupes_status(rows)
+        
