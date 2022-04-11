@@ -66,7 +66,7 @@ async def get_form_data(form_name: str, form_type: str,limit:int=50, skip:int=0)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@router.get("{form_id}/transfer")
+@router.get("/transfer")
 async def transfer_form_data(form_id: str):
     """
     Transfer data.
@@ -81,12 +81,13 @@ async def transfer_form_data(form_id: str):
                     if result:
                         for r in result:
                             r["form"] = form["_id"]
-                            if r["data_out"] is not None:
-                                res = requests.post(form["url_out"],json=r["data_out"],headers=headers)
-                                if res.status_code == 200:
-                                    update_data({"_id":r["_id"]},{"$set":{"response":res.json(),"status":"sent"}})
-                                else:
-                                    update_data({"_id":r["_id"]},{"$set":{"response":res.json(),"status":"error"}})
+                            if ("data_out" in r) and (r["data_out"] is not None):
+                                if  ("response" in r and r["response"] is not None and r["response"]["succes"] == False):
+                                    res = requests.post(form["url_out"],json=r["data_out"],headers=headers)
+                                    update_data({"_id":r["_id"]},{"$set":{"response":res.json()}})
+                                elif ("response" in r)==False:
+                                    res = requests.post(form["url_out"],json=r["data_out"],headers=headers)
+                                    update_data({"_id":r["_id"]},{"$set":{"response":res.json()}})
                         return result
                     raise HTTPException(status_code=404,detail="Data not found") # {"message":"Data not found"}
             raise HTTPException(status_code=404,detail="Url Out not found in form") # {"message":"Url not found"}
