@@ -34,7 +34,7 @@ async def create_form_data_xlsx(form_type: str, form_name: str, file: UploadFile
         result = await retrieveForm(form_name, form_type)
         if result:
             form = result
-            df = pd.read_excel(file.file.read(), header=1)
+            df = pd.read_excel(file.file.read(), header=1).astype(str)
             if 'unique_fields' in form:
                 unique_fields = list(form["unique_fields"])
                 if len(unique_fields) > 0:
