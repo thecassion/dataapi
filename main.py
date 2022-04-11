@@ -210,3 +210,12 @@ def insert_household():
         return {"message":"success"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/muso/groups/status/sync")
+def sync_groups_status():
+    hiv_groups = MusoGroup().get_muso_groups()
+    # df_hiv_groups = MusoGroup().get_muso_groupes_df()
+    # hiv_groups_list = [dict(zip(group)) for group in hiv_groups]
+    cc_groups = MusoGroupesCase().get()
+    muso_groupes = MusoGroupes(cc_groups, hiv_groups)
+    muso_groupes.update_groupes_sync_status()

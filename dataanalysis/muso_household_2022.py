@@ -1,4 +1,3 @@
-from multiprocessing import set_forkserver_preload
 import  pandas as pd
 from db.mysql import engine, sql_achemy_engine
 from db.muso_household_2022 import MusoHousehold2022 as MusoHousehold2022db

@@ -1,4 +1,3 @@
-from tkinter import INSERT
 from db.mysql import engine, sql_achemy_engine
 import pandas as pd
 
