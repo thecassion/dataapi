@@ -1,4 +1,4 @@
-from curses import def_shell_mode
+from multiprocessing import set_forkserver_preload
 import pandas as pd
 from db.muso_group import MusoGroup
 # from pyspark.sql import SparkSession
@@ -22,6 +22,11 @@ class MusoGroupes:
         # print(df.show())
         # return df.toPandas().to_dict("records")
         df = pd.DataFrame(self.cc_groupes)
+        cc_columns = df.columns
+        df_hiv = pd.DataFrame(self.hi_groupes)
+        df = pd.merge(df, df_hiv,on="case_id", suffixes=(None,"_hiv"))
+        df = df[df["commune_hiv"].isna()]
+        df = df[cc_columns]
         df["external_id"] = pd.to_numeric(df["external_id"],errors="coerce")
         df = df[df["external_id"].isna()]
         return df.to_dict("records")
@@ -43,18 +48,33 @@ class MusoGroupes:
 
     def groups_duplicated_on_cc(self):
         df = pd.DataFrame(self.cc_groupes)
+        cc_columns = df.columns
+        df_hiv = pd.DataFrame(self.hi_groupes)
+        df = pd.merge(df, df_hiv,on="case_id", suffixes=(None,"_hiv"))
+        df = df[df["commune_hiv"].isna()]
+        df = df[cc_columns]
         df["external_id"] = pd.to_numeric(df["external_id"],errors="coerce")
         df_duplicated = df[df[["office_name","code"]].duplicated(keep=False)]
         df_duplicated=df_duplicated[df_duplicated["external_id"].isna()]
         return df_duplicated.to_dict("records")
     def groups_duplicated_on_cc_df(self):
         df = pd.DataFrame(self.cc_groupes)
+        cc_columns = df.columns
+        df_hiv = pd.DataFrame(self.hi_groupes)
+        df = pd.merge(df, df_hiv,on="case_id", suffixes=(None,"_hiv"))
+        df = df[df["commune_hiv"].isna()]
+        df = df[cc_columns]
         df["external_id"] = pd.to_numeric(df["external_id"],errors="coerce")
         df_duplicated = df[df[["office_name","code"]].duplicated(keep=False)]
         df_duplicated=df_duplicated[df_duplicated["external_id"].isna()]
         return df_duplicated
     def max_group_code_by_office(self):
         df = pd.DataFrame(self.cc_groupes)
+        cc_columns = df.columns
+        df_hiv = pd.DataFrame(self.hi_groupes)
+        df = pd.merge(df, df_hiv,on="case_id", suffixes=(None,"_hiv"))
+        df = df[df["commune_hiv"].isna()]
+        df = df[cc_columns]
         df["external_id"] = pd.to_numeric(df["external_id"],errors="coerce")
         df["code"]=pd.to_numeric(df["code"],errors="coerce")
         df_pivot = df.pivot_table(index=["office_name"],values=["code"],aggfunc=max)
@@ -121,6 +141,11 @@ class MusoGroupes:
             print("No groupes duplicated on cc")
 
     def insert_groupes_cc_to_hiv(self,groupes):
+        cc_columns = df.columns
+        df_hiv = pd.DataFrame(self.hi_groupes)
+        df = pd.merge(df, df_hiv,on="case_id", suffixes=(None,"_hiv"))
+        df = df[df["commune_hiv"].isna()]
+        df = df[cc_columns]
         df_groupes = pd.DataFrame(groupes)
         print(df_groupes.head())
         df_hi_groupes = pd.DataFrame(self.hi_groupes)
@@ -150,6 +175,45 @@ class MusoGroupes:
         muso_group.insert_groupes(df)
 
 
+
+    def insert_cc_groupes_to_hiv(self):
+        df_hiv = pd.DataFrame(self.hi_groupes)
+        df_groupes = pd.DataFrame(self.cc_groupes)
+        df_groupes.to_excel("cc_groupes_b_merge.xlsx")	
+        cc_columns = df_groupes.columns
+        df_groupes = pd.merge(df_groupes, df_hiv,on="case_id",how="left", suffixes=(None,"_hiv"))
+        df_groupes.to_excel("groupes_v.xlsx")
+        print(df_groupes.head())
+        df_groupes = df_groupes[df_groupes["commune_hiv"].isnull()]
+        df_groupes.to_excel("groupes_v_without_commune_hiv.xlsx")
+        df_groupes = df_groupes[cc_columns]
+        print(df_groupes.head())
+        # df_hi_groupes = pd.DataFrame(self.hi_groupes)
+        # df_hi_groupes = df_hi_groupes[["office","code","name","id"]]
+        # df_groupes.drop(columns=["office"],inplace=True)
+        df_groupes["office"]=df_groupes["office_name"]
+        df_groupes["name"]=df_groupes["case_name"]
+        df_groupes["section"]= pd.to_numeric(df_groupes["section"],errors="coerce")
+        df_groupes = df_groupes[df_groupes["section"].notna() & df_groupes["section"]>0]
+        df_groupes["section"]=df_groupes["section"].astype(int).astype(str)
+        df_groupes["localite"]=df_groupes["section"]
+        df_groupes["localite_name"]=df_groupes["section_name"]
+        df_groupes.drop(columns=["office_name"],inplace=True)
+        # df_groupes["code"]=pd.to_numeric(df_groupes["code"],errors="coerce")
+        df_g = df_groupes
+        print(df_g.head())
+        __columns = list(pd.DataFrame(self.hi_groupes).columns)
+        __columns.remove("id")
+        __columns.remove("created_at")
+        __columns.remove("updated_at")
+        __columns.remove("created_by")
+        __columns.remove("updated_by")
+        df = df_g[__columns]
+        df["case_id"]=df_g["case_id"]
+        muso_group = MusoGroup()
+        muso_group.insert_groupes(df)
+        return df.to_dict("records")
+    
     def get_hi_groupes_without_case_id(self):
         muso_group = MusoGroup()
         df = pd.DataFrame(muso_group.groupes_without_case_id())

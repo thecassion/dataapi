@@ -1,6 +1,7 @@
 import re
 from typing import Optional
 import time
+from mangum import Mangum
 
 from fastapi import FastAPI, HTTPException
 from core.CommCareAPI import CommCareAPI
@@ -77,10 +78,8 @@ def sync_muso_groups():
     hiv_groups = MusoGroup().get_muso_groups()
     cc_groups = MusoGroupesCase().get()
     muso_groupes = MusoGroupes(cc_groups, hiv_groups)
-    muso_groupes.insert_groupes_without_code_cc()
-    muso_groupes.insert_groupes_duplicated_on_cc()
-    muso_groupes.insert_groupes_not_on_hiv()
-    return {"message":"muso groups synced"}
+    r =muso_groupes.insert_cc_groupes_to_hiv()
+    return {"message":"muso groups synced", "groups_added":r}
 
 @app.get("/muso/groups/hiv_case_id")
 def get_hiv_case_id():

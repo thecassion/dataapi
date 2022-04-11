@@ -6,5 +6,6 @@ requests
 openpyxl
 PyMySQL
 sqlalchemy
-pyspark[sql] >= 3.2.0
-pyspark[pandas_on_spark] >= 3.2.0
+# pyspark[sql] >= 3.2.0
+# pyspark[pandas_on_spark] >= 3.2.0
+mangum
