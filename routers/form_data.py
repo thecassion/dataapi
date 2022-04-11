@@ -77,7 +77,7 @@ async def transfer_form_data(form_name:str,form_type:str):
         if form:
             if "url_out" in form:
                 if form["url_out"] is not None:
-                    result = await retrieveDataByFormId(ObjectId(form_id))
+                    result = await retrieveDataByFormId(form["_id"])
                     if result:
                         for r in result:
                             r["form"] = form["_id"]
