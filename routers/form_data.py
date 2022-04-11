@@ -67,13 +67,13 @@ async def get_form_data(form_name: str, form_type: str,limit:int=50, skip:int=0)
         raise HTTPException(status_code=400, detail=str(e))
 
 @router.get("/transfer")
-async def transfer_form_data(form_id: str):
+async def transfer_form_data(form_name:str,form_type:str):
     """
     Transfer data.
     """
     headers={'Content-type':'application/json', 'Accept':'application/json'}
     try:
-        form = await retrieveForm(ObjectId(form_id))
+        form = await retrieveForm(form_name,form_type)
         if form:
             if "url_out" in form:
                 if form["url_out"] is not None:
