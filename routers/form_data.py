@@ -1,6 +1,6 @@
 from bson.objectid import ObjectId
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
-from db.data import createData, retrieveData, retrieveDataByFormId, update_data
+from db.data import createData, retrieveData, retrieveDataByFormId, update_data, retrieveDataByFormId_not_sent
 from db.form import retrieveForm
 from dependencies import get_current_user_from_token
 from models.form_data import FormData
@@ -77,24 +77,16 @@ async def transfer_form_data(form_name:str,form_type:str):
         if form:
             if "url_out" in form:
                 if form["url_out"] is not None:
-                    result = await retrieveDataByFormId(form["_id"])
+                    result = await retrieveDataByFormId_not_sent(form["_id"])
                     if result:
                         i= 0
                         for r in result:
                             r["form"] = form["_id"]
-                            if ("data_out" in r) and (r["data_out"] is not None):
-                                if  ("response" in r and r["response"] is not None and r["response"]["succes"] == False):
-                                    res = requests.post(form["url_out"],json=r["data_out"],headers=headers)
-                                    await update_data(r["_id"],{"response":res.json()})
-                                    i = i + 1
-                                    print(res.json())
-                                    print(r)
-                                elif ("response" in r)==False:
-                                    res = requests.post(form["url_out"],json=r["data_out"],headers=headers)
-                                    await update_data(r["_id"],{"response":res.json()})
-                                    print(res.json())
-                                    print(r)
-                                    i = i + 1
+                            res = requests.post(form["url_out"],json=r["data_out"],headers=headers)
+                            await update_data(r["_id"],{"response":res.json()})
+                            i = i + 1
+                            print(res.json())
+                            print(r)
                         return {"message":"Data transfer completed","count":i}
                     raise HTTPException(status_code=404,detail="Data not found") # {"message":"Data not found"}
             raise HTTPException(status_code=404,detail="Url Out not found in form") # {"message":"Url not found"}
