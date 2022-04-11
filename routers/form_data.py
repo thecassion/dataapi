@@ -79,16 +79,23 @@ async def transfer_form_data(form_name:str,form_type:str):
                 if form["url_out"] is not None:
                     result = await retrieveDataByFormId(form["_id"])
                     if result:
+                        i= 0
                         for r in result:
                             r["form"] = form["_id"]
                             if ("data_out" in r) and (r["data_out"] is not None):
                                 if  ("response" in r and r["response"] is not None and r["response"]["succes"] == False):
                                     res = requests.post(form["url_out"],json=r["data_out"],headers=headers)
                                     await update_data({"_id":r["_id"]},{"$set":{"response":res.json()}})
+                                    i = i + 1
+                                    print(res.json())
+                                    print(r)
                                 elif ("response" in r)==False:
                                     res = requests.post(form["url_out"],json=r["data_out"],headers=headers)
                                     await update_data({"_id":r["_id"]},{"$set":{"response":res.json()}})
-                        return result
+                                    print(res.json())
+                                    print(r)
+                                    i = i + 1
+                        return {"message":"Data transfer completed","count":i}
                     raise HTTPException(status_code=404,detail="Data not found") # {"message":"Data not found"}
             raise HTTPException(status_code=404,detail="Url Out not found in form") # {"message":"Url not found"}
         raise HTTPException(status_code=404,detail="Form not found") # {"message":"Form not found"}
