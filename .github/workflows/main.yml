@@ -79,7 +79,7 @@ jobs:
           name: api
           
         ## TEST
-      - name: Test credential
+      - name: Test credential 4
         run: aws configure list
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
