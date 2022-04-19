@@ -18,7 +18,7 @@ jobs:
       - name: Set up Python 
         uses: actions/setup-python@v2
         with:
-          python-version: 3.10
+          python-version: "3.10.4"
           architecture: x64
       # Step 3
       - name: Install Python Virtual ENV
@@ -44,7 +44,7 @@ jobs:
       # Step 7
       - name: Create Zipfile archive of Dependencies
         run: |
-          cd ./venv/lib/python3.10/site-packages
+          cd ./venv/lib/python3.10.4/site-packages
           zip -r9 ../../../../api.zip .
       
       # Step 8
