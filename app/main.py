@@ -219,3 +219,5 @@ def sync_groups_status():
     cc_groups = MusoGroupesCase().get()
     muso_groupes = MusoGroupes(cc_groups, hiv_groups)
     muso_groupes.update_groupes_sync_status()
+
+handler = Mangum(app=app)
