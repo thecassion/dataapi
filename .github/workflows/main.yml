@@ -41,6 +41,9 @@ jobs:
 #       - name: Activate venv and Run Test        
 #         run: . venv/bin/activate && pytest
       
+      ## TEST
+      - name: Folder Name
+        run: ls ./venv/lib/
       # Step 7
       - name: Create Zipfile archive of Dependencies
         run: |
