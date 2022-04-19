@@ -179,13 +179,10 @@ class MusoGroupes:
     def insert_cc_groupes_to_hiv(self):
         df_hiv = pd.DataFrame(self.hi_groupes)
         df_groupes = pd.DataFrame(self.cc_groupes)
-        df_groupes.to_excel("cc_groupes_b_merge.xlsx")	
         cc_columns = df_groupes.columns
         df_groupes = pd.merge(df_groupes, df_hiv,on="case_id",how="left", suffixes=(None,"_hiv"))
-        df_groupes.to_excel("groupes_v.xlsx")
         print(df_groupes.head())
         df_groupes = df_groupes[df_groupes["commune_hiv"].isnull()]
-        df_groupes.to_excel("groupes_v_without_commune_hiv.xlsx")
         df_groupes = df_groupes[cc_columns]
         print(df_groupes.head())
         # df_hi_groupes = pd.DataFrame(self.hi_groupes)
