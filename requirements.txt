@@ -19,4 +19,5 @@ python-dotenv
 python-jose
 requests
 aiohttp
+mangum
 
