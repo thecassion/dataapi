@@ -198,6 +198,7 @@ async def sync_form_questions(form_type: str, form_name: str):
             # return res.json()
             if "rows_to_insert" in __response:
                 re_resp = requests.post(__form["questions_url_out"], json=__response["rows_to_insert"],headers=headers)
+                print re_resp
                 __response["api_response"] = re_resp.json()
             return __response
         else:
