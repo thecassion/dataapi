@@ -7,9 +7,9 @@ from fastapi import (
 from pydantic import EmailStr
 from typing import  List, Optional
 
-from .core.config import settings
-from .models.user import User
-from .db.user import (
+from ..core.config import settings
+from ..models.user import User
+from ..db.user import (
     createUser,
     getUsers,
     getUserByEmail,
@@ -19,7 +19,7 @@ from .db.user import (
     delUserByEmail,
     delUserByUsername
 )
-from .dependencies import get_current_admin_from_token
+from ..dependencies import get_current_admin_from_token
 
 router = APIRouter(
     prefix="/admin",
