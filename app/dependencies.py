@@ -15,7 +15,7 @@ from fastapi.security import (
 from jose import jwt, JWTError
 from .core.hashing import Hasher
 from datetime import timedelta,datetime
-from core.config import settings
+from .core.config import settings
 from .models.token import TokenData
 from .models.user import User
 
