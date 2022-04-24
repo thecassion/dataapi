@@ -26,7 +26,7 @@ from .routers.form import router as form_router
 from .routers.login import router as login_router
 from .routers.register import router as register_router
 from .routers.admin import router as admin_router
-from dependencies import oauth2_scheme, get_current_user_from_token, authenticate_user,create_access_token
+from .dependencies import oauth2_scheme, get_current_user_from_token, authenticate_user,create_access_token
 from mangum import Mangum
 
 app = FastAPI(title=settings.PROJECT_TITLE, description=settings.PORJECT_DESCRIPTION, version=settings.PROJECT_VERSION, docs_url=settings.DOCS_URL)
