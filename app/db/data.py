@@ -1,4 +1,4 @@
-from .db import db
+from ..db import db
 from models.form_data import FormData
 from bson import ObjectId
 import numpy as np
