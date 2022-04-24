@@ -3,7 +3,7 @@ from fastapi import (
         Depends,
         HTTPException
 )
-from db.user import(
+from .db.user import(
     getUserByUsername,
     getUserByEmail,
     createUser
@@ -13,11 +13,11 @@ from fastapi.security import (
     OAuth2PasswordRequestForm
 )
 from jose import jwt, JWTError
-from core.hashing import Hasher
+from .core.hashing import Hasher
 from datetime import timedelta,datetime
 from core.config import settings
-from models.token import TokenData
-from models.user import User
+from .models.token import TokenData
+from .models.user import User
 
 
 
