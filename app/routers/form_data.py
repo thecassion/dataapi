@@ -1,9 +1,9 @@
 from bson.objectid import ObjectId
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
-from db.data import createData, retrieveData, retrieveDataByFormId, update_data, retrieveDataByFormId_not_sent
-from db.form import retrieveForm
-from dependencies import get_current_user_from_token
-from models.form_data import FormData
+from .db.data import createData, retrieveData, retrieveDataByFormId, update_data, retrieveDataByFormId_not_sent
+from .db.form import retrieveForm
+from .dependencies import get_current_user_from_token
+from .models.form_data import FormData
 import pandas as pd
 import numpy as np
 import json

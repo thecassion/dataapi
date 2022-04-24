@@ -1,15 +1,15 @@
 from ast import List
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
-from db.question import create_question, get_questions_by_form, get_questions_without_uid_by_form_id, update_question_uid
-from db.form import retrieveForm
+from .db.question import create_question, get_questions_by_form, get_questions_without_uid_by_form_id, update_question_uid
+from .db.form import retrieveForm
 import pandas as pd
 from starlette.responses import StreamingResponse
-from models.question import UpdateQuestions, Questions
-from core.config import settings
+from .models.question import UpdateQuestions, Questions
+from .core.config import settings
 import io
 import requests
-from dependencies import get_current_user_from_token
+from .dependencies import get_current_user_from_token
 
 router = APIRouter(
     prefix="/form/questions",

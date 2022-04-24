@@ -9,12 +9,12 @@ from fastapi.security import(
     OAuth2PasswordBearer, 
     OAuth2PasswordRequestForm
 )
-from core.config import settings
-from dependencies import (
+from .core.config import settings
+from .dependencies import (
     authenticate_user,
     create_access_token,
 )
-from models.token import Token
+from .models.token import Token
 
 
 

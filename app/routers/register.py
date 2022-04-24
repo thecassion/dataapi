@@ -4,9 +4,9 @@ from fastapi import (
     status,
     HTTPException   
 )
-from core.config import settings
-from models.user import RegisterAdmin, RegisterUser
-from db.user import registerAdmin, registerUser
+from .core.config import settings
+from .models.user import RegisterAdmin, RegisterUser
+from .db.user import registerAdmin, registerUser
 
 
 router = APIRouter(

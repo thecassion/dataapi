@@ -1,13 +1,13 @@
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.params import Body
-from db.data import retrieveDataByFormId, update_data,retrieveDataByFormId_not_sent
-from db.form import createForm, retrieveForm,update_form,deleteForm, createForms, retrieveForms, get_form_by_id, updateForms
-from db.question import get_questions_by_form_id
-from models.form import Form, UpdateFormModel
-from dependencies import get_current_user_from_token
-from core.config import settings
-from utils.data import dataInToDataOut
+from .db.data import retrieveDataByFormId, update_data,retrieveDataByFormId_not_sent
+from .db.form import createForm, retrieveForm,update_form,deleteForm, createForms, retrieveForms, get_form_by_id, updateForms
+from .db.question import get_questions_by_form_id
+from .models.form import Form, UpdateFormModel
+from .dependencies import get_current_user_from_token
+from .core.config import settings
+from .utils.data import dataInToDataOut
 from fastapi.responses import JSONResponse
 
 router = APIRouter(
