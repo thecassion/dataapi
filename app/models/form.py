@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field, EmailStr
 from utils.typing import PyObjectId
 from bson import ObjectId
 
-from models.question import Question
+from ..models.question import Question
 
 class Form(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId, title="The unique identifier of the form", description="The unique identifier of the form", alias="_id")
