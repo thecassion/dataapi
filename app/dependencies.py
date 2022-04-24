@@ -21,7 +21,7 @@ from .models.user import User
 
 
 
-from db.user import (
+from .db.user import (
     getUserByUsername,
     getUserByEmail,
     createUser
