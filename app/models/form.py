@@ -1,6 +1,6 @@
 from typing import List,Optional
 from pydantic import BaseModel, Field, EmailStr
-from utils.typing import PyObjectId
+from ..utils.typing import PyObjectId
 from bson import ObjectId
 
 from ..models.question import Question
