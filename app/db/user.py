@@ -1,7 +1,7 @@
 from typing import List
-from db import db
-from core.hashing import Hasher
-from models.user import User, RegisterUser, RegisterAdmin
+from .db import db
+from ..core.hashing import Hasher
+from ..models.user import User, RegisterUser, RegisterAdmin
 from typing import Optional
 
 user_collection = db.users

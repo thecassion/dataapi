@@ -1,7 +1,7 @@
 
 from typing import List
-from db import db
-from models.form import Form
+from .db import db
+from ..models.form import Form
 from bson.objectid import ObjectId
 form_collection = db.forms
 import pymongo as pm

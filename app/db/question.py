@@ -1,8 +1,8 @@
 from functools import partial
 from bson import objectid
-from db import db
-from models.question import Questions, UpdateQuestions, Question, UpadateQuestion
-from db.form import retrieveForm
+from .db import db
+from ..models.question import Questions, UpdateQuestions, Question, UpadateQuestion
+from .db.form import retrieveForm
 import pymongo as pm
 
 
