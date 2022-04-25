@@ -165,10 +165,12 @@ async def sync_form_questions(form_type: str, form_name: str):
                 df_questions_db_without_uid_but_not_in_api = df_questions_db_without_uid[df_questions_db_without_uid["description_api"].isnull()]
 
                 if not df_questions_db_without_uid_but_is_in_api.empty:
+                    print("There are question to update in the db")
                     if "uid" in df_questions_db.columns:
                         df_questions_db_without_uid_but_is_in_api["uid"]=df_questions_db_without_uid_but_is_in_api["uid_api"]
                     rows_to_update_uid = df_questions_db_without_uid_but_is_in_api.to_dict(orient="records")
                     for _row in  rows_to_update_uid:
+                        print("row updated  ", _row)
                         await update_question_uid(_row)
                     __response["rows_to_update_uid"] = df_questions_db_without_uid_but_is_in_api.to_dict(orient="records")
                 if not df_questions_db_without_uid_but_not_in_api.empty:
@@ -198,7 +200,6 @@ async def sync_form_questions(form_type: str, form_name: str):
             # return res.json()
             if "rows_to_insert" in __response:
                 re_resp = requests.post(__form["questions_url_out"], json=__response["rows_to_insert"],headers=headers)
-                print("Response caa ", re_resp.text)
                 __response["api_response"] = re_resp.json()
             return __response
         else:
