@@ -1,7 +1,7 @@
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.params import Body
-from ..db.data import retrieveDataByFormId, update_data,retrieveDataByFormId_not_sent
+from ..db.data import retrieveDataByFormId, update_data,retrieveDataByFormId_not_sent,retrieveDataByFormId_not_sent_regardless_data_out
 from ..db.form import createForm, retrieveForm,update_form,deleteForm, createForms, retrieveForms, get_form_by_id, updateForms
 from ..db.question import get_questions_by_form_id
 from ..models.form import Form, UpdateFormModel
@@ -60,12 +60,12 @@ async def transform_data_in_to_data_out(form_name:str,form_type:str):
         result = await retrieveForm(form_name,form_type)
         questions = await get_questions_by_form_id(result["_id"])
         if result is not None:
-            __res = await retrieveDataByFormId_not_sent(result["_id"])
+            __res = await retrieveDataByFormId_not_sent_regardless_data_out(result["_id"])
             if __res is not None:
                 for  __res_item in __res:
                     __data_out = dataInToDataOut(__res_item["data_in"],result["format_in"],result["format_out"],questions)
                     __update_data = await update_data(__res_item["_id"],{"data_out":__data_out})
-                __res_new = await retrieveDataByFormId_not_sent(result["_id"], limit=10)
+                __res_new = await retrieveDataByFormId_not_sent_regardless_data_out(result["_id"], limit=10)
 
                 return JSONResponse(content=__res_new)
             raise HTTPException(status_code=404, detail="Form data not found")
