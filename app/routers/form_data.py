@@ -1,6 +1,6 @@
 from bson.objectid import ObjectId
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
-from ..db.data import createData, retrieveData, retrieveDataByFormId, update_data, retrieveDataByFormId_not_sent
+from ..db.data import createData, retrieveData, retrieveDataByFormId, update_data, retrieveDataByFormId_not_sent,retrieveDataByFormId_not_sent_regardless_data_out
 from ..db.form import retrieveForm
 from ..dependencies import get_current_user_from_token
 from ..models.form_data import FormData
@@ -77,7 +77,7 @@ async def transfer_form_data(form_name:str,form_type:str):
         if form:
             if "url_out" in form:
                 if form["url_out"] is not None:
-                    result = await retrieveDataByFormId_not_sent(form["_id"])
+                    result = await retrieveDataByFormId_not_sent_regardless_data_out(form["_id"])
                     if result:
                         i= 0
                         for r in result:

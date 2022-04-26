@@ -51,7 +51,9 @@ async def retrieveDataByFormId(form_id:ObjectId, limit=100000)->list[dict]:
 async def retrieveDataByFormId_not_sent(form_id:ObjectId, limit=100000)->list[dict]:
     data = await data_collection.find({"$and":[{"form_id":form_id},{"data_out":{"$exists":True}},{"$or":[{"response.succes":False},{"response":{"$exists":False}}]}]},{"form_id":0}).to_list(length=limit)
     return data
-
+async def retrieveDataByFormId_not_sent_regardless_data_out(form_id:ObjectId, limit=100000)->list[dict]:
+    data = await data_collection.find({"$and":[{"form_id":form_id},{"$or":[{"response.succes":False},{"response":{"$exists":False}}]}]},{"form_id":0}).to_list(length=limit)
+    return data
 
 async def update_data(id:ObjectId, data:dict)->dict:
     result = await data_collection.update_one({"_id":id},{"$set":data})
