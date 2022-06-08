@@ -1,4 +1,4 @@
-from db.mysql import engine, sql_achemy_engine
+from ..db.mysql import engine, sql_achemy_engine
 import pandas as pd
 class MusoBeneficiary:
     def __init__(self) -> None:

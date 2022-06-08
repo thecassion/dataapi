@@ -1,8 +1,7 @@
 import pandas as pd
-from sqlalchemy import null
-from db.mysql import engine, sql_achemy_engine
+from ..db.mysql import engine, sql_achemy_engine
 
-from db.muso_beneficiary import MusoBeneficiary
+from ..db.muso_beneficiary import MusoBeneficiary
 
 class MusoBeneficiaries:
     """
@@ -134,4 +133,10 @@ class MusoBeneficiaries:
                     beneficiaries.append(cc_benificiary)
                     i+=1
         return beneficiaries
+
+        def update_muso_groupmembers_non_applicable(self):
+            df_hiv_ben = pd.DataFrame(self.hiv_beneficiaries)
+            df_cc_ben = pd.DataFrame(self.cc_beneficiaries)
+            
+
 
