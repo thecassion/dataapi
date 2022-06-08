@@ -1,6 +1,6 @@
 from multiprocessing import set_forkserver_preload
 import pandas as pd
-from db.muso_group import MusoGroup
+from ..db.muso_group import MusoGroup
 # from pyspark.sql import SparkSession
 # from pyspark.sql.types import StringType
 

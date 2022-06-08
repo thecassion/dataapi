@@ -1,4 +1,4 @@
-from core.CommCareAPI import CommCareAPI
+from ..core.CommCareAPI import CommCareAPI
 class MusoBeneficiariesCase:
     def __init__(self) -> None:
         pass

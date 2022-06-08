@@ -4,20 +4,20 @@ import time
 from mangum import Mangum
 
 from fastapi import FastAPI, HTTPException
-from core.CommCareAPI import CommCareAPI
+from .core.CommCareAPI import CommCareAPI
 import  pandas as pd
 import io
 from starlette.responses import StreamingResponse
-from dataanalysis.muso_groupes import MusoGroupes
-from db.muso_group import MusoGroup
-from db.muso_beneficiary import MusoBeneficiary
-from CommCare.MusoGroupesCase import MusoGroupesCase
-from CommCare.MusoBeneficiariesCase import MusoBeneficiariesCase
-from dataanalysis.muso_beneficiaries import MusoBeneficiaries
+from .dataanalysis.muso_groupes import MusoGroupes
+from .db.muso_group import MusoGroup
+from .db.muso_beneficiary import MusoBeneficiary
+from .CommCare.MusoGroupesCase import MusoGroupesCase
+from .CommCare.MusoBeneficiariesCase import MusoBeneficiariesCase
+from .dataanalysis.muso_beneficiaries import MusoBeneficiaries
 
-from CommCare.MusoHousehold2022Case import MusoHousehold2022Case
-from dataanalysis.muso_household_2022 import MusoHousehold2022
-from db.muso_household_2022 import MusoHousehold2022 as HivMusoHousehold2022
+from .CommCare.MusoHousehold2022Case import MusoHousehold2022Case
+from .dataanalysis.muso_household_2022 import MusoHousehold2022
+from .db.muso_household_2022 import MusoHousehold2022 as HivMusoHousehold2022
 
 
 app = FastAPI()
@@ -219,5 +219,9 @@ def sync_groups_status():
     cc_groups = MusoGroupesCase().get()
     muso_groupes = MusoGroupes(cc_groups, hiv_groups)
     muso_groupes.update_groupes_sync_status()
+
+@app.get("/ptme/other_visit/sync")
+def sync_other_visit_ptme():
+    return {"Test":"Done"}
 
 handler = Mangum(app=app)
