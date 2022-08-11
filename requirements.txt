@@ -10,3 +10,4 @@ sqlalchemy
 # pyspark[pandas_on_spark] >= 3.2.0
 mangum
 python-dotenv
+celery
