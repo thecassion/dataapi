@@ -26,9 +26,9 @@ class CommCareAPI:
         url = self.base_url + f"case/{case_id}"
         response = requests.get(url, auth = self.auth).json()
         return response
-    def get_forms(self,type,limit):
+    def get_forms(self,xmlns,limit):
         url = self.base_url + "form/"
-        parameters = {"type": type, "limit": limit}
+        parameters = {"xmlns": xmlns, "limit": limit}
         response = requests.get(url, auth = self.auth, params= parameters).json()
         objects = response["objects"]
 
