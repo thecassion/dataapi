@@ -14,3 +14,15 @@ services:
       - 8000:8000
     extra_hosts:
       - "host.docker.internal:172.17.0.1"
+    depends_on:
+      - rabbitmq
+    networks:
+      - data_api_tiers
+  rabbitmq:
+   image: rabbitmq
+   ports:
+     - 5672:5672
+
+networks:
+  data_api_tiers:
+    driver: bridge
