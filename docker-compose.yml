@@ -20,10 +20,11 @@ services:
       - data_api_tiers
   krabbitmq:
    image: rabbitmq:3-management
-   volumes:
-    - "./rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf"
+  #  volumes:
+  #   - "./rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf"
    ports:
      - 5672:5672
+     - 15672:15672
    networks:
      - data_api_tiers
 networks:
