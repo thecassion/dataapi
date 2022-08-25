@@ -18,9 +18,12 @@ from .dataanalysis.muso_beneficiaries import MusoBeneficiaries
 from .CommCare.MusoHousehold2022Case import MusoHousehold2022Case
 from .dataanalysis.muso_household_2022 import MusoHousehold2022
 from .db.muso_household_2022 import MusoHousehold2022 as HivMusoHousehold2022
+from .config.celery_utils import create_celery
+
 
 
 app = FastAPI()
+celery = create_celery() #TODO celery function is not yet implemented
 
 
 @app.get("/")

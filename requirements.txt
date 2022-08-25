@@ -11,3 +11,4 @@ sqlalchemy
 mangum
 python-dotenv
 celery
+flower
