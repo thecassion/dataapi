@@ -4,7 +4,7 @@ import time
 from mangum import Mangum
 
 from fastapi import FastAPI, HTTPException
-from .core.CommCareAPI import CommCareAPI
+from .core import CommCareAPI
 import  pandas as pd
 import io
 from starlette.responses import StreamingResponse

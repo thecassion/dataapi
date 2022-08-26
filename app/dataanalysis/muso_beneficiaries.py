@@ -1,5 +1,5 @@
 import pandas as pd
-from ..db.mysql import engine, sql_achemy_engine
+from ..core import engine, sql_achemy_engine
 
 from ..db.muso_beneficiary import MusoBeneficiary
 
