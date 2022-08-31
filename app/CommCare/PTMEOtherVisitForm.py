@@ -1,4 +1,4 @@
-from ..core.CommCareAPI import CommCareAPI
+from ..core import CommCareAPI
 
 class PTMEOtherVisitForm:
     def __init__(self):
