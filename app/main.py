@@ -1,13 +1,14 @@
-import re
-from typing import Optional
 import time
 from mangum import Mangum
-
 from fastapi import FastAPI, HTTPException
-from .core.CommCareAPI import CommCareAPI
-import  pandas as pd
-import io
 from starlette.responses import StreamingResponse
+import io
+import  pandas as pd
+
+from .core import (
+    CommCareAPI,
+    settings
+)
 from .dataanalysis.muso_groupes import MusoGroupes
 from .db.muso_group import MusoGroup
 from .db.muso_beneficiary import MusoBeneficiary
@@ -22,13 +23,18 @@ from .config.celery_utils import create_celery
 
 
 
-app = FastAPI()
+app = FastAPI(
+    title=settings.project_title,
+    description=settings.project_description,
+    version=settings.project_version,
+    docs_url=settings.project_docs_url
+)
+
+
 celery = create_celery() #TODO celery function is not yet implemented
 
 
-@app.get("/")
-def read_root():
-    return {"message": "/docs"}
+
 
 
 @app.get("/cases/{type}/xlsx")

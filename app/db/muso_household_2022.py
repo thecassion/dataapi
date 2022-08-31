@@ -1,4 +1,4 @@
-from ..db.mysql import engine, sql_achemy_engine
+from ..core import engine, sql_achemy_engine
 import pandas as pd
 
 class MusoHousehold2022:

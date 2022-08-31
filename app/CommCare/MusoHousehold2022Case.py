@@ -1,4 +1,4 @@
-from ..core.CommCareAPI import CommCareAPI
+from ..core import CommCareAPI
 class MusoHousehold2022Case:
     def __init__(self) -> None:
         pass
