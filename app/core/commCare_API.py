@@ -1,12 +1,13 @@
-import os
 import requests
+
+from .settings import settings
 class CommCareAPI:
     def __init__(self,domain,version) -> None:
         self.domain = domain
         self.version = version
         self.base_url = f"https://www.commcarehq.org/a/{domain}/api/v{version}/"
         self.bbase_url = f"https://www.commcarehq.org/a/{domain}/"
-        self.auth = (os.environ["COMMCARE_USERNAME"], os.environ["COMMCARE_PASSWORD"])
+        self.auth = (settings.commcare_username, settings.commcare_password)
     
     def get_cases(self,type,limit):
         url = self.base_url + "case/"

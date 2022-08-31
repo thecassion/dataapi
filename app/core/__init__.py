@@ -3,6 +3,6 @@ from .mysql import (
     sql_achemy_engine
 )
 from .commCare_API import CommCareAPI
-from .settings import Settings
+from .settings import settings
 
-settings = Settings()
+
