@@ -1,6 +1,6 @@
 import  pandas as pd
 from ..core import engine, sql_achemy_engine
-from ..db.muso_household_2022 import MusoHousehold2022 as MusoHousehold2022db
+from ..db import MusoHousehold2022 as MusoHousehold2022db
 
 class MusoHousehold2022:
     def __init__(self, data):

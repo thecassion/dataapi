@@ -9,16 +9,18 @@ from .core import (
     CommCareAPI,
     settings
 )
-from .dataanalysis.muso_groupes import MusoGroupes
-from .db.muso_group import MusoGroup
-from .db.muso_beneficiary import MusoBeneficiary
+from .dataanalysis import MusoBeneficiaries
+from .dataanalysis import MusoGroupes
+from .dataanalysis import MusoHousehold2022
+
+from .db import MusoGroup
+from .db import MusoBeneficiary
+from .db import MusoHousehold2022 as HivMusoHousehold2022
+
 from .CommCare.MusoGroupesCase import MusoGroupesCase
 from .CommCare.MusoBeneficiariesCase import MusoBeneficiariesCase
-from .dataanalysis.muso_beneficiaries import MusoBeneficiaries
-
 from .CommCare.MusoHousehold2022Case import MusoHousehold2022Case
-from .dataanalysis.muso_household_2022 import MusoHousehold2022
-from .db.muso_household_2022 import MusoHousehold2022 as HivMusoHousehold2022
+
 from .config.celery_utils import create_celery
 
 

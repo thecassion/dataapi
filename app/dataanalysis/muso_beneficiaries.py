@@ -1,7 +1,7 @@
 import pandas as pd
 from ..core import engine, sql_achemy_engine
 
-from ..db.muso_beneficiary import MusoBeneficiary
+from ..db import MusoBeneficiary
 
 class MusoBeneficiaries:
     """
