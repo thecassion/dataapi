@@ -6,5 +6,5 @@ class MusoGroupesCase:
     def get(self):
         cc = CommCareAPI("caris-test", "0.5")
         cases = cc.get_cases("muso_groupes", 5000)
-        properties = [{**case["properties"],"case_id":case["case_id"],"user_id":case["user_id"] }for case in cases]
+        properties = [{**case["properties"],"case_id":case["case_id"],"user_id":case["user_id"],"closed":case["closed"] }for case in cases]
         return properties
