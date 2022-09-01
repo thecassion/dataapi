@@ -21,9 +21,9 @@ app = FastAPI(
 celery = create_celery() #TODO celery function is not yet implemented
 
 
-app.include_router(muso_router)
-app.include_router(cases_router)
 app.include_router(ptme_router)
+app.include_router(cases_router)
+app.include_router(muso_router)
 
 
 
