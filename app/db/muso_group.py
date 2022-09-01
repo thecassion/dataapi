@@ -74,7 +74,7 @@ class MusoGroup:
                     cursor = conn.cursor()
                     for group in groupes:
                         print(group)
-                        cursor.execute("UPDATE muso_group SET is_graduated=%s , graduation_date=%s ,is_inactive=%s,inactive_date=%s   WHERE case_id=%s",(group['is_graduated'],group['graduation_date'],group['is_inactive'],group['inactive_date'],group['case_id']))
+                        cursor.execute("UPDATE muso_group SET is_graduated=%s , graduation_date=%s ,is_inactive=%s,inactive_date=%s,closed_on_commcare=%s   WHERE case_id=%s",(group['is_graduated'],group['graduation_date'],group['is_inactive'],group['inactive_date'],group["closed"],group['case_id']))
                     conn.commit()
                 except Exception as e:
                     print(e)

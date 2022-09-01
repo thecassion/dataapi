@@ -242,6 +242,7 @@ class MusoGroupes:
         df[["inactive_date","graduation_date"]] = df[["inactive_date","graduation_date"]].fillna("")
         df["is_graduated"] = df["is_graduated"].astype(int)
         df["is_inactive"] = df["is_inactive"].astype(int)
+        df["closed"]=df["closed"].astype(int)
         # df = df[(df["is_graduated"]==1) | (df["is_inactive"]==1)]
         rows = df.to_dict("records")
 
