@@ -210,7 +210,7 @@ class MusoGroupes:
         muso_group = MusoGroup()
         muso_group.insert_groupes(df)
         return df.to_dict("records")
-    
+
     def get_hi_groupes_without_case_id(self):
         muso_group = MusoGroup()
         df = pd.DataFrame(muso_group.groupes_without_case_id())
@@ -233,7 +233,7 @@ class MusoGroupes:
             muso_group.update_groupes_case_id(g)
         except Exception as e:
             print(e)
-        
+
     def update_groupes_sync_status(self):
         muso_group = MusoGroup()
         ## Get graduated groupes or inactive groupes
@@ -242,8 +242,8 @@ class MusoGroupes:
         df[["inactive_date","graduation_date"]] = df[["inactive_date","graduation_date"]].fillna("")
         df["is_graduated"] = df["is_graduated"].astype(int)
         df["is_inactive"] = df["is_inactive"].astype(int)
-        df = df[(df["is_graduated"]==1) | (df["is_inactive"]==1)]
+        # df = df[(df["is_graduated"]==1) | (df["is_inactive"]==1)]
         rows = df.to_dict("records")
-        
+
         return muso_group.update_groupes_status(rows)
-        
+
