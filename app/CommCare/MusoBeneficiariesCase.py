@@ -9,7 +9,7 @@ class MusoBeneficiariesCase:
         properties = []
         for case in cases:
             if "parent" in case["indices"]:
-                properties.append({**case["properties"],"case_id":case["case_id"],"user_id":case["user_id"],"parent_id":case["indices"]["parent"]["case_id"] })
+                properties.append({**case["properties"],"case_id":case["case_id"],"user_id":case["user_id"],"parent_id":case["indices"]["parent"]["case_id"],"closed":case["closed"] })
             else:
-                properties.append({**case["properties"],"case_id":case["case_id"],"user_id":case["user_id"] })
+                properties.append({**case["properties"],"case_id":case["case_id"],"user_id":case["user_id"],"closed":case["closed"]})
         return properties

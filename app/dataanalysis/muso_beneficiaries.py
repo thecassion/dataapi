@@ -1,4 +1,6 @@
 import pandas as pd
+
+from app.db import muso_beneficiary
 from ..core import engine, sql_achemy_engine
 
 from ..db import MusoBeneficiary
@@ -137,6 +139,23 @@ class MusoBeneficiaries:
         def update_muso_groupmembers_non_applicable(self):
             df_hiv_ben = pd.DataFrame(self.hiv_beneficiaries)
             df_cc_ben = pd.DataFrame(self.cc_beneficiaries)
-            
+
+
+
+    def update_beneficiaries_status(self):
+        """
+            Update beneficiaries status : is_inactive , graduated , is_abandonned
+        """
+        muso_beneficiary = MusoBeneficiary()
+        # df = pd.DataFrame(self.cc_beneficiaries)
+        # df[["graduated","is_inactive"]]=df[["graduated","is_inactive"]].fillna(0)
+        # df[["inactive_date","graduation_date"]] = df[["inactive_date","graduation_date"]].fillna("")
+        # df["graduated"] = df["graduated"].astype(int)
+        # df["is_inactive"] = df["is_inactive"].astype(int)
+        # df["closed"]=df["closed"].astype(int)
+        # rows = df.to_dict("records")
+        return muso_beneficiary.update_benficiaries_status(self.cc_beneficiaries)
+
+
 
 
