@@ -307,3 +307,7 @@ class AgywPrevCommune(AgywPrev):
 
     def __str__(self):
         return f"<AgywPrevCommune {self.__i_am}>"
+
+
+
+datim = AgywPrev()
