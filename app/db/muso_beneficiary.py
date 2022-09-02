@@ -97,3 +97,24 @@ class MusoBeneficiary:
                 print(beneficiary)
                 raise Exception(e)
                 return False
+
+
+    def update_benficiaries_status(self, beneficiairies):
+        if isinstance(beneficiairies,list):
+            e = engine()
+            with e as conn:
+                try:
+                    cursor = conn.cursor()
+                    for ben in beneficiairies:
+                        ben["graduated"]=int(ben["graduated"])
+                        ben["is_inactive"]=int(ben["is_inactive"])
+                        ben["closed"]=int(ben["closed"])
+                        cursor.execute("UPDATE muso_group_members mgm LEFT JOIN patient p on p.id=mgm.id_patient SET mgm.graduated=%s , mgm.graduation_date=%s ,mgm.is_inactive=%s,mgm.inactive_date=%s,mgm.closed_on_commcare=%s   WHERE p.muso_case_id=%s",(ben['graduated'],ben['graduation_date'],ben['is_inactive'],ben['inactive_date'],ben["closed"],ben['case_id']))
+                        print("status sync for beneficiaire ", ben)
+                    conn.commit()
+                except Exception as e:
+                    print(e)
+                    return False
+            return True
+        else:
+            raise Exception("beneficiaries must be a list")

@@ -200,3 +200,14 @@ def sync_groups_status():
     cc_groups = MusoGroupesCase().get()
     muso_groupes = MusoGroupes(cc_groups, hiv_groups)
     muso_groupes.update_groupes_sync_status()
+
+
+@router.get("/beneficiaries/status/sync")
+async def sync_beneficiaries_status():
+    muso_beneficiary = MusoBeneficiary()
+    hiv_beneficiaries = muso_beneficiary.get_muso_beneficiaries()
+    cc_beneficiaries = MusoBeneficiariesCase().get()
+    max_rank_beneficiaries_by_groups = muso_beneficiary.get_max_rank_beneficiaries_by_groups()
+    analysis_muso_beneficiaries = MusoBeneficiaries({"cc_beneficiaries":cc_beneficiaries, "hiv_beneficiaries":hiv_beneficiaries,"max_rank_beneficiaries_by_groups":max_rank_beneficiaries_by_groups})
+    analysis_muso_beneficiaries.update_beneficiaries_status()
+    return {"message":"beneficiaries status synced"}
