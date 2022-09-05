@@ -24,7 +24,7 @@ def engine():
 
 def sql_achemy_engine():
     try:
-        engine = create_engine(f"mysql+pymysql://'{settings.mysql_username}':'{settings.mysql_password}'@'{settings.mysql_host}':'{settings.mysql_port}'/'{settings.mysql_database}'?charset=UTF8MB4'", echo=True, encoding='utf8')
+        engine = create_engine(f"mysql+pymysql://{settings.mysql_username}:{settings.mysql_password}@{settings.mysql_host}:{settings.mysql_port}/{settings.mysql_database}?charset=UTF8MB4", echo=True, encoding='utf8')
         return engine
     except Exception as e:
         raise Exception("Could not connect to database",e)
