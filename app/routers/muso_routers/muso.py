@@ -130,7 +130,7 @@ def sync_beneficiaries_case_id():
 
 @router.get("/beneficiaries/sync_to_hivhaiti")
 def sync_beneficiaries_to_hivhaiti():
-    try:
+    # try:
         muso_beneficiary = MusoBeneficiary()
         hiv_beneficiaries = muso_beneficiary.get_muso_beneficiaries()
         cc_beneficiaries = MusoBeneficiariesCase().get()
@@ -149,8 +149,8 @@ def sync_beneficiaries_to_hivhaiti():
             print("case_id:"+beneficiary["case_id"]+"  i: "+str((i/l)*100)+"%  "+"i:"+str(i))
             i+=1
         return {"message":"beneficiaries synced"}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    # except Exception as e:
+    #     raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/households/xlsx")
 def households_to_excel():

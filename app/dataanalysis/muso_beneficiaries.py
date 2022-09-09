@@ -84,7 +84,7 @@ class MusoBeneficiaries:
             df[__liste] = pd.to_numeric(df[__liste], errors="coerce").fillna(0).astype(int)
 
 
-        df[["inactive_date","abandoned_date","graduation_date"]] = df[["inactive_date","abandoned_date","graduation_date"]].fillna(value=null)
+        df[["inactive_date","abandoned_date","graduation_date"]] = df[["inactive_date","abandoned_date","graduation_date"]].fillna('')
 
 
         df.fillna('', inplace=True)
@@ -113,9 +113,9 @@ class MusoBeneficiaries:
                         cc_benificiary["gender"]=0
 
                     l_dates = ["inactive_date","abandoned_date","graduation_date"]
-                    for l_date in l_dates:
-                        if cc_benificiary[l_date] ==null:
-                            cc_benificiary[l_date] = None
+                    # for l_date in l_dates:
+                    #     if cc_benificiary[l_date] ==null:
+                    #         cc_benificiary[l_date] = None
 
                     # cc_benificiary["gender"]=int(cc_benificiary["gender"])
                     # if "pvih" in cc_benificiary:
@@ -154,7 +154,7 @@ class MusoBeneficiaries:
         df["is_inactive"] = df["is_inactive"].astype(int)
         df["closed"]=df["closed"].astype(int)
 
-        df = df[df["closed"]==1| df["graduated"]==1 | df["is_inactive"]==1 ]
+        df = df[(df["closed"]==1) | (df["graduated"]==1) | (df["is_inactive"]==1) ]
         rows = df.to_dict("records")
         # __rows = list(filter(lambda r: (r["graduated"]==1 or r["is_inactive"]==1 or r["closed"]==1) , rows))
         return muso_beneficiary.update_benficiaries_status(rows)
