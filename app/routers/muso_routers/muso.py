@@ -60,7 +60,7 @@ def sync_muso_groups():
     cc_groups = MusoGroupesCase().get()
     muso_groupes = MusoGroupes(cc_groups, hiv_groups)
     r =muso_groupes.insert_cc_groupes_to_hiv()
-    return {"message":"muso groups synced", "groups_added":r}
+    return {"message":"muso groups synced", "groups_added":"Please return the result"}
 
 @router.get("/groups/hiv_case_id")
 def get_hiv_case_id():
@@ -130,7 +130,7 @@ def sync_beneficiaries_case_id():
 
 @router.get("/beneficiaries/sync_to_hivhaiti")
 def sync_beneficiaries_to_hivhaiti():
-    try:
+    # try:
         muso_beneficiary = MusoBeneficiary()
         hiv_beneficiaries = muso_beneficiary.get_muso_beneficiaries()
         cc_beneficiaries = MusoBeneficiariesCase().get()
@@ -149,8 +149,8 @@ def sync_beneficiaries_to_hivhaiti():
             print("case_id:"+beneficiary["case_id"]+"  i: "+str((i/l)*100)+"%  "+"i:"+str(i))
             i+=1
         return {"message":"beneficiaries synced"}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    # except Exception as e:
+    #     raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/households/xlsx")
 def households_to_excel():
@@ -210,4 +210,15 @@ async def sync_beneficiaries_status():
     max_rank_beneficiaries_by_groups = muso_beneficiary.get_max_rank_beneficiaries_by_groups()
     analysis_muso_beneficiaries = MusoBeneficiaries({"cc_beneficiaries":cc_beneficiaries, "hiv_beneficiaries":hiv_beneficiaries,"max_rank_beneficiaries_by_groups":max_rank_beneficiaries_by_groups})
     analysis_muso_beneficiaries.update_beneficiaries_status()
+    return {"message":"beneficiaries status synced"}
+
+
+@router.get("/beneficiaries/household_applicable/sync")
+async def sync_beneficiaries_household_applicable():
+    muso_beneficiary = MusoBeneficiary()
+    hiv_beneficiaries = muso_beneficiary.get_muso_beneficiaries()
+    cc_beneficiaries = MusoBeneficiariesCase().get()
+    max_rank_beneficiaries_by_groups = muso_beneficiary.get_max_rank_beneficiaries_by_groups()
+    analysis_muso_beneficiaries = MusoBeneficiaries({"cc_beneficiaries":cc_beneficiaries, "hiv_beneficiaries":hiv_beneficiaries,"max_rank_beneficiaries_by_groups":max_rank_beneficiaries_by_groups})
+    analysis_muso_beneficiaries.update_beneficiaries_household_not_applicable()
     return {"message":"beneficiaries status synced"}

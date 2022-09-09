@@ -193,6 +193,7 @@ class MusoGroupes:
         df_groupes["section"]= pd.to_numeric(df_groupes["section"],errors="coerce")
         df_groupes = df_groupes[df_groupes["section"].notna() & df_groupes["section"]>0]
         df_groupes["section"]=df_groupes["section"].astype(int).astype(str)
+        df_groupes["closed_on_commcare"]=df_groupes["closed"].astype(int)
         df_groupes["localite"]=df_groupes["section"]
         df_groupes["localite_name"]=df_groupes["section_name"]
         df_groupes.drop(columns=["office_name"],inplace=True)

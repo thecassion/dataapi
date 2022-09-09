@@ -84,7 +84,7 @@ class MusoBeneficiaries:
             df[__liste] = pd.to_numeric(df[__liste], errors="coerce").fillna(0).astype(int)
 
 
-        df[["inactive_date","abandoned_date","graduation_date"]] = df[["inactive_date","abandoned_date","graduation_date"]].fillna(value=null)
+        df[["inactive_date","abandoned_date","graduation_date"]] = df[["inactive_date","abandoned_date","graduation_date"]].fillna('')
 
 
         df.fillna('', inplace=True)
@@ -113,9 +113,9 @@ class MusoBeneficiaries:
                         cc_benificiary["gender"]=0
 
                     l_dates = ["inactive_date","abandoned_date","graduation_date"]
-                    for l_date in l_dates:
-                        if cc_benificiary[l_date] ==null:
-                            cc_benificiary[l_date] = None
+                    # for l_date in l_dates:
+                    #     if cc_benificiary[l_date] ==null:
+                    #         cc_benificiary[l_date] = None
 
                     # cc_benificiary["gender"]=int(cc_benificiary["gender"])
                     # if "pvih" in cc_benificiary:
@@ -147,15 +147,29 @@ class MusoBeneficiaries:
             Update beneficiaries status : is_inactive , graduated , is_abandonned
         """
         muso_beneficiary = MusoBeneficiary()
-        # df = pd.DataFrame(self.cc_beneficiaries)
-        # df[["graduated","is_inactive"]]=df[["graduated","is_inactive"]].fillna(0)
-        # df[["inactive_date","graduation_date"]] = df[["inactive_date","graduation_date"]].fillna("")
-        # df["graduated"] = df["graduated"].astype(int)
-        # df["is_inactive"] = df["is_inactive"].astype(int)
-        # df["closed"]=df["closed"].astype(int)
-        # rows = df.to_dict("records")
-        return muso_beneficiary.update_benficiaries_status(self.cc_beneficiaries)
+        df = pd.DataFrame(self.cc_beneficiaries)
+        df[["graduated","is_inactive"]]=df[["graduated","is_inactive"]].fillna(0)
+        df[["inactive_date","graduation_date"]] = df[["inactive_date","graduation_date"]].fillna("")
+        df["graduated"] = df["graduated"].astype(int)
+        df["is_inactive"] = df["is_inactive"].astype(int)
+        df["closed"]=df["closed"].astype(int)
+
+        df = df[(df["closed"]==1) | (df["graduated"]==1) | (df["is_inactive"]==1) ]
+        rows = df.to_dict("records")
+        # __rows = list(filter(lambda r: (r["graduated"]==1 or r["is_inactive"]==1 or r["closed"]==1) , rows))
+        return muso_beneficiary.update_benficiaries_status(rows)
 
 
+    def update_beneficiaries_household_not_applicable(self):
+        """
+            Update beneficiaries status : is_inactive , graduated , is_abandonned
+        """
+        muso_beneficiary = MusoBeneficiary()
+        df = pd.DataFrame(self.cc_beneficiaries)
+        # df["household_number_2022"]=df["household_number_2022"].astype(int)
+        df_house  = df[df["household_number_2022"]=="0"]
+        df_house["is_household_applicable"]="yes"
+        print(df_house)
 
-
+        rows = df_house.to_dict("records")
+        return muso_beneficiary.update_beneficiairies_household_not_applicable(rows)
