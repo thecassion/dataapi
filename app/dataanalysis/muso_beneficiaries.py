@@ -96,8 +96,13 @@ class MusoBeneficiaries:
         """
         beneficiaries=[]
         __cc_benificiary_without_external_id = self.cc_beneficiaries_without_external_id_and_patient_code()
+        if len(__cc_benificiary_without_external_id) == 0:
+            return beneficiaries
         for group in self.max_rank_beneficiaries_by_groups:
-            i=1
+            i = 1
+            # print group max_rank
+            print("Max rank for group "+group["group_case_id"]+" is "+str(group["max_rank"]))
+
             for cc_benificiary in __cc_benificiary_without_external_id:
                 if cc_benificiary["parent_id"] == group["group_case_id"]:
                     cc_benificiary["rank"] = group["max_rank"] + i
