@@ -66,6 +66,9 @@ SELECT
                     AND c.month_in_program <= 24,
                 '13-24 months',
                 '25+ months'))) AS month_in_program_range,
+    IF(sc.id_patient IS NOT NULL,
+        'yes',
+        'no') AS has_schooling_payment_in_the_interval,
     IF(e.id_patient IS NOT NULL,
         'yes',
         'no') AS muso,
@@ -118,7 +121,13 @@ FROM
         dream_member dmx
     INNER JOIN patient px ON px.id = dmx.id_patient
     INNER JOIN gardening_beneficiary gbx ON gbx.code_dreams = px.patient_code
-    GROUP BY dmx.id_patient)) a
+    GROUP BY dmx.id_patient) UNION (SELECT 
+        ds.id_patient
+    FROM
+        caris_db.dreams_schooling ds
+    WHERE
+        ds.closed = FALSE AND ds.eskew_peye = 1
+            AND (ds.dat_peyman_fet BETWEEN '{Set_date.period_start.value}' AND '{Set_date.period_end.value}'))) a
         LEFT JOIN
     (SELECT 
         xy.id_patient,
@@ -231,6 +240,14 @@ FROM
             OR dpga.yg_vd = 'P')
             AND dpgs.date BETWEEN '{Set_date.period_start.value}' AND '{Set_date.period_end.value}'
     GROUP BY id_patient) h ON h.id_patient = a.id_patient
+    LEFT JOIN
+    (SELECT 
+        ds.id_patient
+    FROM
+        caris_db.dreams_schooling ds
+    WHERE
+        ds.closed = FALSE AND ds.eskew_peye = 1
+        AND (ds.dat_peyman_fet BETWEEN '{Set_date.period_start.value}' AND '{Set_date.period_end.value}')) sc ON sc.id_patient = a.id_patient
         LEFT JOIN
     ((SELECT 
         dhi.id_patient
@@ -319,6 +336,9 @@ SELECT
                     AND c.month_in_program <= 24,
                 '13-24 months',
                 '25+ months'))) AS month_in_program_range,
+    IF(sc.id_patient IS NOT NULL,
+        'yes',
+        'no') AS has_schooling_payment_in_the_interval,
     IF(e.id_patient IS NOT NULL,
         'yes',
         'no') AS muso,
@@ -371,7 +391,13 @@ FROM
         dream_member dmx
     INNER JOIN patient px ON px.id = dmx.id_patient
     INNER JOIN gardening_beneficiary gbx ON gbx.code_dreams = px.patient_code
-    GROUP BY dmx.id_patient)) a
+    GROUP BY dmx.id_patient) UNION (SELECT 
+        ds.id_patient
+    FROM
+        caris_db.dreams_schooling ds
+    WHERE
+        ds.closed = FALSE AND ds.eskew_peye = 1
+            AND (ds.dat_peyman_fet BETWEEN '{Set_date.master_start.value}' AND '{Set_date.master_end.value}'))) a
         LEFT JOIN
     (SELECT 
         xy.id_patient,
@@ -484,6 +510,14 @@ FROM
             OR dpga.yg_vd = 'P')
             AND dpgs.date BETWEEN '{Set_date.master_start.value}' AND '{Set_date.master_end.value}'
     GROUP BY id_patient) h ON h.id_patient = a.id_patient
+    LEFT JOIN
+    (SELECT 
+        ds.id_patient
+    FROM
+        caris_db.dreams_schooling ds
+    WHERE
+        ds.closed = FALSE AND ds.eskew_peye = 1
+        AND (ds.dat_peyman_fet BETWEEN '{Set_date.master_start.value}' AND '{Set_date.master_end.value}')) sc ON sc.id_patient = a.id_patient
         LEFT JOIN
     ((SELECT 
         dhi.id_patient

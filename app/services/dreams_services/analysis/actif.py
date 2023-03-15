@@ -97,6 +97,7 @@ actif_served.number_contraceptive_sensibilization_date_in_the_interval = actif_s
     int16)
 
 # services
+actif_served['education'] = actif_served.has_schooling_payment_in_the_interval
 actif_served['parenting_detailed'] = actif_served.nbre_parenting_coupe_present.map(
     parenting_detailed)
 actif_served['parenting'] = actif_served.nbre_parenting_coupe_present.map(
