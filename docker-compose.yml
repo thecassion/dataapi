@@ -14,19 +14,19 @@ services:
       - 8000:8000
     # extra_hosts:
       # - "host.docker.internal:172.17.0.1"
-    depends_on:
-      - krabbitmq
+    # depends_on:
+    #   - krabbitmq
     networks:
       - data_api_tiers
-  krabbitmq:
-   image: rabbitmq:3-management
+  # krabbitmq:
+  #  image: rabbitmq:3-management
   #  volumes:
   #   - "./rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf"
-   ports:
-     - 5672:5672
-     - 15672:15672
-   networks:
-     - data_api_tiers
+  #  ports:
+  #    - 5672:5672
+  #    - 15672:15672
+  #  networks:
+  #    - data_api_tiers
 networks:
   data_api_tiers:
     driver: bridge
