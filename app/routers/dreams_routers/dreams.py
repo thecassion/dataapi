@@ -6,10 +6,15 @@ from fastapi import (
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 
-from ...services.dreams_services import (
-    DATIM_SCHEMA,
-    DISTRICT_SCHEMA
-)
+""" from ...services.dreams_services import (
+    datim_function,
+    #district_function,
+    #DISTRICT_SCHEMA,
+    datim_object
+) """
+
+from ...services.services_dreams import run_datim
+
 from ...core import settings
 
 router = APIRouter(
@@ -25,13 +30,14 @@ router = APIRouter(
     status_code=status.HTTP_200_OK
 )
 async def datim():
-    json_datim = jsonable_encoder(DATIM_SCHEMA)
+    DATIM_SCHEMA = run_datim()
+    json_datim =  jsonable_encoder(DATIM_SCHEMA)
     if json_datim:
         return JSONResponse(content=json_datim)
     raise HTTPException(status.HTTP_404_NOT_FOUND, "Something went wrong")
 
 
-@router.get(
+""" @router.get(
     '/district',
     response_description=settings.DISTRICT_DESCRIPTION,
     summary=settings.DISTRICT_SUMMARY,
@@ -41,4 +47,4 @@ async def district():
     json_district = jsonable_encoder(DISTRICT_SCHEMA)
     if json_district:
         return JSONResponse(content=json_district)
-    raise HTTPException(status.HTTP_404_NOT_FOUND, "Something went wrong")
+    raise HTTPException(status.HTTP_404_NOT_FOUND, "Something went wrong") """

@@ -1,4 +1,4 @@
-from ..analysis import (
+""" from ..analysis import (
     total_datimI_PAP,
     total_datimII_PAP,
     total_datimIII_PAP,
@@ -36,10 +36,10 @@ from ..analysis import (
     datimIII_DESS,
     datimIV_DESS,
     datim
-)
+) """
 
 
-DISTRICT = {
+""" DISTRICT = {
     'PAP': {
         "total_datim": int(total_datim_general_PAP),
         "titleI": datim.datim_titleI(),
@@ -101,3 +101,7 @@ DISTRICT = {
         'total_datimIV': int(total_datimIV_DESS)
     }
 }
+
+def district_function(data):
+    return data
+"""

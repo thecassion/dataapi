@@ -1,5 +1,5 @@
 from .agyw import datim
-from .district import(
+""" from .district import(
     total_datimI_PAP,
     total_datimII_PAP,
     total_datimIII_PAP,
@@ -37,3 +37,4 @@ from .district import(
     datimIII_DESS,
     datimIV_DESS
 )
+ """

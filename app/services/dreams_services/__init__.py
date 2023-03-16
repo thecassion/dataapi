@@ -1,5 +1,46 @@
 from .schema import (
-    DATIM as DATIM_SCHEMA,
-    DISTRICT as DISTRICT_SCHEMA
-    
+    datim_function,
+    #DISTRICT as DISTRICT_SCHEMA,
+    #district_function
 )
+from .analysis import datim as datim_object
+""" from .analysis import (
+    total_datimI_PAP,
+    total_datimII_PAP,
+    total_datimIII_PAP,
+    total_datimIV_PAP,
+    total_datim_general_PAP,
+    datimI_PAP,
+    datimII_PAP,
+    datimIII_PAP,
+    datimIV_PAP,
+    total_datimI_CAP,
+    total_datimII_CAP,
+    total_datimIII_CAP,
+    total_datimIV_CAP,
+    total_datim_general_CAP,
+    datimI_CAP,
+    datimII_CAP,
+    datimIII_CAP,
+    datimIV_CAP,
+    total_datimI_SM,
+    total_datimII_SM,
+    total_datimIII_SM,
+    total_datimIV_SM,
+    total_datim_general_SM,
+    datimI_SM,
+    datimII_SM,
+    datimIII_SM,
+    datimIV_SM,
+    total_datimI_DESS,
+    total_datimII_DESS,
+    total_datimIII_DESS,
+    total_datimIV_DESS,
+    total_datim_general_DESS,
+    datimI_DESS,
+    datimII_DESS,
+    datimIII_DESS,
+    datimIV_DESS,
+    datim
+)
+ """

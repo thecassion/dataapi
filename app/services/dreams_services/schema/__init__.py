@@ -1,2 +1,2 @@
-from .agyw_district_schema import DISTRICT
-from .agyw_schema import DATIM
+#from .agyw_district_schema import DISTRICT, district_function
+from .agyw_schema import datim_function
