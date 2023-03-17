@@ -8,6 +8,7 @@ from .core import (
 from .routers import  muso_router
 from .routers import cases_router
 from .routers import ptme_router
+from .routers import dreams_router
 
 
 app = FastAPI(
@@ -23,6 +24,7 @@ app = FastAPI(
 
 app.include_router(ptme_router)
 app.include_router(cases_router)
+app.include_router(dreams_router)
 app.include_router(muso_router)
 
 
