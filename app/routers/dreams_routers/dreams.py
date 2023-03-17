@@ -15,7 +15,7 @@ from fastapi.responses import JSONResponse
 
 from ...services.services_dreams import run_datim
 
-from ...core import settings
+from ...core import settings, sql_achemy_engine
 
 router = APIRouter(
     prefix='/dreams',
@@ -30,10 +30,11 @@ router = APIRouter(
     status_code=status.HTTP_200_OK
 )
 async def datim():
-    DATIM_SCHEMA = run_datim()
-    json_datim =  jsonable_encoder(DATIM_SCHEMA)
-    if json_datim:
-        return JSONResponse(content=json_datim)
+    engine = sql_achemy_engine()
+    if engine:
+        DATIM_SCHEMA = run_datim(engine)
+        json_datim =  jsonable_encoder(DATIM_SCHEMA)
+        return JSONResponse(content=json_datim)  
     raise HTTPException(status.HTTP_404_NOT_FOUND, "Something went wrong")
 
 

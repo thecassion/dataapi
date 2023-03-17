@@ -1,5 +1,5 @@
 import pymysql
-from sqlalchemy import create_engine, text
+from sqlalchemy import  text
 from pandas import read_sql_query
 
 from .analysis import AGYW_Analysis
@@ -12,9 +12,7 @@ from .utils import (
 
 from ...core import settings
 
-def run_datim():
-    engine = create_engine(
-    f"mysql+pymysql://{settings.mysql_username}:{settings.mysql_password}@{settings.mysql_host}/{settings.mysql_database}")
+def run_datim(engine):
     agyw_served_period = read_sql_query(text(QUERY_PERIOD), engine.connect(), parse_dates=True)
     agyw_served = read_sql_query(text(QUERY_MASTER), engine.connect(), parse_dates=True)
     engine.dispose()
