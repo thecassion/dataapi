@@ -12,3 +12,5 @@ mangum
 python-dotenv
 # celery
 # flower
+siuba
+numpyencoder

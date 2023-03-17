@@ -32,5 +32,6 @@ def run_datim(engine):
         'total_datimIII': int(datim.total_datimIII),
         "titleIV": datim.datim_titleIV(),
         "tableIV": datim.datim_agyw_prevIV().to_dict('split'),
-        'total_datimIV': int(datim.total_datimIV)
+        'total_datimIV': int(datim.total_datimIV),
+        'table_vital_info':datim.datim_vital_info().to_dict('split')
     }
