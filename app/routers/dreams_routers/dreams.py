@@ -4,7 +4,9 @@ from fastapi import (
     HTTPException
 )
 from fastapi.encoders import jsonable_encoder
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
+from json import dumps
+from numpyencoder import NumpyEncoder
 
 """ from ...services.dreams_services import (
     datim_function,
@@ -33,8 +35,10 @@ async def datim():
     engine = sql_achemy_engine()
     if engine:
         DATIM_SCHEMA = run_datim(engine)
-        json_datim =  jsonable_encoder(DATIM_SCHEMA)
-        return JSONResponse(content=json_datim)  
+        #json_datim =  jsonable_encoder(DATIM_SCHEMA)
+        #return JSONResponse(content=json_datim)  
+        json_datim =  dumps(DATIM_SCHEMA, cls=NumpyEncoder).encode('utf-8')
+        return Response(media_type="application/json", content=json_datim)
     raise HTTPException(status.HTTP_404_NOT_FOUND, "Something went wrong")
 
 
