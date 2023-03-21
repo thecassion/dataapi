@@ -24,6 +24,8 @@ def data_processing(engine):
 def run_datim(engine):
     datim  = data_processing(engine)
     return [
+        {"ok":True}
+        ,
         {
             "who_am_i": datim.who_am_i,
             "name": "AGYW_PREV",
