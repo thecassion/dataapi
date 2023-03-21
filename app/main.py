@@ -1,5 +1,6 @@
 from mangum import Mangum
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from .core import (
     settings
 )
@@ -18,6 +19,18 @@ app = FastAPI(
     #docs_url=settings.project_docs_url
 )
 
+
+origins=[
+    "http://localhost:3000"
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # celery = create_celery() #TODO celery function is not yet implemented
 
