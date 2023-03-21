@@ -20,6 +20,55 @@ def data_processing(engine):
     datim = AgywPrev(data=AGYW_ACTIF)
     return datim
 
+
+def run_datim(engine):
+    datim  = data_processing(engine)
+    return [
+        {
+            "who_am_i": datim.who_am_i,
+            "name": "AGYW_PREV",
+            "total": datim.total_datim_general
+        },
+        {
+            "rows_title": datim.datim_agyw_prevI().columns.to_list(),
+            "tab1":{
+                "table_name": "Table I",
+                "description": datim.datim_titleI(),
+                'total': datim.total_datimI,
+                "rows": datim.datim_agyw_prevI().to_dict('records'),
+            },
+            "tab2":{
+                "table_name": "Table II",
+                "description": datim.datim_titleII(),
+                'total': datim.total_datimII,
+                "rows": datim.datim_agyw_prevII().to_dict('records'),
+            },
+            "tab3":{
+                "table_name": "Table III",
+                "description": datim.datim_titleIII(),
+                'total': datim.total_datimIII,
+                "rows": datim.datim_agyw_prevIII().to_dict('records'),
+            },
+            "tab4":{
+                "table_name": "Table IV",
+                "description": datim.datim_titleIV(),
+                'total': datim.total_datimIV,
+                "rows": datim.datim_agyw_prevIV().to_dict('records'),
+            },
+        },
+        {
+            "rows_title": [
+                datim.datim_vital_info().to_dict('tight')['columns'][0],
+                datim.datim_vital_info().to_dict('tight')['data'][0][0],
+                datim.datim_vital_info().to_dict('tight')['data'][1][0]
+            ],
+            "value_row1":datim.datim_vital_info().to_dict('tight')['columns'][1],
+            "value_row2": datim.datim_vital_info().to_dict('tight')['data'][0][1],
+            "value_row3": datim.datim_vital_info().to_dict('tight')['data'][1][1]
+        }
+    ]
+
+
 def run_agywprevI(engine):
     datim  = data_processing(engine)
     return [
