@@ -21,7 +21,7 @@ app = FastAPI(
 
 
 origins=[
-    "http://localhost:3000"
+    "*"
 ]
 
 app.add_middleware(
@@ -44,7 +44,7 @@ app.include_router(muso_router)
 @app.get("/")
 def home():
     return {
-        "message": "The documentation is avalaible on the localhost:8000/docs"
+        "message": "Welcome to the Caris Data API"
     }
 
 
