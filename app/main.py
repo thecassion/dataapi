@@ -10,6 +10,7 @@ from .routers import  muso_router
 from .routers import cases_router
 from .routers import ptme_router
 from .routers import dreams_router
+from .routers import eid_router
 
 
 app = FastAPI(
@@ -35,10 +36,11 @@ app.add_middleware(
 # celery = create_celery() #TODO celery function is not yet implemented
 
 
-app.include_router(ptme_router)
-app.include_router(cases_router)
+app.include_router(eid_router)
 app.include_router(dreams_router)
 app.include_router(muso_router)
+app.include_router(ptme_router)
+app.include_router(cases_router)
 
 
 @app.get("/")
