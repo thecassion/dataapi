@@ -46,7 +46,7 @@ async def datim():
 
 
 
-@router.get(
+""" @router.get(
     '/agyw_prevTableI',
     response_description=settings.AGYWPREVTABI_DESCRIPTION,
     summary=settings.AGYWPREVTABI_SUMMARY,
@@ -100,7 +100,7 @@ async def agyw_prevTableIV():
         AGYWPREVTABIV_SCHEMA = run_agywprevIV(engine) 
         json_datim =  dumps(AGYWPREVTABIV_SCHEMA, cls=NumpyEncoder).encode('utf-8')
         return Response(media_type="application/json", content=json_datim)
-    raise HTTPException(status.HTTP_404_NOT_FOUND, "Something went wrong")
+    raise HTTPException(status.HTTP_404_NOT_FOUND, "Something went wrong") """
 
 @router.get(
     '/vital_info',
