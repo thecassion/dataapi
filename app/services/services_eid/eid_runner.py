@@ -5,7 +5,7 @@ from dateutil.relativedelta import relativedelta
 
 
 from .eid_query import EID
-from .eid_summary_processing import pmtctEID_heiPos_ON_ARV
+from .eid_summary_processing import Eid
 
 from ...core import settings
 
@@ -23,7 +23,14 @@ def data_processing(engine):
 
 
 
-def summary_eid_total(engine,year=None):
+def summary_eid_total(engine,year=None, quarter=None, network=None):
     eid = data_processing(engine)
-    result_eid = pmtctEID_heiPos_ON_ARV(eid,year)
-    return result_eid.to_dict('records')
+    result_eid = Eid.pmtctEID_heiPos_ON_ARV(eid,year,quarter,network)
+    title_eid = Eid.get_filter_title(eid)
+    return {
+        "year_title": title_eid["year_title"],
+        "quarter_title": title_eid["quarter_title"],
+        "network_title": title_eid["network_title"],
+        "summary": result_eid.to_dict('records')
+        
+    }
