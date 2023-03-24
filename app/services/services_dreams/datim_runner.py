@@ -25,29 +25,29 @@ def run_datim(engine):
     datim  = data_processing(engine)
     return [
         {
-            "rows_title": datim.datim_agyw_prevI().columns.to_list(),
-            "name": "Table I",
-            "description": datim.datim_titleI(),
-            'total': datim.total_datimI,
-            "rows": datim.datim_agyw_prevI().to_dict('records'),
-        },
-        {
             "rows_title": datim.datim_agyw_prevII().columns.to_list(),
-            "name": "Table II",
+            "name": "completed primary and at least 1 secondary service",
             "description": datim.datim_titleII(),
             'total': datim.total_datimII,
             "rows": datim.datim_agyw_prevII().to_dict('records'),
         },
         {
+            "rows_title": datim.datim_agyw_prevI().columns.to_list(),
+            "name": "completed only primary package",
+            "description": datim.datim_titleI(),
+            'total': datim.total_datimI,
+            "rows": datim.datim_agyw_prevI().to_dict('records'),
+        },
+        {
             "rows_title": datim.datim_agyw_prevIII().columns.to_list(),
-            "name": "Table III",
+            "name": "completed <1 DREAMS service ",
             "description": datim.datim_titleIII(),
             'total': datim.total_datimIII,
             "rows": datim.datim_agyw_prevIII().to_dict('records'),
         },
         {
             "rows_title": datim.datim_agyw_prevIV().columns.to_list(),
-            "name": "Table IV",
+            "name": "4: started 1 DREAMS service",
             "description": datim.datim_titleIV(),
             'total': datim.total_datimIV,
             "rows": datim.datim_agyw_prevIV().to_dict('records'),
