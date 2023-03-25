@@ -14,3 +14,5 @@ python-dotenv
 # flower
 siuba
 numpyencoder
+fastapi-filter
+python-dateutil
