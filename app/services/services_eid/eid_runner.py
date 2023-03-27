@@ -6,6 +6,7 @@ from dateutil.relativedelta import relativedelta
 
 from .eid_query import EID
 from .eid_summary_processing import Eid
+from .eid_status import StatusEid
 
 from ...core import settings
 
@@ -34,3 +35,34 @@ def summary_eid_total(engine,year=None, quarter=None, network=None):
         "summary": result_eid.to_dict('records')
         
     }
+
+
+
+def testing_eid_total(engine,year=None, office=None, hospital=None):
+    eid = data_processing(engine)
+    result_eid = StatusEid.testing_status(eid,year,office,hospital)
+    #title_eid = StatusEid.get_filter_title(eid)
+    """ return {
+        "titles": title_eid,
+        "columns":{
+            "Year": result_eid.Year.tolist(),
+            "Office": result_eid.Office.tolist(),
+            "Hospital": result_eid.hospital.tolist(),
+            "Result": result_eid.Result.tolist(),
+            "Quarter": result_eid.Quarter.tolist(),
+            "tranche_age": result_eid.tranche_age.tolist(),
+            "Liaison_mere": result_eid.Liaison_mere.tolist(),
+        }
+        
+    } """
+    return {
+            "Year": result_eid.Year.tolist(),
+            "Office": result_eid.Office.tolist(),
+            "Hospital": result_eid.hospital.tolist(),
+            "Result": result_eid.Result.tolist(),
+            "Quarter": result_eid.Quarter.tolist(),
+            "tranche_age": result_eid.tranche_age.tolist(),
+            "Liaison_mere": result_eid.Liaison_mere.tolist(),
+        
+    }
+
