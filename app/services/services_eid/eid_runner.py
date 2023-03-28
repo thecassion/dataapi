@@ -40,29 +40,15 @@ def summary_eid_total(engine,year=None, quarter=None, network=None):
 
 def testing_eid_total(engine,year=None, office=None, hospital=None):
     eid = data_processing(engine)
-    result_eid = StatusEid.testing_status(eid,year,office,hospital)
-    #title_eid = StatusEid.get_filter_title(eid)
-    """ return {
-        "titles": title_eid,
-        "columns":{
-            "Year": result_eid.Year.tolist(),
-            "Office": result_eid.Office.tolist(),
-            "Hospital": result_eid.hospital.tolist(),
-            "Result": result_eid.Result.tolist(),
-            "Quarter": result_eid.Quarter.tolist(),
-            "tranche_age": result_eid.tranche_age.tolist(),
-            "Liaison_mere": result_eid.Liaison_mere.tolist(),
-        }
-        
-    } """
+    title_eid = StatusEid.get_filter_title(eid)
+    pcr_eid = StatusEid.pcr_status(eid,year,office,hospital)
+    positivity_eid = StatusEid.positivity_status(eid,year,office,hospital)
+    liaison_eid = StatusEid.liaison_status(eid,year,office,hospital)
     return {
-            "Year": result_eid.Year.tolist(),
-            "Office": result_eid.Office.tolist(),
-            "Hospital": result_eid.hospital.tolist(),
-            "Result": result_eid.Result.tolist(),
-            "Quarter": result_eid.Quarter.tolist(),
-            "tranche_age": result_eid.tranche_age.tolist(),
-            "Liaison_mere": result_eid.Liaison_mere.tolist(),
-        
+        "titles": title_eid,
+        "pcr_status": pcr_eid.to_dict('split'),
+        "positivity_status": positivity_eid.to_dict('split'),
+        "liaison_mere_status": liaison_eid.to_dict('records')
     }
+    
 

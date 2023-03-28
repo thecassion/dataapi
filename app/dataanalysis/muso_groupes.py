@@ -10,7 +10,6 @@ class MusoGroupes:
         self.hi_groupes = hi_groupes
         # self.spark = SparkSession.builder.appName("Caris").master("local").config("spark.sql.execution.arrow.pyspark.enabled", "true").getOrCreate()
 
-        pass
     def groups_not_on_hiv(self):
         # sp_cc_groupes = self.spark.createDataFrame(self.cc_groupes)
         # sp_hi_groupes = self.spark.createDataFrame(self.hi_groupes)
