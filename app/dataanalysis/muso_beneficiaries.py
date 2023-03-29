@@ -73,7 +73,7 @@ class MusoBeneficiaries:
         """
         Verify that the case id is not in the patient table with muso_case_id
         """
-        df_patient = pd.read_sql_table("patient", sql_achemy_engine())
+        df_patient = pd.read_sql_table("patient", sql_achemy_engine().connect())
         df = pd.merge(df, df_patient, how="left", right_on="muso_case_id", left_on="case_id",suffixes=(None, "__patient"))
         df = df[df["patient_code__patient"].isna()]
         df = df[__columns]

@@ -8,4 +8,9 @@ class Eid_filter(filter.Filter):
     network: Optional[str]
 
 
+class EidStatus_filter(filter.Filter):
+    year: Optional[int]
+    office: Optional[str]
+    hospital: Optional[str]
+
 
