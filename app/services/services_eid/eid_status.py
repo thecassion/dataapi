@@ -41,11 +41,10 @@ class StatusEid():
         
         EID = eid_Qi.pivot_table(
             values='Patient_code',
-            index="tranche_age",
-            columns=["Year", "Quarter"],
+            index=["Year", "Quarter", "tranche_age"],
             aggfunc=len,
             fill_value = 0, 
-        )
+        ).reset_index().rename_axis(axis=1).rename(columns={'Patient_code':"Total"})
         return EID 
 
     @classmethod
@@ -69,11 +68,10 @@ class StatusEid():
         
         EID = eid_Qi.pivot_table(
             values='Patient_code',
-            index="Result",
-            columns=["Year", "Quarter"],
+            index=["Year", "Quarter", "tranche_age"],
             aggfunc=len,
             fill_value = 0, 
-        )
+        ).reset_index().rename_axis(axis=1).rename(columns={'Patient_code':"Total"})
         return EID
 
     @classmethod
