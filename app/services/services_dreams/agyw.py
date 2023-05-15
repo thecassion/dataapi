@@ -647,10 +647,11 @@ class AgywPrevCommune(AgywPrev):
     """A class that extend AgywPrev with the purpose of the indicator AGYW_PREV DATIM by commune"""
     __who_am_I = "DATIM"
 
-    def __init__(self, name):
+    def __init__(self, name, data):
         self.__name = name
+        self.__data = data
         self.__i_am = f"{AgywPrevCommune.__who_am_I} {self.__name}"
-        super().__init__(commune=self.__name)
+        super().__init__(commune=self.__name, data=self.__data)
 
     @property
     def who_am_i(self):
