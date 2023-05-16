@@ -1,28 +1,26 @@
-import pymysql
-from sqlalchemy import  text
-from pandas import read_sql_query
+from polars import read_database
+from .db import conn
+
+from .periods import query_master, query_period
+
 
 from .analysis import AGYW_Analysis
 from .agyw import AgywPrev
 
-from .utils import (
-    QUERY_MASTER,
-    QUERY_PERIOD
-)
 
-from ...core import settings
-
-def data_processing(engine):
-    agyw_served_period = read_sql_query(text(QUERY_PERIOD), engine.connect(), parse_dates=True)
-    agyw_served = read_sql_query(text(QUERY_MASTER), engine.connect(), parse_dates=True)
-    engine.dispose()
-    AGYW_ACTIF = AGYW_Analysis(agyw_served,agyw_served_period).data_actif_served()
+def data_processing():
+    agyw_served = read_database(
+        connection_uri=conn, query=query_master, engine="connectorx")
+    agyw_served_period = read_database(
+        connection_uri=conn, query=query_period, engine="connectorx")
+    AGYW_ACTIF = AGYW_Analysis(
+        agyw_served, agyw_served_period).data_actif_served()
     datim = AgywPrev(data=AGYW_ACTIF)
     return datim
 
 
-def run_datim(engine):
-    datim  = data_processing(engine)
+def run_datim():
+    datim = data_processing()
     return [
         {
             "rows_title": datim.datim_agyw_prevII().columns.to_list(),
@@ -65,8 +63,8 @@ def run_datim(engine):
     ]
 
 
-def run_agywprevI(engine):
-    datim  = data_processing(engine)
+def run_agywprevI():
+    datim = data_processing()
     return [
         {
             "who_am_i": datim.who_am_i,
@@ -83,8 +81,8 @@ def run_agywprevI(engine):
     ]
 
 
-def run_agywprevII(engine):
-    datim  = data_processing(engine)
+def run_agywprevII():
+    datim = data_processing()
     return [
         {
             "who_am_i": datim.who_am_i,
@@ -100,8 +98,9 @@ def run_agywprevII(engine):
         }
     ]
 
-def run_agywprevIII(engine):
-    datim  = data_processing(engine)
+
+def run_agywprevIII():
+    datim = data_processing()
     return [
         {
             "who_am_i": datim.who_am_i,
@@ -118,8 +117,8 @@ def run_agywprevIII(engine):
     ]
 
 
-def run_agywprevIV(engine):
-    datim  = data_processing(engine)
+def run_agywprevIV():
+    datim = data_processing()
     return [
         {
             "who_am_i": datim.who_am_i,
@@ -135,8 +134,9 @@ def run_agywprevIV(engine):
         }
     ]
 
-def run_vital_info(engine):
-    datim  = data_processing(engine)
+
+def run_vital_info():
+    datim = data_processing()
     return [
         {
             "rows_title": [

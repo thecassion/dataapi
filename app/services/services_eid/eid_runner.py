@@ -48,8 +48,7 @@ def testing_eid_total(engine,year=None, office=None, hospital=None):
     liaison_eid = StatusEid.liaison_status(eid,year,office,hospital)
     return {
         "titles": title_eid,
-        #  put it in records
-        "pcr_status": pcr_eid,
+        "pcr_status": pcr_eid.to_dict('split'),
         "positivity_status": positivity_eid.to_dict('split'),
         "liaison_mere_status": liaison_eid.to_dict('records')
     }
