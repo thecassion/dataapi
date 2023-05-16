@@ -1,0 +1,1 @@
+from .vbg import router as vbg_router

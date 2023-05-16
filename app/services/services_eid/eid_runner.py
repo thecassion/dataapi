@@ -2,6 +2,7 @@ import pymysql
 from sqlalchemy import  text
 from pandas import read_sql_query
 from dateutil.relativedelta import relativedelta
+import pandas as pd
 
 
 from .eid_query import EID
@@ -33,7 +34,7 @@ def summary_eid_total(engine,year=None, quarter=None, network=None):
         "quarter_title": title_eid["quarter_title"],
         "network_title": title_eid["network_title"],
         "summary": result_eid.to_dict('records')
-        
+ 
     }
 
 
@@ -41,12 +42,14 @@ def summary_eid_total(engine,year=None, quarter=None, network=None):
 def testing_eid_total(engine,year=None, office=None, hospital=None):
     eid = data_processing(engine)
     title_eid = StatusEid.get_filter_title(eid)
-    pcr_eid = StatusEid.pcr_status(eid,year,office,hospital)
+    # put it in records
+    pcr_eid = pd.DataFrame(StatusEid.pcr_status(eid,year,office,hospital).to_records()).to_dict(orient='records')
     positivity_eid = StatusEid.positivity_status(eid,year,office,hospital)
     liaison_eid = StatusEid.liaison_status(eid,year,office,hospital)
     return {
         "titles": title_eid,
-        "pcr_status": pcr_eid.to_dict('split'),
+        #  put it in records
+        "pcr_status": pcr_eid,
         "positivity_status": positivity_eid.to_dict('split'),
         "liaison_mere_status": liaison_eid.to_dict('records')
     }

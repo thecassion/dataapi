@@ -41,8 +41,8 @@ class StatusEid():
         
         EID = eid_Qi.pivot_table(
             values='Patient_code',
-            index="tranche_age",
-            columns=["Year", "Quarter"],
+            index=["tranche_age","Year", "Quarter"],
+            # columns=["Year", "Quarter"],
             aggfunc=len,
             fill_value = 0, 
         )
