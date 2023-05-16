@@ -21,6 +21,18 @@ class CommCareAPI:
             print(response["meta"]["next"])
         return objects
     
+    def get_cases_by_parameters(self,parameters):
+        url = self.base_url + "case/"
+        parameters = parameters
+        response = requests.get(url, auth = self.auth, params= parameters).json()
+        objects = response["objects"]
+
+        while response["meta"]["next"]:
+            response = requests.get(url+response["meta"]["next"], auth=self.auth).json()
+            objects += response["objects"]
+            print(response["meta"]["next"])
+        return objects
+    
     def get_case(self,case_id):
         url = self.base_url + f"case/{case_id}"
         response = requests.get(url, auth = self.auth).json()

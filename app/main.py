@@ -11,6 +11,8 @@ from .routers import cases_router
 from .routers import ptme_router
 from .routers import dreams_router
 from .routers import eid_router
+from .routers import vbg_router
+from .routers import ovc_router
 
 
 app = FastAPI(
@@ -41,6 +43,8 @@ app.include_router(dreams_router)
 app.include_router(muso_router)
 app.include_router(ptme_router)
 app.include_router(cases_router)
+app.include_router(vbg_router)
+app.include_router(ovc_router)
 
 
 @app.get("/")
