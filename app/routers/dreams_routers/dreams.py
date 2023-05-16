@@ -9,7 +9,6 @@ from json import dumps
 from numpyencoder import NumpyEncoder
 
 
-
 from ...services.services_dreams import (
     run_agywprevI,
     run_agywprevII,
@@ -27,7 +26,6 @@ router = APIRouter(
 )
 
 
-
 @router.get(
     '/datim',
     response_description=settings.DATIM_DESCRIPTION,
@@ -35,15 +33,11 @@ router = APIRouter(
     status_code=status.HTTP_200_OK
 )
 async def datim():
-    engine = sql_achemy_engine()
-    if engine:
-        DATIM_SCHEMA = run_datim(engine)
-        json_datim =  dumps(DATIM_SCHEMA, cls=NumpyEncoder).encode('utf-8')
+    DATIM_SCHEMA = run_datim()
+    if DATIM_SCHEMA:
+        json_datim = dumps(DATIM_SCHEMA, cls=NumpyEncoder).encode('utf-8')
         return Response(media_type="application/json", content=json_datim)
     raise HTTPException(status.HTTP_404_NOT_FOUND, "Something went wrong")
-
-
-
 
 
 """ @router.get(
@@ -102,6 +96,7 @@ async def agyw_prevTableIV():
         return Response(media_type="application/json", content=json_datim)
     raise HTTPException(status.HTTP_404_NOT_FOUND, "Something went wrong") """
 
+
 @router.get(
     '/vital_info',
     response_description=settings.VITAL_DESCRIPTION,
@@ -109,11 +104,8 @@ async def agyw_prevTableIV():
     status_code=status.HTTP_200_OK
 )
 async def vital_info():
-    engine = sql_achemy_engine()
-    if engine:
-        VITAL_SCHEMA = run_vital_info(engine)  
-        json_datim =  dumps(VITAL_SCHEMA, cls=NumpyEncoder).encode('utf-8')
+    VITAL_SCHEMA = run_vital_info()
+    if VITAL_SCHEMA:
+        json_datim = dumps(VITAL_SCHEMA, cls=NumpyEncoder).encode('utf-8')
         return Response(media_type="application/json", content=json_datim)
     raise HTTPException(status.HTTP_404_NOT_FOUND, "Something went wrong")
-
-

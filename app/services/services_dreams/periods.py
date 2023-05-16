@@ -1,7 +1,6 @@
-from .dates_helper import Set_date
+from .constant import period_end, period_start, master_end, master_start
 
-
-QUERY_PERIOD = f"""
+query_period = f"""
 SELECT 
     a.id_patient,
     h.id_parenting_group,
@@ -84,23 +83,23 @@ FROM
     FROM
         dream_hivinfos dhi
     WHERE
-        (dhi.condom_sensibilization_date BETWEEN '{Set_date.period_start.value}' AND '{Set_date.period_end.value}')
-            OR (dhi.contraceptive_reception_date BETWEEN '{Set_date.period_start.value}' AND '{Set_date.period_end.value}')
-            OR (dhi.test_date BETWEEN '{Set_date.period_start.value}' AND '{Set_date.period_end.value}')
-            OR (dhi.condoms_reception_date BETWEEN '{Set_date.period_start.value}' AND '{Set_date.period_end.value}')
-            OR (dhi.vbg_treatment_date BETWEEN '{Set_date.period_start.value}' AND '{Set_date.period_end.value}')
-            OR (dhi.gynecological_care_date BETWEEN '{Set_date.period_start.value}' AND '{Set_date.period_end.value}')
-            OR (dhi.prep_initiation_date BETWEEN '{Set_date.period_start.value}' AND '{Set_date.period_end.value}')
+        (dhi.condom_sensibilization_date BETWEEN '{period_start}' AND '{period_end}')
+            OR (dhi.contraceptive_reception_date BETWEEN '{period_start}' AND '{period_end}')
+            OR (dhi.test_date BETWEEN '{period_start}' AND '{period_end}')
+            OR (dhi.condoms_reception_date BETWEEN '{period_start}' AND '{period_end}')
+            OR (dhi.vbg_treatment_date BETWEEN '{period_start}' AND '{period_end}')
+            OR (dhi.gynecological_care_date BETWEEN '{period_start}' AND '{period_end}')
+            OR (dhi.prep_initiation_date BETWEEN '{period_start}' AND '{period_end}')
             OR (dhi.has_been_sensibilize_for_condom = 1
-            AND ((dhi.condom_sensibilization_date BETWEEN '{Set_date.period_start.value}' AND '{Set_date.period_end.value}')
-            OR (dhi.condoms_reception_date BETWEEN '{Set_date.period_start.value}' AND '{Set_date.period_end.value}')))) UNION (SELECT 
+            AND ((dhi.condom_sensibilization_date BETWEEN '{period_start}' AND '{period_end}')
+            OR (dhi.condoms_reception_date BETWEEN '{period_start}' AND '{period_end}')))) UNION (SELECT 
         dga.id_patient
     FROM
         dream_group_attendance dga
     LEFT JOIN dream_group_session dgs ON dgs.id = dga.id_group_session
     WHERE
         dga.value = 'P'
-            AND dgs.date BETWEEN '{Set_date.period_start.value}' AND '{Set_date.period_end.value}') UNION (SELECT 
+            AND dgs.date BETWEEN '{period_start}' AND '{period_end}') UNION (SELECT 
         dpga.id_patient
     FROM
         dream_parenting_group_attendance dpga
@@ -110,7 +109,7 @@ FROM
             OR dpga.parent_vd = 'P'
             OR dpga.yg_g = 'P'
             OR dpga.yg_vd = 'P')
-            AND dpgs.date BETWEEN '{Set_date.period_start.value}' AND '{Set_date.period_end.value}') UNION (SELECT 
+            AND dpgs.date BETWEEN '{period_start}' AND '{period_end}') UNION (SELECT 
         dm.id_patient
     FROM
         dream_member dm
@@ -127,7 +126,7 @@ FROM
         caris_db.dreams_schooling ds
     WHERE
         ds.closed = FALSE AND ds.eskew_peye = 1
-            AND (ds.dat_peyman_fet BETWEEN '{Set_date.period_start.value}' AND '{Set_date.period_end.value}'))) a
+            AND (ds.dat_peyman_fet BETWEEN '{period_start}' AND '{period_end}'))) a
         LEFT JOIN
     (SELECT 
         xy.id_patient,
@@ -152,7 +151,7 @@ FROM
     LEFT JOIN dream_group_session dgs ON dgs.id = dga.id_group_session
     WHERE
         dga.value = 'P'
-            AND dgs.date BETWEEN '{Set_date.period_start.value}' AND '{Set_date.period_end.value}'
+            AND dgs.date BETWEEN '{period_start}' AND '{period_end}'
     GROUP BY dga.id_patient , dgs.topic) xy
     GROUP BY xy.id_patient) b ON b.id_patient = a.id_patient
         LEFT JOIN
@@ -167,35 +166,35 @@ FROM
         LEFT JOIN
     (SELECT 
         dhi1.id_patient,
-            SUM((dhi1.condom_sensibilization_date BETWEEN '{Set_date.period_start.value}' AND '{Set_date.period_end.value}')
+            SUM((dhi1.condom_sensibilization_date BETWEEN '{period_start}' AND '{period_end}')
                 AND (dhi1.condom_sensibilization_date IS NOT NULL)) AS number_condoms_sensibilization_date_in_the_interval,
-            SUM((dhi1.contraceptive_reception_date BETWEEN '{Set_date.period_start.value}' AND '{Set_date.period_end.value}')
+            SUM((dhi1.contraceptive_reception_date BETWEEN '{period_start}' AND '{period_end}')
                 AND (dhi1.contraceptive_reception_date IS NOT NULL)) AS number_contraceptive_reception_in_the_interval,
             SUM(dhi1.has_been_sensibilize_for_condom = 1
                 AND (dhi1.has_been_sensibilize_for_condom IS NOT NULL)) AS number_of_condoms_sensibilize,
-            SUM((dhi1.condoms_reception_date BETWEEN '{Set_date.period_start.value}' AND '{Set_date.period_end.value}')
+            SUM((dhi1.condoms_reception_date BETWEEN '{period_start}' AND '{period_end}')
                 AND (dhi1.condoms_reception_date IS NOT NULL)) AS number_condoms_reception_in_the_interval,
-            SUM((dhi1.test_date BETWEEN '{Set_date.period_start.value}' AND '{Set_date.period_end.value}')
+            SUM((dhi1.test_date BETWEEN '{period_start}' AND '{period_end}')
                 AND (dhi1.test_date IS NOT NULL)) AS number_test_date_in_the_interval,
-            SUM((dhi1.vbg_treatment_date BETWEEN '{Set_date.period_start.value}' AND '{Set_date.period_end.value}')
+            SUM((dhi1.vbg_treatment_date BETWEEN '{period_start}' AND '{period_end}')
                 AND (dhi1.vbg_treatment_date IS NOT NULL)) AS number_vbg_treatment_date_in_the_interval,
-            SUM((dhi1.gynecological_care_date BETWEEN '{Set_date.period_start.value}' AND '{Set_date.period_end.value}')
+            SUM((dhi1.gynecological_care_date BETWEEN '{period_start}' AND '{period_end}')
                 AND (dhi1.gynecological_care_date IS NOT NULL)) AS number_gynecological_care_date_in_the_interval,
-            SUM((dhi1.prep_initiation_date BETWEEN '{Set_date.period_start.value}' AND '{Set_date.period_end.value}')
+            SUM((dhi1.prep_initiation_date BETWEEN '{period_start}' AND '{period_end}')
                 AND (dhi1.prep_initiation_date IS NOT NULL)) AS number_prep_initiation_date_in_the_interval,
             GROUP_CONCAT(DISTINCT dhi1.test_result, ',') AS test_results,
-            SUM((dhi1.prep_awareness_date BETWEEN '{Set_date.period_start.value}' AND '{Set_date.period_end.value}')
+            SUM((dhi1.prep_awareness_date BETWEEN '{period_start}' AND '{period_end}')
                 AND (dhi1.prep_awareness_date IS NOT NULL)) AS number_prep_awareness_date_in_the_interval,
-            SUM((dhi1.prep_reference_date BETWEEN '{Set_date.period_start.value}' AND '{Set_date.period_end.value}')
+            SUM((dhi1.prep_reference_date BETWEEN '{period_start}' AND '{period_end}')
                 AND (dhi1.prep_reference_date IS NOT NULL)) AS number_prep_reference_date_in_the_interval,
-            SUM((dhi1.contraceptive_sensibilization_date BETWEEN '{Set_date.period_start.value}' AND '{Set_date.period_end.value}')
+            SUM((dhi1.contraceptive_sensibilization_date BETWEEN '{period_start}' AND '{period_end}')
                 AND (dhi1.contraceptive_sensibilization_date IS NOT NULL)) AS number_contraceptive_sensibilization_date_in_the_interval,
-            SUM((dhi1.hiv_treatment_start_date BETWEEN '{Set_date.period_start.value}' AND '{Set_date.period_end.value}')
+            SUM((dhi1.hiv_treatment_start_date BETWEEN '{period_start}' AND '{period_end}')
                 AND (dhi1.hiv_treatment_start_date IS NOT NULL)) AS number_hiv_treatment_start_date_in_the_interval,
-            SUM((dhi1.hiv_test_awareness_date BETWEEN '{Set_date.period_start.value}' AND '{Set_date.period_end.value}')
+            SUM((dhi1.hiv_test_awareness_date BETWEEN '{period_start}' AND '{period_end}')
                 AND (dhi1.hiv_test_awareness_date IS NOT NULL)) AS number_hiv_test_awareness_date_in_the_interval,
             GROUP_CONCAT(DISTINCT dhi1.type_of_test, ',') AS type_of_test_vih,
-            SUM((dhi1.autotest_date BETWEEN '{Set_date.period_start.value}' AND '{Set_date.period_end.value}')
+            SUM((dhi1.autotest_date BETWEEN '{period_start}' AND '{period_end}')
                 AND (dhi1.autotest_date IS NOT NULL)) AS number_autotest_date_in_the_interval,
             GROUP_CONCAT(DISTINCT dhi1.autotest_result, ',') AS autotest_result
     FROM
@@ -238,7 +237,7 @@ FROM
             OR dpga.parent_vd = 'P'
             OR dpga.yg_g = 'P'
             OR dpga.yg_vd = 'P')
-            AND dpgs.date BETWEEN '{Set_date.period_start.value}' AND '{Set_date.period_end.value}'
+            AND dpgs.date BETWEEN '{period_start}' AND '{period_end}'
     GROUP BY id_patient) h ON h.id_patient = a.id_patient
     LEFT JOIN
     (SELECT 
@@ -247,31 +246,31 @@ FROM
         caris_db.dreams_schooling ds
     WHERE
         ds.closed = FALSE AND ds.eskew_peye = 1
-        AND (ds.dat_peyman_fet BETWEEN '{Set_date.period_start.value}' AND '{Set_date.period_end.value}')) sc ON sc.id_patient = a.id_patient
+        AND (ds.dat_peyman_fet BETWEEN '{period_start}' AND '{period_end}')
+        group by ds.id_patient) sc ON sc.id_patient = a.id_patient
         LEFT JOIN
     ((SELECT 
         dhi.id_patient
     FROM
         dream_hivinfos dhi
     WHERE
-        (dhi.test_date < '{Set_date.period_start.value}')
-            OR (dhi.condoms_reception_date < '{Set_date.period_start.value}')
-            OR (dhi.vbg_treatment_date < '{Set_date.period_start.value}')
-            OR (dhi.gynecological_care_date < '{Set_date.period_start.value}')
-            OR (dhi.prep_initiation_date < '{Set_date.period_start.value}')
-            OR (dhi.condom_sensibilization_date < '{Set_date.period_start.value}')
-            OR (dhi.contraceptive_reception_date < '{Set_date.period_start.value}')) UNION (SELECT 
+        (dhi.test_date < '{period_start}')
+            OR (dhi.condoms_reception_date < '{period_start}')
+            OR (dhi.vbg_treatment_date < '{period_start}')
+            OR (dhi.gynecological_care_date < '{period_start}')
+            OR (dhi.prep_initiation_date < '{period_start}')
+            OR (dhi.condom_sensibilization_date < '{period_start}')
+            OR (dhi.contraceptive_reception_date < '{period_start}')) UNION (SELECT 
         dga.id_patient
     FROM
         dream_group_attendance dga
     LEFT JOIN dream_group_session dgs ON dgs.id = dga.id_group_session
     WHERE
         dga.value = 'P'
-            AND dgs.date < '{Set_date.period_start.value}')) past ON past.id_patient = a.id_patient
+            AND dgs.date < '{period_start}')) past ON past.id_patient = a.id_patient
 """
 
-
-QUERY_MASTER = f"""
+query_master = f"""
 SELECT 
     a.id_patient,
     h.id_parenting_group,
@@ -354,23 +353,23 @@ FROM
     FROM
         dream_hivinfos dhi
     WHERE
-        (dhi.condom_sensibilization_date BETWEEN '{Set_date.master_start.value}' AND '{Set_date.master_end.value}')
-            OR (dhi.contraceptive_reception_date BETWEEN '{Set_date.master_start.value}' AND '{Set_date.master_end.value}')
-            OR (dhi.test_date BETWEEN '{Set_date.master_start.value}' AND '{Set_date.master_end.value}')
-            OR (dhi.condoms_reception_date BETWEEN '{Set_date.master_start.value}' AND '{Set_date.master_end.value}')
-            OR (dhi.vbg_treatment_date BETWEEN '{Set_date.master_start.value}' AND '{Set_date.master_end.value}')
-            OR (dhi.gynecological_care_date BETWEEN '{Set_date.master_start.value}' AND '{Set_date.master_end.value}')
-            OR (dhi.prep_initiation_date BETWEEN '{Set_date.master_start.value}' AND '{Set_date.master_end.value}')
+        (dhi.condom_sensibilization_date BETWEEN '{master_start}' AND '{master_end}')
+            OR (dhi.contraceptive_reception_date BETWEEN '{master_start}' AND '{master_end}')
+            OR (dhi.test_date BETWEEN '{master_start}' AND '{master_end}')
+            OR (dhi.condoms_reception_date BETWEEN '{master_start}' AND '{master_end}')
+            OR (dhi.vbg_treatment_date BETWEEN '{master_start}' AND '{master_end}')
+            OR (dhi.gynecological_care_date BETWEEN '{master_start}' AND '{master_end}')
+            OR (dhi.prep_initiation_date BETWEEN '{master_start}' AND '{master_end}')
             OR (dhi.has_been_sensibilize_for_condom = 1
-            AND ((dhi.condom_sensibilization_date BETWEEN '{Set_date.master_start.value}' AND '{Set_date.master_end.value}')
-            OR (dhi.condoms_reception_date BETWEEN '{Set_date.master_start.value}' AND '{Set_date.master_end.value}')))) UNION (SELECT 
+            AND ((dhi.condom_sensibilization_date BETWEEN '{master_start}' AND '{master_end}')
+            OR (dhi.condoms_reception_date BETWEEN '{master_start}' AND '{master_end}')))) UNION (SELECT 
         dga.id_patient
     FROM
         dream_group_attendance dga
     LEFT JOIN dream_group_session dgs ON dgs.id = dga.id_group_session
     WHERE
         dga.value = 'P'
-            AND dgs.date BETWEEN '{Set_date.master_start.value}' AND '{Set_date.master_end.value}') UNION (SELECT 
+            AND dgs.date BETWEEN '{master_start}' AND '{master_end}') UNION (SELECT 
         dpga.id_patient
     FROM
         dream_parenting_group_attendance dpga
@@ -380,7 +379,7 @@ FROM
             OR dpga.parent_vd = 'P'
             OR dpga.yg_g = 'P'
             OR dpga.yg_vd = 'P')
-            AND dpgs.date BETWEEN '{Set_date.master_start.value}' AND '{Set_date.master_end.value}') UNION (SELECT 
+            AND dpgs.date BETWEEN '{master_start}' AND '{master_end}') UNION (SELECT 
         dm.id_patient
     FROM
         dream_member dm
@@ -397,7 +396,7 @@ FROM
         caris_db.dreams_schooling ds
     WHERE
         ds.closed = FALSE AND ds.eskew_peye = 1
-            AND (ds.dat_peyman_fet BETWEEN '{Set_date.master_start.value}' AND '{Set_date.master_end.value}'))) a
+            AND (ds.dat_peyman_fet BETWEEN '{master_start}' AND '{master_end}'))) a
         LEFT JOIN
     (SELECT 
         xy.id_patient,
@@ -422,7 +421,7 @@ FROM
     LEFT JOIN dream_group_session dgs ON dgs.id = dga.id_group_session
     WHERE
         dga.value = 'P'
-            AND dgs.date BETWEEN '{Set_date.master_start.value}' AND '{Set_date.master_end.value}'
+            AND dgs.date BETWEEN '{master_start}' AND '{master_end}'
     GROUP BY dga.id_patient , dgs.topic) xy
     GROUP BY xy.id_patient) b ON b.id_patient = a.id_patient
         LEFT JOIN
@@ -437,35 +436,35 @@ FROM
         LEFT JOIN
     (SELECT 
         dhi1.id_patient,
-            SUM((dhi1.condom_sensibilization_date BETWEEN '{Set_date.master_start.value}' AND '{Set_date.master_end.value}')
+            SUM((dhi1.condom_sensibilization_date BETWEEN '{master_start}' AND '{master_end}')
                 AND (dhi1.condom_sensibilization_date IS NOT NULL)) AS number_condoms_sensibilization_date_in_the_interval,
-            SUM((dhi1.contraceptive_reception_date BETWEEN '{Set_date.master_start.value}' AND '{Set_date.master_end.value}')
+            SUM((dhi1.contraceptive_reception_date BETWEEN '{master_start}' AND '{master_end}')
                 AND (dhi1.contraceptive_reception_date IS NOT NULL)) AS number_contraceptive_reception_in_the_interval,
             SUM(dhi1.has_been_sensibilize_for_condom = 1
                 AND (dhi1.has_been_sensibilize_for_condom IS NOT NULL)) AS number_of_condoms_sensibilize,
-            SUM((dhi1.condoms_reception_date BETWEEN '{Set_date.master_start.value}' AND '{Set_date.master_end.value}')
+            SUM((dhi1.condoms_reception_date BETWEEN '{master_start}' AND '{master_end}')
                 AND (dhi1.condoms_reception_date IS NOT NULL)) AS number_condoms_reception_in_the_interval,
-            SUM((dhi1.test_date BETWEEN '{Set_date.master_start.value}' AND '{Set_date.master_end.value}')
+            SUM((dhi1.test_date BETWEEN '{master_start}' AND '{master_end}')
                 AND (dhi1.test_date IS NOT NULL)) AS number_test_date_in_the_interval,
-            SUM((dhi1.vbg_treatment_date BETWEEN '{Set_date.master_start.value}' AND '{Set_date.master_end.value}')
+            SUM((dhi1.vbg_treatment_date BETWEEN '{master_start}' AND '{master_end}')
                 AND (dhi1.vbg_treatment_date IS NOT NULL)) AS number_vbg_treatment_date_in_the_interval,
-            SUM((dhi1.gynecological_care_date BETWEEN '{Set_date.master_start.value}' AND '{Set_date.master_end.value}')
+            SUM((dhi1.gynecological_care_date BETWEEN '{master_start}' AND '{master_end}')
                 AND (dhi1.gynecological_care_date IS NOT NULL)) AS number_gynecological_care_date_in_the_interval,
-            SUM((dhi1.prep_initiation_date BETWEEN '{Set_date.master_start.value}' AND '{Set_date.master_end.value}')
+            SUM((dhi1.prep_initiation_date BETWEEN '{master_start}' AND '{master_end}')
                 AND (dhi1.prep_initiation_date IS NOT NULL)) AS number_prep_initiation_date_in_the_interval,
             GROUP_CONCAT(DISTINCT dhi1.test_result, ',') AS test_results,
-            SUM((dhi1.prep_awareness_date BETWEEN '{Set_date.master_start.value}' AND '{Set_date.master_end.value}')
+            SUM((dhi1.prep_awareness_date BETWEEN '{master_start}' AND '{master_end}')
                 AND (dhi1.prep_awareness_date IS NOT NULL)) AS number_prep_awareness_date_in_the_interval,
-            SUM((dhi1.prep_reference_date BETWEEN '{Set_date.master_start.value}' AND '{Set_date.master_end.value}')
+            SUM((dhi1.prep_reference_date BETWEEN '{master_start}' AND '{master_end}')
                 AND (dhi1.prep_reference_date IS NOT NULL)) AS number_prep_reference_date_in_the_interval,
-            SUM((dhi1.contraceptive_sensibilization_date BETWEEN '{Set_date.master_start.value}' AND '{Set_date.master_end.value}')
+            SUM((dhi1.contraceptive_sensibilization_date BETWEEN '{master_start}' AND '{master_end}')
                 AND (dhi1.contraceptive_sensibilization_date IS NOT NULL)) AS number_contraceptive_sensibilization_date_in_the_interval,
-            SUM((dhi1.hiv_treatment_start_date BETWEEN '{Set_date.master_start.value}' AND '{Set_date.master_end.value}')
+            SUM((dhi1.hiv_treatment_start_date BETWEEN '{master_start}' AND '{master_end}')
                 AND (dhi1.hiv_treatment_start_date IS NOT NULL)) AS number_hiv_treatment_start_date_in_the_interval,
-            SUM((dhi1.hiv_test_awareness_date BETWEEN '{Set_date.master_start.value}' AND '{Set_date.master_end.value}')
+            SUM((dhi1.hiv_test_awareness_date BETWEEN '{master_start}' AND '{master_end}')
                 AND (dhi1.hiv_test_awareness_date IS NOT NULL)) AS number_hiv_test_awareness_date_in_the_interval,
             GROUP_CONCAT(DISTINCT dhi1.type_of_test, ',') AS type_of_test_vih,
-            SUM((dhi1.autotest_date BETWEEN '{Set_date.master_start.value}' AND '{Set_date.master_end.value}')
+            SUM((dhi1.autotest_date BETWEEN '{master_start}' AND '{master_end}')
                 AND (dhi1.autotest_date IS NOT NULL)) AS number_autotest_date_in_the_interval,
             GROUP_CONCAT(DISTINCT dhi1.autotest_result, ',') AS autotest_result
     FROM
@@ -508,7 +507,7 @@ FROM
             OR dpga.parent_vd = 'P'
             OR dpga.yg_g = 'P'
             OR dpga.yg_vd = 'P')
-            AND dpgs.date BETWEEN '{Set_date.master_start.value}' AND '{Set_date.master_end.value}'
+            AND dpgs.date BETWEEN '{master_start}' AND '{master_end}'
     GROUP BY id_patient) h ON h.id_patient = a.id_patient
     LEFT JOIN
     (SELECT 
@@ -517,25 +516,26 @@ FROM
         caris_db.dreams_schooling ds
     WHERE
         ds.closed = FALSE AND ds.eskew_peye = 1
-        AND (ds.dat_peyman_fet BETWEEN '{Set_date.master_start.value}' AND '{Set_date.master_end.value}')) sc ON sc.id_patient = a.id_patient
+        AND (ds.dat_peyman_fet BETWEEN '{master_start}' AND '{master_end}')
+        group by ds.id_patient) sc ON sc.id_patient = a.id_patient
         LEFT JOIN
     ((SELECT 
         dhi.id_patient
     FROM
         dream_hivinfos dhi
     WHERE
-        (dhi.test_date < '{Set_date.master_start.value}')
-            OR (dhi.condoms_reception_date < '{Set_date.master_start.value}')
-            OR (dhi.vbg_treatment_date < '{Set_date.master_start.value}')
-            OR (dhi.gynecological_care_date < '{Set_date.master_start.value}')
-            OR (dhi.prep_initiation_date < '{Set_date.master_start.value}')
-            OR (dhi.condom_sensibilization_date < '{Set_date.master_start.value}')
-            OR (dhi.contraceptive_reception_date < '{Set_date.master_start.value}')) UNION (SELECT 
+        (dhi.test_date < '{master_start}')
+            OR (dhi.condoms_reception_date < '{master_start}')
+            OR (dhi.vbg_treatment_date < '{master_start}')
+            OR (dhi.gynecological_care_date < '{master_start}')
+            OR (dhi.prep_initiation_date < '{master_start}')
+            OR (dhi.condom_sensibilization_date < '{master_start}')
+            OR (dhi.contraceptive_reception_date < '{master_start}')) UNION (SELECT 
         dga.id_patient
     FROM
         dream_group_attendance dga
     LEFT JOIN dream_group_session dgs ON dgs.id = dga.id_group_session
     WHERE
         dga.value = 'P'
-            AND dgs.date < '{Set_date.master_start.value}')) past ON past.id_patient = a.id_patient
+            AND dgs.date < '{master_start}')) past ON past.id_patient = a.id_patient
 """
