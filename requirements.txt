@@ -17,3 +17,5 @@ fastapi-filter
 python-dateutil
 polars[all]
 connectorx
+pymongo[srv]
+motor
