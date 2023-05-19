@@ -248,7 +248,7 @@ class PtmeOvc:
                         """
                 return query;
 
-    def get_ovc_serv_semester_query(self, report_year_1 , report_quarter_1, report_year_2, report_qyarter_2):
+    def get_ovc_serv_semester_query(self, report_year_1 , report_quarter_1, report_year_2, report_qyarter_2, type_of_aggregation=None):
         query_1= self.get_ovc_query_by_year_quarter(report_year_1 , report_quarter_1)
         query_2= self.get_ovc_query_by_year_quarter(report_year_2 , report_qyarter_2)
         query = f"""SELECT
@@ -256,14 +256,52 @@ class PtmeOvc:
                         left join
                         ({query_2}) b on a.id_patient=b.id_patient
                         where b.id_patient is not null"""
-        return query
+        
+        aggregations = [
+            {"departement": "d.name"},
+            {"commune": "c.name"},
+            {"site_code": "concat(p.city_code,'/',p.hospital_code)"}
 
-    def get_ovc_serv_semester(self, report_year_1 , report_quarter_1, report_year_2, report_qyarter_2):
+        ]
+        select = "a.id_patient as id_patient"
+        group_by = ""
+        order_by = ""
+        aggregation_keys = [key for aggregation in aggregations for key in aggregation.keys()]
+        if type_of_aggregation in aggregation_keys:
+            select = ""
+            for aggregation in aggregations:
+                for key, value in aggregation.items():
+                    select +=f"{value} as {key} ,"
+                    group_by += f"{value} ,"
+                    order_by = f"{value} ,"
+                if type_of_aggregation in aggregation.keys():
+                    break
+            group_by = " group by "+group_by[:-1]
+            print(group_by)
+            select = select +" count(*) as quantity"
+            order_by = " order by "+order_by[:-1]
+
+        query_final = f"""SELECT 
+                         {select} from ({query}) a
+                        left join patient p on p.id=a.id_patient
+                        left join lookup_hospital h on h.city_code=p.city_code and h.hospital_code=p.hospital_code
+                        left join lookup_commune c on h.commune=c.id
+                        left join lookup_departement d on d.id=c.departement
+                        left join lookup_office o on o.id=h.office
+                        where p.linked_to_id_patient=0 and h.network !=6
+                        {group_by}
+
+
+
+                        """
+        return query_final
+
+    def get_ovc_serv_semester(self, report_year_1 , report_quarter_1, report_year_2, report_qyarter_2, type_of_aggregation=None):
         e = engine()
         with e as conn:
             try:
                 cursor = conn.cursor()
-                query = self.get_ovc_serv_semester_query(report_year_1 , report_quarter_1, report_year_2, report_qyarter_2)
+                query = self.get_ovc_serv_semester_query(report_year_1 , report_quarter_1, report_year_2, report_qyarter_2, type_of_aggregation)
                 cursor.execute(query)
                 return cursor.fetchall()
                 # return pd.read_sql(query, conn)
