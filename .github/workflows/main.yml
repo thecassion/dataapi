@@ -87,6 +87,7 @@ jobs:
       - name : Build and Push Docker image
         run: |
           docker build -t dataapi -f Dockerfile.aws.lambda .
+          ls
           docker tag dataapi:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_DEFAULT_REGION }}.amazonaws.com/dataapi:latest
           docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_DEFAULT_REGION }}.amazonaws.com/dataapi:latest
   
