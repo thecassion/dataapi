@@ -26,15 +26,4 @@ Resources:
             Path: /{proxy+}
             Method: ANY
 
-  carisdataapi:
-    Type: AWS::Serverless::Api
-    Properties:
-      StageName: Prod
-      DefinitionBody:
-        swagger: '2.0'
-        info:
-          title: Caris Data API
-        paths:
-          /docs:
-            x-amazon-apigateway-any-method:
 
