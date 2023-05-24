@@ -13,7 +13,7 @@ Resources:
   MyFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: MyFunction
+      FunctionName: carisdataapi
       Handler: app.main_handler
       Runtime: python3.8
       CodeUri: .
