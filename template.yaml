@@ -1,19 +1,13 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: >
-  carisdataapi
+  dataapi
 
-#s3 bucket
-Parameters:
-  S3BucketName:
-    Type: String
-    Description: S3 Bucket Name
-    Default: carisdataapi
 Resources:
   MyFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: carisdataapi
+      FunctionName: dataapi
       Handler: app.main_handler
       Runtime: python3.8
       CodeUri: .
