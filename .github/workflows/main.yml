@@ -84,9 +84,11 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v1
         with:
           registry: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_DEFAULT_REGION }}.amazonaws.com
+      - name: List files in the repository
+        run: |
+          ls ${{ github.workspace }}
       - name : Build and Push Docker image
         run: |
-          ls ${{ github.workspace }} - run: echo
           docker build -t dataapi -f Dockerfile.aws.lambda .
           docker tag dataapi:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_DEFAULT_REGION }}.amazonaws.com/dataapi:latest
           docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_DEFAULT_REGION }}.amazonaws.com/dataapi:latest
