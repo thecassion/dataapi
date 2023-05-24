@@ -1,4 +1,3 @@
-import motor.motor_asyncio
 import os
 import pymongo
 # client = motor.motor_asyncio.AsyncIOMotorClient(os.environ.get('MONGODB_URI'))
