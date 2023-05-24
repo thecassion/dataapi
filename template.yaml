@@ -1,0 +1,32 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Resources:
+  MyFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: MyFunction
+      Handler: app.main_handler
+      Runtime: python3.8
+      CodeUri: .
+      Timeout: 30
+      MemorySize: 256
+      Events:
+        ApiGatewayEvent:
+          Type: Api
+          Properties:
+            Path: /{proxy+}
+            Method: ANY
+
+  carisdataapi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Prod
+      DefinitionBody:
+        swagger: '2.0'
+        info:
+          title: Caris Data API
+        paths:
+          /docs:
+            x-amazon-apigateway-any-method:
+
