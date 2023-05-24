@@ -15,6 +15,5 @@ python-dotenv
 numpyencoder
 fastapi-filter
 python-dateutil
-polars[connector]
+polars[connectorx]
 pymongo[srv]
-motor
