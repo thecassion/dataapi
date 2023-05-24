@@ -1,6 +1,14 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
+Description: >
+  carisdataapi
 
+#s3 bucket
+Parameters:
+  S3BucketName:
+    Type: String
+    Description: S3 Bucket Name
+    Default: carisdataapi
 Resources:
   MyFunction:
     Type: AWS::Serverless::Function
