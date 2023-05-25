@@ -7,17 +7,20 @@ Resources:
   MyFunction:
     Type: AWS::Serverless::Function
     Properties:
+      PackageType: Image
       FunctionName: dataapi
       Handler: app.main_handler
       Runtime: python3.8
       CodeUri: .
-      Timeout: 30
-      MemorySize: 256
+      Timeout: 3000
+      MemorySize: 1024
       Events:
         ApiGatewayEvent:
           Type: Api
           Properties:
             Path: /{proxy+}
             Method: ANY
-
-
+    Metadata:
+      DockerTag: python3.8-v1
+      DockerContext: .
+      Dockerfile: Dockerfile.aws.lambda
