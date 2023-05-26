@@ -35,6 +35,7 @@ class Settings(BaseSettings):
     
     commcare_username: str = Field(...,env='COMMCARE_USERNAME')
     commcare_password: str = Field(...,env='COMMCARE_PASSWORD')
+    mongo_uri: str = Field(...,env='MONGODB_URI')
     
     class Config:
         env_prefix = ""
