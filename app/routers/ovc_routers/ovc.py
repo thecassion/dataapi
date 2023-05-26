@@ -38,3 +38,8 @@ def appel_ptme(report_year,report_quarter, type_appel="APPELS_PTME"):
 #         'Content-Disposition': 'attachment; filename=ovc_semester_'+date+'.xlsx'
 #     }
 #     return StreamingResponse(buffer, headers=headers)
+
+
+@router.get("/test/")
+def test():
+    return {"message":"test"}
