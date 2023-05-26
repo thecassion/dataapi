@@ -3,7 +3,7 @@ from fastapi import (
     HTTPException
 )
 
-from .db import PtmeOvc as ptme_ovc
+# from .db import PtmeOvc as ptme_ovc
 # import io
 import pandas as pd
 import datetime
