@@ -16,12 +16,12 @@ router = APIRouter(
     tags=["OVC"]
 )
 
-@router.get("/semester/")
+@router.get("/semester")
 def sync_other_visit_ptme(report_year_1: int, report_quarter_1: int, report_year_2: int, report_quarter_2: int,type_of_aggregation=None):
     return {"Test":"Done"}
     # ptme_ovc().get_ovc_serv_semester(report_year_1, report_quarter_1, report_year_2, report_quarter_2, type_of_aggregation)
 
-@router.get("/appel_ptme/")
+@router.get("/appel_ptme")
 def appel_ptme(report_year,report_quarter, type_appel="APPELS_PTME"):
     return {"Test":"Done"}
     # ptme_ovc().get_appel_ptme_from_mongo(report_year,report_quarter, type_appel)
@@ -42,6 +42,6 @@ def appel_ptme(report_year,report_quarter, type_appel="APPELS_PTME"):
 #     return StreamingResponse(buffer, headers=headers)
 
 
-@router.get("/test/")
+@router.get("/test")
 def test():
     return {"message":"test"}
