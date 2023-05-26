@@ -5,7 +5,7 @@ from fastapi import (
 
 # from .db import PtmeOvc as ptme_ovc
 # import io
-import pandas as pd
+# import pandas as pd
 import datetime
 from starlette.responses import StreamingResponse
 
