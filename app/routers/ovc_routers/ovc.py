@@ -39,6 +39,15 @@ def ovc_semester(report_year_1: int, report_quarter_1: int, report_year_2: int, 
     }
     return StreamingResponse(buffer, headers=headers)
 
+@router.get("/ptme/household")
+def ptme_household(report_year,report_quarter):
+    return ptme_ovc().get_ptme_household(report_year,report_quarter)
+
+@router.get("/infant/household/")
+def infant_household(report_year,report_quarter):
+    return ptme_ovc().get_infant_household(report_year,report_quarter)
+
+
 
 @router.get("/test")
 def test():
