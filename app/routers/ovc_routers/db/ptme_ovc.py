@@ -277,12 +277,33 @@ class PtmeOvc:
                 if type_of_aggregation in aggregation.keys():
                     break
             group_by = " group by "+group_by[:-1]
-            print(group_by)
-            select = select +" count(*) as quantity"
+            male =1
+            female = 2
+            select = select +f''' count(*) as quantity ,
+            sum(pg.gender={male} and pg.gender is not null) as male, 
+            sum(pg.gender={female} and pg.gender is not null) as female,
+            sum(pg.gender is null) as unknown_gender,
+            SUM(pg.gender={female} and pg.age<1 and (pg.gender is not null) and pg.age is not null) as f_under_1,
+            sum(pg.gender={female} and (pg.age between 1 and 4) and (pg.gender is not null) and pg.age is not null ) as f_1_4,
+            sum(pg.gender={female} and (pg.age between 5 and 9) and (pg.gender is not null) and pg.age is not null ) as f_5_9,
+            sum( pg.gender={female} and (pg.age between 10 and 14) and (pg.gender is not null) and pg.age is not null ) as f_10_14,
+            sum( pg.gender={female} and (pg.age between 15 and 17) and (pg.gender is not null) and pg.age is not null ) as f_15_17,
+            sum( pg.gender={female} and (pg.age between 18 and 24) and ( pg.gender is not null) and pg.age is not null ) as f_18_24,
+            sum( pg.gender={female} and pg.age>24 and (pg.gender is not null) and pg.age is not null ) as f_over_24,
+            SUM(pg.gender={male} and pg.age<1 and (pg.gender is not null) and pg.age is not null) as m_under_1,
+            sum(pg.gender={male} and (pg.age between 1 and 4) and (pg.gender is not null) and pg.age is not null ) as m_1_4,
+            sum(pg.gender={male} and (pg.age between 5 and 9) and (pg.gender is not null) and pg.age is not null ) as m_5_9,
+            sum( pg.gender={male} and (pg.age between 10 and 14) and (pg.gender is not null) and pg.age is not null ) as m_10_14,
+            sum( pg.gender={male} and (pg.age between 15 and 17) and (pg.gender is not null) and pg.age is not null ) as m_15_17,
+            sum( pg.gender={male} and (pg.age between 18 and 24) and ( pg.gender is not null) and pg.age is not null ) as m_18_24,
+            sum( pg.gender={male} and (pg.age>24) and (pg.gender is not null) and pg.age is not null ) as m_over_24
+
+            '''
             order_by = " order by "+order_by[:-1]
 
-        query_final = f"""SELECT 
+        query_final = f"""SELECT
                          {select} from ({query}) a
+                        left join patient_gender_age_view pg on pg.id_patient=a.id_patient
                         left join patient p on p.id=a.id_patient
                         left join lookup_hospital h on h.city_code=p.city_code and h.hospital_code=p.hospital_code
                         left join lookup_commune c on h.commune=c.id
@@ -290,10 +311,12 @@ class PtmeOvc:
                         left join lookup_office o on o.id=h.office
                         where p.linked_to_id_patient=0 and h.network !=6
                         {group_by}
-
-
-
+ 
                         """
+        # write query to file
+        with open('query.sql', 'w') as f:
+            f.write(query_final)
+
         return query_final
 
     def get_ovc_serv_semester(self, report_year_1 , report_quarter_1, report_year_2, report_qyarter_2, type_of_aggregation=None):
