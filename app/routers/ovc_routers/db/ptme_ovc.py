@@ -313,9 +313,6 @@ class PtmeOvc:
                         {group_by}
  
                         """
-        # write query to file
-        with open('query.sql', 'w') as f:
-            f.write(query_final)
 
         return query_final
 
