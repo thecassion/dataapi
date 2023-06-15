@@ -4,6 +4,7 @@ from fastapi import (
 )
 
 from .db import PtmeOvc as ptme_ovc
+from .db.muso import Muso as muso_ovc
 import io
 import pandas as pd
 import datetime
@@ -47,6 +48,44 @@ def ptme_household(report_year,report_quarter):
 def infant_household(report_year,report_quarter):
     return ptme_ovc().get_infant_household(report_year,report_quarter)
 
+
+@router.get("/muso/semester/all")
+def muso_all(report_year_start,report_quarter_start,type_of_aggregation="commune"):
+    return muso_ovc().get_ovc_muso_all(report_year_start,report_quarter_start, type_of_aggregation)
+
+@router.get("/muso/semester/all/xlsx")
+def muso_all_xlsx(report_year_start,report_quarter_start, type_of_aggregation="commune"):
+    json_dict = muso_ovc().get_ovc_muso_all(report_year_start,report_quarter_start,type_of_aggregation)
+    buffer = io.BytesIO()
+    with pd.ExcelWriter(buffer) as writer:
+        pd.DataFrame(json_dict).to_excel(writer, sheet_name="OVC_MUSO_ALL")
+        writer.close()
+    buffer.seek(0)
+    date = datetime.datetime.now().strftime("%Y-%m-%d")
+
+    headers = {
+        'Content-Disposition': 'attachment; filename=ovc_muso_all_'+date+'.xlsx'
+    }
+    return StreamingResponse(buffer, headers=headers)
+
+@router.get("/muso/semester/carismemberless")
+def muso_carismemberless(report_year_start,report_quarter_start, type_of_aggregation="commune"):
+    return muso_ovc().get_ovc_muso_without_caris_member(report_year_start,report_quarter_start,type_of_aggregation)
+
+@router.get("/muso/semester/carismemberless/xlsx")
+def muso_carismemberless_xlsx(report_year_start,report_quarter_start, type_of_aggregation="commune"):
+    json_dict = muso_ovc().get_ovc_muso_without_caris_member(report_year_start,report_quarter_start,type_of_aggregation)
+    buffer = io.BytesIO()
+    with pd.ExcelWriter(buffer) as writer:
+        pd.DataFrame(json_dict).to_excel(writer, sheet_name="OVC_MUSO_CARIS_MEMBERLESS")
+        writer.close()
+    buffer.seek(0)
+    date = datetime.datetime.now().strftime("%Y-%m-%d")
+
+    headers = {
+        'Content-Disposition': 'attachment; filename=ovc_muso_caris_memberless_'+date+'.xlsx'
+    }
+    return StreamingResponse(buffer, headers=headers)
 
 
 @router.get("/test")

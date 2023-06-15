@@ -153,7 +153,7 @@ class MusoBeneficiaries:
         """
         muso_beneficiary = MusoBeneficiary()
         df = pd.DataFrame(self.cc_beneficiaries)
-        df[["graduated","is_inactive"]]=df[["graduated","is_inactive"]].fillna(0)
+        df[["graduated","is_inactive","is_pvvih"]]=df[["graduated","is_inactive","is_pvvih"]].fillna(0)
         df[["inactive_date","graduation_date"]] = df[["inactive_date","graduation_date"]].fillna("")
         df["graduated"] = df["graduated"].astype(int)
         df["is_inactive"] = df["is_inactive"].astype(int)
@@ -163,6 +163,37 @@ class MusoBeneficiaries:
         rows = df.to_dict("records")
         # __rows = list(filter(lambda r: (r["graduated"]==1 or r["is_inactive"]==1 or r["closed"]==1) , rows))
         return muso_beneficiary.update_benficiaries_status(rows)
+    
+
+    def update_beneficiaries_pvvih(self):
+        """
+            Update beneficiaries status : is_inactive , graduated , is_abandonned
+        """
+        muso_beneficiary = MusoBeneficiary()
+        df = pd.DataFrame(self.cc_beneficiaries)
+        # df["is_pvvih"] = df["is_pvvih"].astype(int)
+        # filter only pvvih which are not NULL
+        df[["graduated","is_inactive"]]=df[["graduated","is_inactive"]].fillna(0)
+        df[["inactive_date","graduation_date"]] = df[["inactive_date","graduation_date"]].fillna("")
+        df["graduated"] = df["graduated"].astype(int)
+        df["is_inactive"] = df["is_inactive"].astype(int)
+        df["closed"]=df["closed"].astype(int)
+        df = df[df["is_pvvih"].notnull() & df["is_pvvih"]!=0]
+        df["is_pvvih"] = df["is_pvvih"].astype(int)
+        df = df[df["is_pvvih"]!=0]
+        rows = df.to_dict("records")
+        return muso_beneficiary.update_benficiaries_status(rows)
+    
+    def update_beneficiaries_is_caris_member(self):
+        df = pd.DataFrame(self.cc_beneficiaries)
+        df["is_caris_member"] = df["is_caris_member"].fillna(0)
+        
+        df = df[(df["is_caris_member"]!=0) & df["is_caris_member"].notnull() & (df["is_caris_member"]!="") ]
+        # df["is_caris_member"] = df["is_caris_member"].astype(int)
+        rows = df.to_dict("records")
+        muso_beneficiary = MusoBeneficiary()
+        return muso_beneficiary.update_is_caris_member(rows)
+
 
 
     def update_beneficiaries_household_not_applicable(self):
