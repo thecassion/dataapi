@@ -66,8 +66,8 @@ class Muso():
             for aggregation in aggregations:
                 for key,value in aggregation.items():
                     select += f"{value} AS {key} ,"
-                    group_by = f"{value} ,"
-                    order_by = f"{value} ,"
+                    group_by += f"{value} ,"
+                    order_by += f"{value} ,"
                 if type_of_disagregation in aggregation.keys():
                     break
             group_by = " group by "+group_by[:-1]
