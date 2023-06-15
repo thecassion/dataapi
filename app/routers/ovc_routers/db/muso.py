@@ -111,7 +111,7 @@ class Muso():
                 AND (mgm.is_pvvih IN (0 , 2)
                 OR (mgm.is_pvvih IS NULL) )
                 AND (
-                (mgm.is_caris_member IS NULL) OR 
+                (mgm.is_caris_member IS NULL) OR
                 (mgm.is_caris_member NOT IN (1 , 2, 3)))
                 """
         return query
@@ -136,9 +136,6 @@ class Muso():
         query = self.get_ovc_muso_query_without_caris_member(report_year_1, report_quarter_1)
         aggregate_query = self.get_disagregation_query(query,type_of_disagregation)
 
-        #write query to file
-        with open("query.sql","w") as f:
-            f.write(aggregate_query)
         with e as conn:
             try:
                 cursor = conn.cursor()
