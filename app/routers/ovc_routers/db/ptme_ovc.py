@@ -259,8 +259,7 @@ class PtmeOvc:
         
         aggregations = [
             {"departement": "d.name"},
-            {"commune": "c.name"},
-            {"site_code": "concat(p.city_code,'/',p.hospital_code)"}
+            {"commune": "c.name"}
 
         ]
         select = "a.id_patient as id_patient"
@@ -279,7 +278,7 @@ class PtmeOvc:
             group_by = " group by "+group_by[:-1]
             male =1
             female = 2
-            select = select +f''' count(*) as quantity ,
+            select = select +f''' count(*) as total ,
             sum(pg.gender={male} and pg.gender is not null) as male, 
             sum(pg.gender={female} and pg.gender is not null) as female,
             sum(pg.gender is null) as unknown_gender,
@@ -288,15 +287,15 @@ class PtmeOvc:
             sum(pg.gender={female} and (pg.age between 5 and 9) and (pg.gender is not null) and pg.age is not null ) as f_5_9,
             sum( pg.gender={female} and (pg.age between 10 and 14) and (pg.gender is not null) and pg.age is not null ) as f_10_14,
             sum( pg.gender={female} and (pg.age between 15 and 17) and (pg.gender is not null) and pg.age is not null ) as f_15_17,
-            sum( pg.gender={female} and (pg.age between 18 and 24) and ( pg.gender is not null) and pg.age is not null ) as f_18_24,
-            sum( pg.gender={female} and pg.age>24 and (pg.gender is not null) and pg.age is not null ) as f_over_24,
+            sum( pg.gender={female} and (pg.age between 18 and 20) and ( pg.gender is not null) and pg.age is not null ) as f_18_20,
+            sum( pg.gender={female} and pg.age>20 and (pg.gender is not null) and pg.age is not null ) as f_over_20,
             SUM(pg.gender={male} and pg.age<1 and (pg.gender is not null) and pg.age is not null) as m_under_1,
             sum(pg.gender={male} and (pg.age between 1 and 4) and (pg.gender is not null) and pg.age is not null ) as m_1_4,
             sum(pg.gender={male} and (pg.age between 5 and 9) and (pg.gender is not null) and pg.age is not null ) as m_5_9,
             sum( pg.gender={male} and (pg.age between 10 and 14) and (pg.gender is not null) and pg.age is not null ) as m_10_14,
             sum( pg.gender={male} and (pg.age between 15 and 17) and (pg.gender is not null) and pg.age is not null ) as m_15_17,
-            sum( pg.gender={male} and (pg.age between 18 and 24) and ( pg.gender is not null) and pg.age is not null ) as m_18_24,
-            sum( pg.gender={male} and (pg.age>24) and (pg.gender is not null) and pg.age is not null ) as m_over_24
+            sum( pg.gender={male} and (pg.age between 18 and 20) and ( pg.gender is not null) and pg.age is not null ) as m_18_20,
+            sum( pg.gender={male} and (pg.age>20) and (pg.gender is not null) and pg.age is not null ) as m_over_20
 
             '''
             order_by = " order by "+order_by[:-1]
