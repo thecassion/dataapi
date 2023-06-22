@@ -82,7 +82,7 @@ def read_schooling():
             item["sexe"] = "female" if item["properties"]["gender"] == "2" else ("male" if item["properties"]["gender"] == "1" else "")
             if age < 1:
                 item["category"] = "<1"
-            elif 1 < age < 5:
+            elif 1 <= age < 5:
                 item["category"] = "1-4"
             elif 5 <= age < 10:
                 item["category"] = "5-9"
@@ -95,14 +95,11 @@ def read_schooling():
 
             item["site"] = item["properties"]["patient_code"][:8]
             item["commune"] = item["properties"]["school_commune_1"]
-            #item["dat_peyman_fet"] = item["properties"]["dat_peyman_fet"]
-
             date_peye = datetime.strptime(item["properties"]["dat_peyman_fet"], "%Y-%m-%d")
-
             quarter = (date_peye.month - 1) // 3 + 1
             item["quarter"] = f"Q{quarter}"
-            
-        
         return JSONResponse(content=data, status_code=200)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e))    
+    
+        
