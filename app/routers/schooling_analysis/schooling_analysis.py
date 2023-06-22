@@ -1,10 +1,11 @@
 from fastapi import FastAPI, HTTPException
 from pymongo import MongoClient
-#from bson import json_util
+from bson import json_util
 from fastapi import APIRouter
 from pydantic import BaseModel
 from fastapi.responses import JSONResponse
 from datetime import datetime
+from typing import Optional
 from ...core import (
     settings
 )
@@ -17,18 +18,25 @@ router = APIRouter(
 )
 class SchoolingPositif(BaseModel):
     case_id: str
-    date_modified: str
+    #date_modified: str
     schooling_year: str
     school_commune_1:str
     patient_code:str
     infant_commune:str
+    dat_peyman_fet:Optional[str]
     gender:str
     agent_name:str
     infant_dob:str
     age:int
     sexe:str
     category:str
-
+    quarter: str
+    
+    @property
+    def calculate_quarter(self):
+        date_peye = datetime.strptime(self.dat_peyman_fet, "%Y-%m-%dT%H:%M:%S.%fZ")
+        quarter = (date_peye.month - 1) // 3 + 1
+        return f"Q{quarter}"
 
 client = MongoClient("mongodb+srv://jhonandre:Pass2Pass@cluster0.5p8etij.mongodb.net/caris_databridge")
 db = client["caris_databridge"]
@@ -41,6 +49,7 @@ collection = db["schooling_enfant_positif"]
 @router.get("/schooling_positif")
 def read_schooling():
     try:
+        
         filter_condition = {"properties.schooling_year": "2022-2023"}
         positif_info = {
             "_id": 0,
@@ -51,13 +60,22 @@ def read_schooling():
             "properties.patient_code": 1,
             "properties.infant_commune": 1,
             "properties.gender": 1,
-            "properties.infant_dob": 1
+            "properties.infant_dob": 1,
+            "properties.dat_peyman_fet":1,
+            "age": 1,
+            "sexe": 1,
+            "category": 1,
+            "quarter": 1,
         }
+        
         data = list(collection.find(filter_condition, positif_info))
         if not data:
             raise HTTPException(status_code=404, detail="No data found")
         
         for item in data:
+            if "dat_peyman_fet" not in item["properties"] or item["properties"]["dat_peyman_fet"] is None:
+                continue  # Skip this iteration and move to the next item
+
             dob = datetime.strptime(item["properties"]["infant_dob"], "%Y-%m-%d")
             age = (datetime.now() - dob).days // 365
             item["age"] = age
@@ -76,7 +94,14 @@ def read_schooling():
                 item["category"] = "18+"
 
             item["site"] = item["properties"]["patient_code"][:8]
-            item["commune"] = item["properties"]["school_commune_1"]    
+            item["commune"] = item["properties"]["school_commune_1"]
+            #item["dat_peyman_fet"] = item["properties"]["dat_peyman_fet"]
+
+            date_peye = datetime.strptime(item["properties"]["dat_peyman_fet"], "%Y-%m-%d")
+
+            quarter = (date_peye.month - 1) // 3 + 1
+            item["quarter"] = f"Q{quarter}"
+            
         
         return JSONResponse(content=data, status_code=200)
     except Exception as e:
