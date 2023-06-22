@@ -23,6 +23,7 @@ class SchoolingPositif(BaseModel):
     school_commune_1:str
     patient_code:str
     infant_commune:str
+    parent_patient_code:str
     dat_peyman_fet:Optional[str]
     gender:str
     agent_name:str
@@ -31,6 +32,7 @@ class SchoolingPositif(BaseModel):
     sexe:str
     category:str
     quarter: str
+    case_type:str
     
     @property
     def calculate_quarter(self):
@@ -41,6 +43,7 @@ class SchoolingPositif(BaseModel):
 client = MongoClient("mongodb+srv://jhonandre:Pass2Pass@cluster0.5p8etij.mongodb.net/caris_databridge")
 db = client["caris_databridge"]
 collection = db["schooling_enfant_positif"]
+second_collection = db["schooling_oev"]
 #client = MongoClient(settings.mongo_uri)
 #db = client[settings.mongodb_database]
 #collection = db[settings.mongodb_collection]
@@ -62,16 +65,43 @@ def read_schooling():
             "properties.gender": 1,
             "properties.infant_dob": 1,
             "properties.dat_peyman_fet":1,
-            "age": 1,
+            "properties.age": 1,
             "sexe": 1,
             "category": 1,
             "quarter": 1,
+            "properties.case_type":1,
         }
         
         data = list(collection.find(filter_condition, positif_info))
         if not data:
             raise HTTPException(status_code=404, detail="No data found")
-        
+        second_filter_condition = {"properties.schooling_year": "2022-2023"}
+        second_info = {
+            "_id": 0,
+            "case_id": 1,
+            "date_modified": 1,
+            "properties.schooling_year": 1,
+            "properties.school_commune_1": 1,
+            "properties.patient_code": 1,
+            "properties.infant_commune": 1,
+            "properties.gender": 1,
+            "properties.infant_dob": 1,
+            "properties.dat_peyman_fet": 1,
+            "properties.age": 1,
+            "sexe": 1,
+            "category": 1,
+            "quarter": 1,
+            "properties.case_type":1,
+            "properties.parent_patient_code":1,
+        }
+        second_data = list(second_collection.find(second_filter_condition, second_info))
+        if not second_data:
+            raise HTTPException(status_code=404, detail="No data found in the second collection")
+
+        merged_data = {
+            "first_collection_data": data,
+            "second_collection_data": second_data,
+        }
         for item in data:
             if "dat_peyman_fet" not in item["properties"] or item["properties"]["dat_peyman_fet"] is None:
                 continue  # Skip this iteration and move to the next item
@@ -98,7 +128,9 @@ def read_schooling():
             date_peye = datetime.strptime(item["properties"]["dat_peyman_fet"], "%Y-%m-%d")
             quarter = (date_peye.month - 1) // 3 + 1
             item["quarter"] = f"Q{quarter}"
-        return JSONResponse(content=data, status_code=200)
+            item["case_type"] = item["properties"]["case_type"]
+            #item["Patient_code_mother"] = item["properties"]["parent_patient_code"]
+        return JSONResponse(content=merged_data, status_code=200)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))    
     
