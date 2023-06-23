@@ -18,7 +18,7 @@ router = APIRouter(
 )
 class SchoolingPositif(BaseModel):
     case_id: str
-    #date_modified: str
+    date_modified: str
     schooling_year: str
     school_commune_1:str
     patient_code:str
@@ -43,7 +43,7 @@ class SchoolingPositif(BaseModel):
 client = MongoClient("mongodb+srv://jhonandre:Pass2Pass@cluster0.5p8etij.mongodb.net/caris_databridge")
 db = client["caris_databridge"]
 collection = db["schooling_enfant_positif"]
-second_collection = db["schooling_oev"]
+schooling_oev_collection = db["schooling_oev"]
 #client = MongoClient(settings.mongo_uri)
 #db = client[settings.mongodb_database]
 #collection = db[settings.mongodb_collection]
@@ -53,7 +53,7 @@ second_collection = db["schooling_oev"]
 def read_schooling():
     try:
         
-        filter_condition = {"properties.schooling_year": "2022-2023"}
+        positive_filter_condition = {"properties.schooling_year": "2022-2023"}
         positif_info = {
             "_id": 0,
             "case_id": 1,
@@ -72,11 +72,11 @@ def read_schooling():
             "properties.case_type":1,
         }
         
-        data = list(collection.find(filter_condition, positif_info))
-        if not data:
+        positive_data = list(collection.find(positive_filter_condition, positif_info))
+        if not positive_data:
             raise HTTPException(status_code=404, detail="No data found")
-        second_filter_condition = {"properties.schooling_year": "2022-2023"}
-        second_info = {
+        oev_filter_condition = {"properties.schooling_year": "2022-2023"}
+        oev_info = {
             "_id": 0,
             "case_id": 1,
             "date_modified": 1,
@@ -94,15 +94,15 @@ def read_schooling():
             "properties.case_type":1,
             "properties.parent_patient_code":1,
         }
-        second_data = list(second_collection.find(second_filter_condition, second_info))
-        if not second_data:
+        oev_data = list(schooling_oev_collection.find(oev_filter_condition, oev_info))
+        if not oev_data:
             raise HTTPException(status_code=404, detail="No data found in the second collection")
 
         merged_data = {
-            "first_collection_data": data,
-            "second_collection_data": second_data,
+            "schooling_positive": positive_data,
+            "schooling_oev": oev_data,
         }
-        for item in data:
+        for item in positive_data:
             if "dat_peyman_fet" not in item["properties"] or item["properties"]["dat_peyman_fet"] is None:
                 continue  # Skip this iteration and move to the next item
 
@@ -129,7 +129,31 @@ def read_schooling():
             quarter = (date_peye.month - 1) // 3 + 1
             item["quarter"] = f"Q{quarter}"
             item["case_type"] = item["properties"]["case_type"]
-            #item["Patient_code_mother"] = item["properties"]["parent_patient_code"]
+            
+        for item in oev_data:
+            if "parent_patient_code" in item["properties"]:
+                item["parent_patient_code"] = item["properties"]["parent_patient_code"]
+                dob = datetime.strptime(item["properties"]["infant_dob"], "%Y-%m-%d")
+                age = (datetime.now() - dob).days // 365
+                item["age"] = age
+                item["sexe"] = "female" if item["properties"]["gender"] == "2" else ("male" if item["properties"]["gender"] == "1" else "")
+            if age < 1:
+                item["category"] = "<1"
+            elif 1 <= age < 5:
+                item["category"] = "1-4"
+            elif 5 <= age < 10:
+                item["category"] = "5-9"
+            elif 10 <= age < 15:
+                item["category"] = "10-14"
+            elif 15 <= age < 18:
+                item["category"] = "15-17"
+            elif age>=18:
+                item["category"] = "18+"
+            item["site"] = item["properties"]["parent_patient_code"][:8]
+            item["commune"] = item["properties"]["school_commune_1"]
+            item["case_type"] = item["properties"]["case_type"] 
+            quarter = (date_peye.month - 1) // 3 + 1
+            item["quarter"] = f"Q{quarter}"       
         return JSONResponse(content=merged_data, status_code=200)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))    
