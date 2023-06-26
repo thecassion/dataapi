@@ -255,3 +255,24 @@ async def sync_beneficiaries_household_applicable():
         {"cc_beneficiaries": cc_beneficiaries, "hiv_beneficiaries": hiv_beneficiaries, "max_rank_beneficiaries_by_groups": max_rank_beneficiaries_by_groups})
     analysis_muso_beneficiaries.update_beneficiaries_household_not_applicable()
     return {"message": "beneficiaries status synced"}
+
+@router.get("/beneficiaries/update/pvvih")
+async def update_beneficiaries_pvvih():
+    muso_beneficiary = MusoBeneficiary()
+    hiv_beneficiaries = muso_beneficiary.get_muso_beneficiaries()
+    cc_beneficiaries = MusoBeneficiariesCase().get()
+    max_rank_beneficiaries_by_groups = muso_beneficiary.get_max_rank_beneficiaries_by_groups()
+    analysis_muso_beneficiaries = MusoBeneficiaries(
+        {"cc_beneficiaries": cc_beneficiaries, "hiv_beneficiaries": hiv_beneficiaries, "max_rank_beneficiaries_by_groups": max_rank_beneficiaries_by_groups})
+    analysis_muso_beneficiaries.update_beneficiaries_pvvih()
+    return {"message": "beneficiaries status synced"}
+
+@router.get("/beneficiaries/update/is_caris_member")
+async def update_beneficiaries_is_caris_member():
+    muso_beneficiary = MusoBeneficiary()
+    hiv_beneficiaries = muso_beneficiary.get_muso_beneficiaries()
+    cc_beneficiaries = MusoBeneficiariesCase().get()
+    max_rank_beneficiaries_by_groups = muso_beneficiary.get_max_rank_beneficiaries_by_groups()
+    analysis_muso_beneficiaries = MusoBeneficiaries(
+        {"cc_beneficiaries": cc_beneficiaries, "hiv_beneficiaries": hiv_beneficiaries, "max_rank_beneficiaries_by_groups": max_rank_beneficiaries_by_groups})
+    analysis_muso_beneficiaries.update_beneficiaries_is_caris_member()
