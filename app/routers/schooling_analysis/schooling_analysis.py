@@ -31,6 +31,7 @@ class SchoolingPositif(BaseModel):
     category:str
     quarter: str
     case_type:str
+    closed:str
     
     #Method calculate the quarter based on dat_peyman_fet
     @property
@@ -54,7 +55,9 @@ schooling_cwv_collection=db["schooling_cwv"]
 def read_schooling():
     try:
         
-        positive_filter_condition = {"properties.schooling_year": "2022-2023"}
+        positive_filter_condition = {"properties.schooling_year": "2022-2023",
+                                      "closed":False,
+                                      "properties.dat_peyman_fet": {"$exists": True}}
         positif_info = {
             "_id": 0,
             "case_id": 1,
@@ -71,13 +74,16 @@ def read_schooling():
             "category": 1,
             "quarter": 1,
             "properties.case_type":1,
+            "closed":1,
         }
         
         positive_data = list(collection.find(positive_filter_condition, positif_info))
         if not positive_data:
             raise HTTPException(status_code=404, detail="No data found")
         
-        oev_filter_condition = {"properties.schooling_year": "2022-2023"}
+        oev_filter_condition = {"properties.schooling_year": "2022-2023",
+                                "closed":False,
+                                "properties.dat_peyman_fet": {"$exists": True}}
         oev_info = {
             "_id": 0,
             "case_id": 1,
@@ -95,13 +101,17 @@ def read_schooling():
             "quarter": 1,
             "properties.case_type":1,
             "properties.parent_patient_code":1,
+            "closed":1,
         }
 
         oev_data = list(schooling_oev_collection.find(oev_filter_condition, oev_info))
         if not oev_data:
             raise HTTPException(status_code=404, detail="No data found in the second collection")
         
-        siblings_filter_condition = {"properties.schooling_year": "2022-2023"}
+        siblings_filter_condition = {"properties.schooling_year": "2022-2023",
+                                     "closed":False,
+                                     "properties.dat_peyman_fet": {"$exists": True}
+                                     }
         siblings_info = {
             "_id": 0,
             "case_id": 1,
@@ -119,6 +129,7 @@ def read_schooling():
             "quarter": 1,
             "properties.case_type":1,
             "properties.parent_patient_code":1,
+            "closed":1,
         }
 
         siblings_data = list(schooling_siblings_collection.find(siblings_filter_condition, siblings_info))
@@ -126,7 +137,9 @@ def read_schooling():
             raise HTTPException(status_code=404, detail="No data found in the second collection")
         #================================================
         
-        cwv_filter_condition = {"properties.schooling_year": "2022-2023"}
+        cwv_filter_condition = {"properties.schooling_year": "2022-2023",
+                                "closed":False,
+                                "properties.dat_peyman_fet": {"$exists": True}}
         cwv_info = {
             "_id": 0,
             "case_id": 1,
@@ -142,6 +155,7 @@ def read_schooling():
             #"category": 1,
             #"quarter": 1,
             "properties.case_type":1,
+            "closed":1,
            
         }
 
@@ -189,6 +203,7 @@ def read_schooling():
             item["quarter"] = f"Q{quarter}"
             item["case_type"] = item["properties"]["case_type"]
             
+            
         # Retrieve data from schooling oev collection using a for loop  
         for item in oev_data:
             if "parent_patient_code" in item["properties"]:
@@ -215,7 +230,8 @@ def read_schooling():
             item["commune"] = item["properties"]["school_commune_1"]
             item["case_type"] = item["properties"]["case_type"] 
             quarter = (date_peye.month - 1) // 3 + 1
-            item["quarter"] = f"Q{quarter}"   
+            item["quarter"] = f"Q{quarter}"
+              
         
         # Retrieve data from schooling siblings collection using a for loop  
         for item in siblings_data:
@@ -243,7 +259,8 @@ def read_schooling():
             item["commune"] = item["properties"]["school_commune"]
             item["case_type"] = item["properties"]["case_type"] 
             quarter = (date_peye.month - 1) // 3 + 1
-            item["quarter"] = f"Q{quarter}" 
+            item["quarter"] = f"Q{quarter}"
+            
 
         #=============================================
         # Retrieve data from schooling cwv collection using a for loop  
@@ -271,7 +288,8 @@ def read_schooling():
             item["commune"] = item["properties"]["school_commune_1"]
             item["case_type"] = item["properties"]["case_type"] 
             quarter = (date_peye.month - 1) // 3 + 1
-            item["quarter"] = f"Q{quarter}" 
+            item["quarter"] = f"Q{quarter}"
+            
         #=============================================    
         return JSONResponse(content=merged_data, status_code=200)
     except Exception as e:
