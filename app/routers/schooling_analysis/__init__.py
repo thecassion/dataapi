@@ -1,0 +1,1 @@
+from .schooling_analysis import router as schooling_router
