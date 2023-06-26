@@ -285,7 +285,6 @@ def read_schooling():
                   item["category"] = "15-17"
                 elif age>=18:
                   item["category"] = "18+"
-
                 item["commune"] = item["properties"]["school_commune_1"]
                 item["case_type"] = item["properties"]["case_type"] 
                 quarter = (date_peye.month - 1) // 3 + 1
