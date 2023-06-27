@@ -35,10 +35,11 @@ class SchoolingPositif(BaseModel):
     
     #Method calculate the quarter based on dat_peyman_fet
     @property
-    def calculate_quarter(self):
-        date_peye = datetime.strptime(self.dat_peyman_fet, "%Y-%m-%dT%H:%M:%S.%fZ")
+    def calculate_quarter(dat_peyman_fet):
+        date_peye = datetime.strptime(dat_peyman_fet, "%Y-%m-%d")
         quarter = (date_peye.month - 1) // 3 + 1
-        return f"Q{quarter}"
+        year = date_peye.year
+        return f"Q{quarter}{year}"
     
     #Function calculate the the category of age    
     @property    
@@ -295,15 +296,16 @@ def read_schooling():
         for item in dreams_data:
             if "dreams_code" in item["properties"]:
                 item["dreams_code"] = item["properties"]["dreams_code"]
-                #dob = datetime.strptime(item["properties"]["infant_dob"], "%Y-%m-%d")
-                #age = (datetime.now() - dob).days // 365
-                #item["age"] = age
+                dob = datetime.strptime(item["properties"]["infant_dob"], "%Y-%m-%d")
+                age = (datetime.now() - dob).days // 365
+                item["age"] = age
                 item["sexe"] = "female" if item["properties"]["gender"] == "F" else ("male" if item["properties"]["gender"] == "M" else "")
-            
+                
         #Calculate different category of age for dreams
-            #item["category"]=SchoolingPositif.calculate_age_category.fget(age)
+            item["category"]=SchoolingPositif.calculate_age_category.fget(age)
             item["commune"] = item["properties"]["school_commune_1"]
-            item["case_type"] = item["properties"]["case_type"] 
+            item["case_type"] = item["properties"]["case_type"]
+            #quarter = SchoolingPositif.calculate_quarter.fget(date_peye)
             quarter = (date_peye.month - 1) // 3 + 1
             item["quarter"] = f"Q{quarter}"
                 
