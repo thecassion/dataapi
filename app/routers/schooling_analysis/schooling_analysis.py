@@ -5,7 +5,7 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 from fastapi.responses import JSONResponse
 from datetime import datetime
-from typing import Optional
+from typing import Optional,Dict, List
 from ...core import (
     settings
 )
@@ -39,13 +39,30 @@ class SchoolingPositif(BaseModel):
         date_peye = datetime.strptime(self.dat_peyman_fet, "%Y-%m-%dT%H:%M:%S.%fZ")
         quarter = (date_peye.month - 1) // 3 + 1
         return f"Q{quarter}"
-
+    
+    #Function calculate the the category of age    
+    @property    
+    def calculate_age_category(age: int) -> str:
+        if age < 1:
+            return "<1"
+        elif 1 <= age < 5:
+            return "1-4"
+        elif 5 <= age < 10:
+            return "5-9"
+        elif 10 <= age < 15:
+            return "10-14"
+        elif 15 <= age < 18:
+            return "15-17"
+        elif age >= 18:
+            return "18+"
+        
 client = MongoClient("mongodb+srv://jhonandre:Pass2Pass@cluster0.5p8etij.mongodb.net/caris_databridge")
 db = client["caris_databridge"]
 collection = db["schooling_enfant_positif"]
 schooling_oev_collection = db["schooling_oev"]
 schooling_siblings_collection = db["schooling_siblings"]
 schooling_cwv_collection=db["schooling_cwv"]
+schooling_dreams_collection=db["schooling_dreams"]
 #client = MongoClient(settings.mongo_uri)
 #db = client[settings.mongodb_database]
 #collection = db[settings.mongodb_collection]
@@ -108,7 +125,7 @@ def read_schooling():
         if not oev_data:
             raise HTTPException(status_code=404, detail="No data found in the second collection")
         
-        siblings_filter_condition = {"properties.schooling_year": "2022-2023",
+        siblings_filter_condition = {"properties.schooling_year": "2022-2023" ,
                                      "closed":False,
                                      "properties.dat_peyman_fet": {"$exists": True}
                                      }
@@ -135,7 +152,7 @@ def read_schooling():
         siblings_data = list(schooling_siblings_collection.find(siblings_filter_condition, siblings_info))
         if not siblings_data:
             raise HTTPException(status_code=404, detail="No data found in the second collection")
-        #================================================
+        
         
         cwv_filter_condition = {"properties.schooling_year": "2022-2023",
                                 "closed":False,
@@ -162,15 +179,44 @@ def read_schooling():
         cwv_data = list(schooling_cwv_collection.find(cwv_filter_condition, cwv_info))
         if not cwv_data:
             raise HTTPException(status_code=404, detail="No data found in the second collection")  
-        #================================================
+        #==============================================================================================
+        dreams_filter_condition = {"properties.schooling_year": "2022-2023",
+                                "closed":False,
+                                "properties.dat_peyman_fet": {"$exists": True}}
+        dreams_info = {
+            "_id": 0,
+            "case_id": 1,
+            "date_modified": 1,
+            "properties.schooling_year": 1,
+            "properties.dreams_code": 1,
+            "properties.school_commune_1": 1,
+            "properties.gender": 1,
+            "properties.infant_dob": 1,
+            "properties.dat_peyman_fet": 1,
+            "properties.eske_peye": 1,
+            "age": 1,
+            "sexe": 1,
+            "category": 1,
+            "quarter": 1,
+            "properties.case_type":1,
+            "closed":1,
+           
+        }
+
+        dreams_data = list(schooling_dreams_collection.find(dreams_filter_condition, dreams_info))
+        if not dreams_data:
+            raise HTTPException(status_code=404, detail="No data found in the second collection") 
+
+        #==============================================================================================
         #Merge collections regarding schooling for analysis
         merged_data = {
             "schooling_positive": positive_data,
             "schooling_oev": oev_data,
             "schooling_siblings":siblings_data,
             "schooling_cwv":cwv_data,
+            "schooling_dreams":dreams_data,
         }
-
+       
         #Retrieve data from schooling positive collection using a for loop
 
         for item in positive_data:
@@ -184,18 +230,8 @@ def read_schooling():
             item["sexe"] = "female" if item["properties"]["gender"] == "2" else ("male" if item["properties"]["gender"] == "1" else "")
 
             #Calculate different category of age
-            if age < 1:
-                item["category"] = "<1"
-            elif 1 <= age < 5:
-                item["category"] = "1-4"
-            elif 5 <= age < 10:
-                item["category"] = "5-9"
-            elif 10 <= age < 15:
-                item["category"] = "10-14"
-            elif 15 <= age < 18:
-                item["category"] = "15-17"
-            elif age>=18:
-                item["category"] = "18+"
+            item["category"]=SchoolingPositif.calculate_age_category.fget(age)
+
             item["site"] = item["properties"]["patient_code"][:8]
             item["commune"] = item["properties"]["school_commune_1"]
             date_peye = datetime.strptime(item["properties"]["dat_peyman_fet"], "%Y-%m-%d")
@@ -214,18 +250,7 @@ def read_schooling():
                 item["sexe"] = "female" if item["properties"]["gender"] == "2" else ("male" if item["properties"]["gender"] == "1" else "")
             
         #Calculate different category of age
-            if age < 1:
-                item["category"] = "<1"
-            elif 1 <= age < 5:
-                item["category"] = "1-4"
-            elif 5 <= age < 10:
-                item["category"] = "5-9"
-            elif 10 <= age < 15:
-                item["category"] = "10-14"
-            elif 15 <= age < 18:
-                item["category"] = "15-17"
-            elif age>=18:
-                item["category"] = "18+"
+            item["category"]=SchoolingPositif.calculate_age_category.fget(age)
             item["site"] = item["properties"]["parent_patient_code"][:8]
             item["commune"] = item["properties"]["school_commune_1"]
             item["case_type"] = item["properties"]["case_type"] 
@@ -243,18 +268,7 @@ def read_schooling():
                 item["sexe"] = "female" if item["properties"]["gender"] == "2" else ("male" if item["properties"]["gender"] == "1" else "")
             
         #Calculate different category of age for siblings
-            if age < 1:
-                item["category"] = "<1"
-            elif 1 <= age < 5:
-                item["category"] = "1-4"
-            elif 5 <= age < 10:
-                item["category"] = "5-9"
-            elif 10 <= age < 15:
-                item["category"] = "10-14"
-            elif 15 <= age < 18:
-                item["category"] = "15-17"
-            elif age>=18:
-                item["category"] = "18+"
+            item["category"]=SchoolingPositif.calculate_age_category.fget(age)
             item["site"] = item["properties"]["parent_patient_code"][:8]
             item["commune"] = item["properties"]["school_commune"]
             item["case_type"] = item["properties"]["case_type"] 
@@ -265,32 +279,35 @@ def read_schooling():
         #=============================================
         # Retrieve data from schooling cwv collection using a for loop  
         for item in cwv_data:
-                #"eske_peye" in item["properties"]:
-                #item["eske_peye"] = item["properties"]["eske_peye"]
                 dob_cwv = datetime.strptime(item["properties"]["dob"], "%Y-%m-%d")
                 age = (datetime.now() - dob_cwv).days // 365
                 item["age"] = age
                 item["sexe"] = "female" if item["properties"]["gender_sex"] == "F" else ("male" if item["properties"]["gender_sex"] == "M" else "")
             
         #Calculate different category of age for cwv
-                if age < 1:
-                   item["category"] = "<1"
-                elif 1 <= age < 5:
-                  item["category"] = "1-4"
-                elif 5 <= age < 10:
-                  item["category"] = "5-9"
-                elif 10 <= age < 15:
-                  item["category"] = "10-14"
-                elif 15 <= age < 18:
-                  item["category"] = "15-17"
-                elif age>=18:
-                  item["category"] = "18+"
+                item["category"]=SchoolingPositif.calculate_age_category.fget(age)
                 item["commune"] = item["properties"]["school_commune_1"]
                 item["case_type"] = item["properties"]["case_type"] 
                 quarter = (date_peye.month - 1) // 3 + 1
                 item["quarter"] = f"Q{quarter}"
+
+        # Retrieve data from schooling dreams collection using a for loop  
+        for item in dreams_data:
+            if "dreams_code" in item["properties"]:
+                item["dreams_code"] = item["properties"]["dreams_code"]
+                #dob = datetime.strptime(item["properties"]["infant_dob"], "%Y-%m-%d")
+                #age = (datetime.now() - dob).days // 365
+                #item["age"] = age
+                item["sexe"] = "female" if item["properties"]["gender"] == "F" else ("male" if item["properties"]["gender"] == "M" else "")
             
-        #=============================================    
+        #Calculate different category of age for dreams
+            #item["category"]=SchoolingPositif.calculate_age_category.fget(age)
+            item["commune"] = item["properties"]["school_commune_1"]
+            item["case_type"] = item["properties"]["case_type"] 
+            quarter = (date_peye.month - 1) // 3 + 1
+            item["quarter"] = f"Q{quarter}"
+                
+        #=============================================#   
         return JSONResponse(content=merged_data, status_code=200)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
