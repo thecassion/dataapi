@@ -248,7 +248,7 @@ class PtmeOvc:
                         """
                 return query;
 
-    def get_ovc_serv_semester_query(self, report_year_1 , report_quarter_1, report_year_2, report_qyarter_2, type_of_aggregation=None):
+    def get_ovc_serv_semester_query(self, report_year_1 , report_quarter_1, report_year_2, report_qyarter_2, type_of_aggregation="commune"):
         query_1= self.get_ovc_query_by_year_quarter(report_year_1 , report_quarter_1)
         query_2= self.get_ovc_query_by_year_quarter(report_year_2 , report_qyarter_2)
         query = f"""SELECT
@@ -256,7 +256,6 @@ class PtmeOvc:
                         left join
                         ({query_2}) b on a.id_patient=b.id_patient
                         where b.id_patient is not null"""
-        
         aggregations = [
             {"departement": "d.name"},
             {"commune": "c.name"}
@@ -272,14 +271,14 @@ class PtmeOvc:
                 for key, value in aggregation.items():
                     select +=f"{value} as {key} ,"
                     group_by += f"{value} ,"
-                    order_by = f"{value} ,"
+                    order_by += f"{value} ,"
                 if type_of_aggregation in aggregation.keys():
                     break
             group_by = " group by "+group_by[:-1]
             male =1
             female = 2
             select = select +f''' count(*) as total ,
-            sum(pg.gender={male} and pg.gender is not null) as male, 
+            sum(pg.gender={male} and pg.gender is not null) as male,
             sum(pg.gender={female} and pg.gender is not null) as female,
             sum(pg.gender is null) as unknown_gender,
             SUM(pg.gender={female} and pg.age<1 and (pg.gender is not null) and pg.age is not null) as f_under_1,
