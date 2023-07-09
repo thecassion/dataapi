@@ -1,28 +1,31 @@
 from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional, Dict, List
+from itertools import groupby
+from operator import itemgetter
 
 
 class SchoolingPositif(BaseModel):
-    case_id: str
-    date_modified: str
-    schooling_year: str
-    school_commune_1: str
-    patient_code: str
-    infant_commune: str
-    parent_patient_code: str
-    dat_peyman_fet: Optional[str]
-    eskew_peye: Optional[str]
-    gender: str
-    agent_name: str
-    infant_dob: str
-    age: int
-    sexe: str
+
     commune: str
-    category: str
-    quarter: str
-    case_type: str
-    closed: str
+    total: int
+    male: int
+    female: int
+    unknown_gender: int
+    f_under_1: int
+    f_1_4: int
+    f_5_9: int
+    f_10_14: int
+    f_15_17: int
+    f_18_20: int
+    f_over_20: int
+    m_under_1: int
+    m_1_4: int
+    m_5_9: int
+    m_10_14: int
+    m_15_17: int
+    m_18_20: int
+    m_over_20: int
 
     # Method calculate the quarter based on dat_peyman_fet
     @property
@@ -49,3 +52,92 @@ class SchoolingPositif(BaseModel):
             return "18-20"
         else:
             return '20+'
+
+    @property
+    def aggregate_cases_by_commune(cases):
+        sorted_cases = sorted(cases, key=itemgetter('commune'))
+        grouped_cases = groupby(sorted_cases, key=itemgetter('commune'))
+        aggregated_results = []
+        for commune, group in grouped_cases:
+            commune_cases = list(group)
+
+            # Count the number of cases in the commune
+            case_count = len(commune_cases)
+
+            # Aggregate other keys as required
+            # Example: Aggregate gender counts
+            gender_counts = {'female': 0, 'male': 0}
+            unknown_gender_counts = {'unknown_gender': 0}
+            female_age_category = {'f_under_1': 0, 'f_1_4': 0, 'f_5_9': 0,
+                                   'f_10_14': 0, 'f_15_17': 0, 'f_18_20': 0, 'f_over_20': 0}
+            male_age_category = {'m_under_1': 0, 'm_1_4': 0, 'm_5_9': 0,
+                                 'm_10_14': 0, 'm_15_17': 0, 'm_18_20': 0, 'm_over_20': 0}
+
+            for case in commune_cases:
+                if case['sexe'] == 'female':
+                    gender_counts['female'] += 1
+                elif case['sexe'] == 'male':
+                    gender_counts['male'] += 1
+                else:
+                    unknown_gender_counts['unknown_gender'] += 1
+
+            for case in commune_cases:
+                if case['category'] == "<1" and case['sexe'] == 'female':
+                    female_age_category['f_under_1'] += 1
+                elif case['category'] == "1-4" and case['sexe'] == 'female':
+                    female_age_category['f_1_4'] += 1
+                if case['category'] == "5-9" and case['sexe'] == 'female':
+                    female_age_category["f_5_9"] += 1
+                elif case['category'] == "10-14" and case['sexe'] == 'female':
+                    female_age_category['f_10_14'] += 1
+                elif case['category'] == "15-17" and case['sexe'] == 'female':
+                    female_age_category['f_15_17'] += 1
+                if case['category'] == "18-20" and case['sexe'] == 'female':
+                    female_age_category["f_18_20"] += 1
+                elif case['category'] == "20+" and case['sexe'] == 'female':
+                    female_age_category['f_over_20'] += 1
+                else:
+                    continue
+
+            for case in commune_cases:
+                if case['category'] == "<1" and case['sexe'] == 'male':
+                    male_age_category['m_under_1'] += 1
+                elif case['category'] == "1-4" and case['sexe'] == 'male':
+                    male_age_category['m_1_4'] += 1
+                if case['category'] == "5-9" and case['sexe'] == 'male':
+                    male_age_category["m_5_9"] += 1
+                elif case['category'] == "10-14" and case['sexe'] == 'male':
+                    male_age_category['m_10_14'] += 1
+                elif case['category'] == "15-17" and case['sexe'] == 'male':
+                    male_age_category['m_15_17'] += 1
+                if case['category'] == "18-20" and case['sexe'] == 'male':
+                    male_age_category["m_18_20"] += 1
+                elif case['category'] == "20+" and case['sexe'] == 'male':
+                    male_age_category['m_over_20'] += 1
+                else:
+                    continue
+
+            # Create the aggregated result for the commune
+            aggregated_result = {
+                'commune': commune,
+                'total': case_count,
+                'male': gender_counts['male'],
+                'female': gender_counts['female'],
+                'unknown_gender': unknown_gender_counts['unknown_gender'],
+                "f_under_1": female_age_category['f_under_1'],
+                "f_1_4": female_age_category['f_1_4'],
+                "f_5_9": female_age_category['f_5_9'],
+                "f_10_14": female_age_category['f_10_14'],
+                "f_15_17": female_age_category['f_15_17'],
+                "f_18_20": female_age_category['f_18_20'],
+                "f_over_20": female_age_category['f_over_20'],
+                "m_under_1": male_age_category['m_under_1'],
+                "m_1_4": male_age_category['m_1_4'],
+                "m_5_9": male_age_category['m_5_9'],
+                "m_10_14": male_age_category['m_10_14'],
+                "m_15_17": male_age_category['m_15_17'],
+                "m_18_20": male_age_category['m_18_20'],
+                "m_over_20": male_age_category['m_over_20']
+            }
+            aggregated_results.append(aggregated_result)
+        return aggregated_results
