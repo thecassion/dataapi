@@ -274,8 +274,9 @@ for item in dreams_data:
 result_count = len(positive_data) + len(oev_data) + \
     len(cwv_data) + len(siblings_data) + len(dreams_data)
 merged_data = {
-    "count": [result_count],
+    "glob": {'total_all_cases': result_count},
     "data": [
+        # {"total_global": result_count},
         *positive_data,
         *oev_data,
         *siblings_data,

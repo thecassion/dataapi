@@ -13,8 +13,11 @@ router = APIRouter(
 @router.get("/schooling_analysis", response_model=SchoolingPositif)
 def read_schooling():
     try:
-        print(merged_data)
-        count_payload = aggregate_cases_by_commune(merged_data)
-        return JSONResponse(content=count_payload, status_code=200)
+        payload = [
+            merged_data['glob'],
+            *aggregate_cases_by_commune(merged_data['data'])
+        ]
+        # count_payload = merged_data
+        return JSONResponse(content=payload, status_code=200)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
