@@ -6,7 +6,7 @@ from operator import itemgetter
 
 
 class SchoolingPositif(BaseModel):
-
+    departement: str
     commune: str
     total: int
     male: int

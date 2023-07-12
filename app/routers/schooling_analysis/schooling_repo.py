@@ -410,19 +410,17 @@ def aggregate_cases_add_departement(cases):
 
     query = ' UNION ALL '.join(
         [f'SELECT {get_select_statement(item)}' for item in results])
-    to_replace = "'"
-    rep = "-"
-    final_query = f' SELECT * from {query} a LEFT JOIN lookup_commune lc on REPLACE(lc.name,"{to_replace}","{rep}")=a.commune '
-    # e = engine()
-    # with e as conn:
-    #     try:
-    #         cursor = conn.cursor()
-    #         cursor.execute(final_query)
-    #         results = cursor.fetchall()
-    #         return results
-    #         # return pd.read_sql(query, conn)
-    #     except Exception as e:
-    #         print(e)
-    #         return repr(e)
-
-    return final_query
+    final_query = r"""SELECT lc.name as departement, a.* from( """+query + \
+        r""")a LEFT JOIN lookup_commune lc on REPLACE(lc.name,"'","-")=a.commune"""
+    # final_query = f"""SELECT lc.name as departement, a.* from {query} a LEFT JOIN lookup_commune lc on {last_segment}"""
+    e = engine()
+    with e as conn:
+        try:
+            cursor = conn.cursor()
+            cursor.execute(final_query.encode("utf-8"))
+            results = cursor.fetchall()
+            return results
+        except Exception as e:
+            print(e)
+            return repr(e)
+    return final_query.encode("utf-8")
