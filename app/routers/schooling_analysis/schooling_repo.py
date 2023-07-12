@@ -1,5 +1,6 @@
 from fastapi import HTTPException
 from datetime import datetime
+import html
 from .db import (
     collection,
     schooling_oev_collection,
@@ -10,6 +11,7 @@ from .db import (
 from .schema import SchoolingPositif
 from itertools import groupby
 from operator import itemgetter
+from ...core import engine
 
 
 positive_filter_condition = {
@@ -378,31 +380,47 @@ def aggregate_cases_by_commune(cases):
 def aggregate_cases_add_departement(cases):
 
     columns = [
-            'commune',
-            'total',
-            'male',
-            'female',
-            'unknown_gender',
-            "f_under_1",
-            "f_1_4",
-            "f_5_9",
-            "f_10_14",
-            "f_15_17",
-            "f_18_20",
-            "f_over_20",
-            "m_under_1",
-            "m_1_4",
-            "m_5_9",
-            "m_10_14",
-            "m_15_17",
-            "m_18_20",
-            "m_over_20"
-        ]
+        'commune',
+        'total',
+        'male',
+        'female',
+        'unknown_gender',
+        "f_under_1",
+        "f_1_4",
+        "f_5_9",
+        "f_10_14",
+        "f_15_17",
+        "f_18_20",
+        "f_over_20",
+        "m_under_1",
+        "m_1_4",
+        "m_5_9",
+        "m_10_14",
+        "m_15_17",
+        "m_18_20",
+        "m_over_20"
+    ]
+
     def get_select_statement(item):
-        return ", ".join([f"'{item[column]}' as {column}" for column in columns])
+        commune = str(item["commune"])
+        item["commune"] = commune.replace("'", "-")
+        return ', '.join([f" '{item[column]}' as {column}" for column in columns])
     results = aggregate_cases_by_commune(cases)
     # Convert the results to a sql UNION query
 
-    
-    query = " UNION ALL".join([f"SELECT {get_select_statement(item)}" for item in results])
-    return query
+    query = ' UNION ALL '.join(
+        [f'SELECT {get_select_statement(item)}' for item in results])
+    final_query = r"""SELECT lc.name as departement, a.* from( """+query + \
+        r""")a LEFT JOIN lookup_commune lc on REPLACE(lc.name,"'","-")=a.commune"""
+    # final_query = f"""SELECT lc.name as departement, a.* from {query} a LEFT JOIN lookup_commune lc on {last_segment}"""
+    e = engine()
+    with e as conn:
+        try:
+            cursor = conn.cursor()
+            cursor.execute(final_query.encode("utf-8"))
+            results = cursor.fetchall()
+            return results
+        except Exception as e:
+            print(e)
+            return repr(e)
+    return final_query.encode("utf-8")
