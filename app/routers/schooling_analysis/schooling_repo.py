@@ -1,6 +1,5 @@
 from fastapi import HTTPException
 from datetime import datetime
-import html
 from .db import (
     collection,
     schooling_oev_collection,
@@ -12,280 +11,197 @@ from .schema import SchoolingPositif
 from itertools import groupby
 from operator import itemgetter
 from ...core import engine
+from .utils import positif_info, oev_info, siblings_info, cwv_info, dreams_info
 
 
-positive_filter_condition = {
-    "properties.schooling_year": {"$in": ["2022-2023", "2023-2024"]},
-    "closed": False,
-    "properties.eskew_peye": {"$in": ["wi", "1"]},
-    "properties.dat_peyman_fet": {"$exists": True}
-}
-positif_info = {
-    "_id": 0,
-    "case_id": 1,
-    "date_modified": 1,
-    "properties.schooling_year": 1,
-    "properties.school_commune_1": 1,
-    "properties.patient_code": 1,
-    "properties.infant_commune": 1,
-    "properties.gender": 1,
-    "properties.infant_dob": 1,
-    "properties.dat_peyman_fet": 1,
-    "properties.eskew_peye": 1,
-    "properties.age": 1,
-    "sexe": 1,
-    "category": 1,
-    "quarter": 1,
-    "properties.case_type": 1,
-    "closed": 1,
-}
+def processing_schooling_case(year: str = "2022-2023", start_date: str = '2022-10-01', end_date: str = '2023-09-30'):
+    positive_filter_condition = {
+        "properties.schooling_year": {"$in": [year, "2023-2024"]},
+        "closed": False,
+        "properties.eskew_peye": {"$in": ["wi", "1"]},
+        "properties.dat_peyman_fet": {"$exists": True},
+        "properties.dat_peyman_fet": {'$lte': end_date, '$gte': start_date}
+    }
 
-positive_data = list(collection.find(
-    positive_filter_condition, positif_info))
-if not positive_data:
-    raise HTTPException(status_code=404, detail="No data found")
+    positive_data = list(collection.find(
+        positive_filter_condition, positif_info))
+    if not positive_data:
+        raise HTTPException(status_code=404, detail="No data found")
 
-oev_filter_condition = {"properties.schooling_year": {"$in": ["2022-2023", "2023-2024"]},
-                        "closed": False,
-                        "properties.eskew_peye": {"$in": ["wi", "1"]},
-                        "properties.dat_peyman_fet": {"$exists": True}}
-oev_info = {
-    "_id": 0,
-    "case_id": 1,
-    "date_modified": 1,
-    "properties.schooling_year": 1,
-    "properties.school_commune_1": 1,
-    "properties.patient_code": 1,
-    "properties.infant_commune": 1,
-    "properties.gender": 1,
-    "properties.infant_dob": 1,
-    "properties.dat_peyman_fet": 1,
-    "properties.eskew_peye": 1,
-    "properties.age": 1,
-    "sexe": 1,
-    "category": 1,
-    "quarter": 1,
-    "properties.case_type": 1,
-    "properties.parent_patient_code": 1,
-    "closed": 1,
-}
+    oev_filter_condition = {"properties.schooling_year": {"$in": [year, "2023-2024"]},
+                            "closed": False,
+                            "properties.eskew_peye": {"$in": ["wi", "1"]},
+                            "properties.dat_peyman_fet": {"$exists": True},
+                            "properties.dat_peyman_fet": {'$lte': end_date, '$gte': start_date}
+                            }
 
-oev_data = list(schooling_oev_collection.find(
-    oev_filter_condition, oev_info))
-if not oev_data:
-    raise HTTPException(
-        status_code=404, detail="No data found in the second collection")
+    oev_data = list(schooling_oev_collection.find(
+        oev_filter_condition, oev_info))
+    if not oev_data:
+        raise HTTPException(
+            status_code=404, detail="No data found in the second collection")
 
-siblings_filter_condition = {"properties.schooling_year": {"$in": ["2022-2023", "2023-2024"]},
-                             "closed": False,
-                             "properties.eskew_peye": {"$in": ["wi", "1"]},
-                             "properties.dat_peyman_fet": {"$exists": True}
-                             }
-siblings_info = {
-    "_id": 0,
-    "case_id": 1,
-    "date_modified": 1,
-    "properties.schooling_year": 1,
-    "properties.school_commune": 1,
-    "properties.patient_code": 1,
-    "properties.infant_commune": 1,
-    "properties.gender": 1,
-    "properties.infant_dob": 1,
-    "properties.dat_peyman_fet": 1,
-    "properties.eskew_peye": 1,
-    "properties.age": 1,
-    "sexe": 1,
-    "category": 1,
-    "quarter": 1,
-    "properties.case_type": 1,
-    "properties.parent_patient_code": 1,
-    "closed": 1,
-}
+    siblings_filter_condition = {"properties.schooling_year": {"$in": [year, "2023-2024"]},
+                                 "closed": False,
+                                 "properties.eskew_peye": {"$in": ["wi", "1"]},
+                                 "properties.dat_peyman_fet": {"$exists": True},
+                                 "properties.dat_peyman_fet": {'$lte': end_date, '$gte': start_date}
+                                 }
 
-siblings_data = list(schooling_siblings_collection.find(
-    siblings_filter_condition, siblings_info))
-if not siblings_data:
-    raise HTTPException(
-        status_code=404, detail="No data found in the second collection")
+    siblings_data = list(schooling_siblings_collection.find(
+        siblings_filter_condition, siblings_info))
+    if not siblings_data:
+        raise HTTPException(
+            status_code=404, detail="No data found in the second collection")
 
-cwv_filter_condition = {"properties.schooling_year": {"$in": ["2022-2023", "2023-2024"]},
-                        "closed": False,
-                        "properties.eskew_peye": {"$in": ["wi", "1"]},
-                        "properties.dat_peyman_fet": {"$exists": True}
-                        }
-cwv_info = {
-    "_id": 0,
-    "case_id": 1,
-    "date_modified": 1,
-    "properties.schooling_year": 1,
-    "properties.school_commune_1": 1,
-    "properties.gender_sex": 1,
-    "properties.dob": 1,
-    "properties.dat_peyman_fet": 1,
-    "properties.eske_peye": 1,
-    "age": 1,
-    "sexe": 1,
-    "category": 1,
-    "quarter": 1,
-    "properties.case_type": 1,
-    "closed": 1,
+    cwv_filter_condition = {
+        "properties.schooling_year": {"$in": [year, "2023-2024"]},
+        "closed": False,
+        "properties.eskew_peye": {"$in": ["wi", "1"]},
+        "properties.dat_peyman_fet": {"$exists": True},
+        "properties.dat_peyman_fet": {'$lte': end_date, '$gte': start_date},
+        "properties.dat_peyman_fet": {"$exists": True},
+        "properties.dat_peyman_fet": {'$lte': end_date, '$gte': start_date},
+    }
 
-}
+    cwv_data = list(schooling_cwv_collection.find(
+        cwv_filter_condition, cwv_info))
+    if not cwv_data:
+        raise HTTPException(
+            status_code=404, detail="No data found in the second collection")
+    # ==============================================================================================
+    dreams_filter_condition = {
+        "properties.schooling_year": {"$in": [year, "2023-2024"]},
+        "closed": False,
+        "properties.eskew_peye": {"$in": ["wi", "1"]},
+        "properties.dat_peyman_fet": {"$exists": True},
+        "properties.dat_peyman_fet": {'$lte': end_date, '$gte': start_date}
+    }
 
-cwv_data = list(schooling_cwv_collection.find(
-    cwv_filter_condition, cwv_info))
-if not cwv_data:
-    raise HTTPException(
-        status_code=404, detail="No data found in the second collection")
-# ==============================================================================================
-dreams_filter_condition = {"properties.schooling_year": {"$in": ["2022-2023", "2023-2024"]},
-                           "closed": False,
-                           "properties.eskew_peye": {"$in": ["wi", "1"]},
-                           "properties.dat_peyman_fet": {"$exists": True}
-                           }
-dreams_info = {
-    "_id": 0,
-    "case_id": 1,
-    "date_modified": 1,
-    "properties.schooling_year": 1,
-    "properties.dreams_code": 1,
-    "properties.school_commune_1": 1,
-    "properties.gender": 1,
-    "properties.infant_dob": 1,
-    "properties.dat_peyman_fet": 1,
-    "properties.eske_peye": 1,
-    "age": 1,
-    "sexe": 1,
-    "category": 1,
-    "quarter": 1,
-    "properties.case_type": 1,
-    "closed": 1,
+    dreams_data = list(schooling_dreams_collection.find(
+        dreams_filter_condition, dreams_info))
+    if not dreams_data:
+        raise HTTPException(
+            status_code=404, detail="No data found in the second collection")
 
-}
+    # ==============================================================================================
 
-dreams_data = list(schooling_dreams_collection.find(
-    dreams_filter_condition, dreams_info))
-if not dreams_data:
-    raise HTTPException(
-        status_code=404, detail="No data found in the second collection")
+    for item in positive_data:
+        # Skip this iteration and move to the next item for some documents without dat_peyman_fet
+        if "dat_peyman_fet" not in item["properties"] or item["properties"]["dat_peyman_fet"] is None:
+            continue  # Skip this iteration and move to the next item
 
-# ==============================================================================================
+        dob = datetime.strptime(
+            item["properties"]["infant_dob"], "%Y-%m-%d")
+        age = (datetime.now() - dob).days // 365
+        item["age"] = age
+        item["sexe"] = "female" if item["properties"]["gender"] == "2" else (
+            "male" if item["properties"]["gender"] == "1" else "")
 
-for item in positive_data:
-    # Skip this iteration and move to the next item for some documents without dat_peyman_fet
-    if "dat_peyman_fet" not in item["properties"] or item["properties"]["dat_peyman_fet"] is None:
-        continue  # Skip this iteration and move to the next item
+        # Calculate different category of age
+        item["category"] = SchoolingPositif.calculate_age_category.fget(
+            age)
 
-    dob = datetime.strptime(
-        item["properties"]["infant_dob"], "%Y-%m-%d")
-    age = (datetime.now() - dob).days // 365
-    item["age"] = age
-    item["sexe"] = "female" if item["properties"]["gender"] == "2" else (
-        "male" if item["properties"]["gender"] == "1" else "")
+        item["site"] = item["properties"]["patient_code"][:8]
+        item["commune"] = item["properties"]["school_commune_1"]
+        date_peye = datetime.strptime(
+            item["properties"]["dat_peyman_fet"], "%Y-%m-%d")
+        quarter = (date_peye.month - 1) // 3 + 1
+        item["quarter"] = f"Q{quarter}"
+        item["case_type"] = item["properties"]["case_type"]
+
+    # Retrieve data from schooling oev collection using a for loop
+    for item in oev_data:
+        if "parent_patient_code" in item["properties"]:
+            item["mother_patient_code"] = item["properties"]["parent_patient_code"]
+            dob = datetime.strptime(
+                item["properties"]["infant_dob"], "%Y-%m-%d")
+            age = (datetime.now() - dob).days // 365
+            item["age"] = age
+            item["sexe"] = "female" if item["properties"]["gender"] == "2" else (
+                "male" if item["properties"]["gender"] == "1" else "")
 
     # Calculate different category of age
-    item["category"] = SchoolingPositif.calculate_age_category.fget(
-        age)
+        item["category"] = SchoolingPositif.calculate_age_category.fget(
+            age)
+        item["site"] = item["properties"]["parent_patient_code"][:8]
+        item["commune"] = item["properties"]["school_commune_1"]
+        item["case_type"] = item["properties"]["case_type"]
+        quarter = (date_peye.month - 1) // 3 + 1
+        item["quarter"] = f"Q{quarter}"
 
-    item["site"] = item["properties"]["patient_code"][:8]
-    item["commune"] = item["properties"]["school_commune_1"]
-    date_peye = datetime.strptime(
-        item["properties"]["dat_peyman_fet"], "%Y-%m-%d")
-    quarter = (date_peye.month - 1) // 3 + 1
-    item["quarter"] = f"Q{quarter}"
-    item["case_type"] = item["properties"]["case_type"]
+    # Retrieve data from schooling siblings collection using a for loop
+    for item in siblings_data:
+        if "parent_patient_code" in item["properties"]:
+            item["positive_patient_code"] = item["properties"]["parent_patient_code"]
+            dob = datetime.strptime(
+                item["properties"]["infant_dob"], "%Y-%m-%d")
+            age = (datetime.now() - dob).days // 365
+            item["age"] = age
+            item["sexe"] = "female" if item["properties"]["gender"] == "2" else (
+                "male" if item["properties"]["gender"] == "1" else "")
 
-# Retrieve data from schooling oev collection using a for loop
-for item in oev_data:
-    if "parent_patient_code" in item["properties"]:
-        item["mother_patient_code"] = item["properties"]["parent_patient_code"]
-        dob = datetime.strptime(
-            item["properties"]["infant_dob"], "%Y-%m-%d")
-        age = (datetime.now() - dob).days // 365
+    # Calculate different category of age for siblings
+        item["category"] = SchoolingPositif.calculate_age_category.fget(
+            age)
+        item["site"] = item["properties"]["parent_patient_code"][:8]
+        item["commune"] = item["properties"]["school_commune"]
+        item["case_type"] = item["properties"]["case_type"]
+        quarter = (date_peye.month - 1) // 3 + 1
+        item["quarter"] = f"Q{quarter}"
+
+    # =============================================
+    # Retrieve data from schooling cwv collection using a for loop
+    for item in cwv_data:
+        dob_cwv = datetime.strptime(item["properties"]["dob"], "%Y-%m-%d")
+        age = (datetime.now() - dob_cwv).days // 365
         item["age"] = age
-        item["sexe"] = "female" if item["properties"]["gender"] == "2" else (
-            "male" if item["properties"]["gender"] == "1" else "")
+        item["sexe"] = "female" if item["properties"]["gender_sex"] == "F" else (
+            "male" if item["properties"]["gender_sex"] == "M" else "")
 
-# Calculate different category of age
-    item["category"] = SchoolingPositif.calculate_age_category.fget(
-        age)
-    item["site"] = item["properties"]["parent_patient_code"][:8]
-    item["commune"] = item["properties"]["school_commune_1"]
-    item["case_type"] = item["properties"]["case_type"]
-    quarter = (date_peye.month - 1) // 3 + 1
-    item["quarter"] = f"Q{quarter}"
+    # Calculate different category of age for cwv
+        item["category"] = SchoolingPositif.calculate_age_category.fget(
+            age)
+        item["commune"] = item["properties"]["school_commune_1"]
+        item["case_type"] = item["properties"]["case_type"]
+        quarter = (date_peye.month - 1) // 3 + 1
+        item["quarter"] = f"Q{quarter}"
 
-# Retrieve data from schooling siblings collection using a for loop
-for item in siblings_data:
-    if "parent_patient_code" in item["properties"]:
-        item["positive_patient_code"] = item["properties"]["parent_patient_code"]
-        dob = datetime.strptime(
-            item["properties"]["infant_dob"], "%Y-%m-%d")
-        age = (datetime.now() - dob).days // 365
-        item["age"] = age
-        item["sexe"] = "female" if item["properties"]["gender"] == "2" else (
-            "male" if item["properties"]["gender"] == "1" else "")
+    # Retrieve data from schooling dreams collection using a for loop
+    for item in dreams_data:
+        if "dreams_code" in item["properties"]:
+            item["dreams_code"] = item["properties"]["dreams_code"]
+            dob = datetime.strptime(
+                item["properties"]["infant_dob"], "%Y-%m-%d")
+            age = (datetime.now() - dob).days // 365
+            item["age"] = age
+            item["sexe"] = "female" if item["properties"]["gender"] == "F" else (
+                "male" if item["properties"]["gender"] == "M" else "")
 
-# Calculate different category of age for siblings
-    item["category"] = SchoolingPositif.calculate_age_category.fget(
-        age)
-    item["site"] = item["properties"]["parent_patient_code"][:8]
-    item["commune"] = item["properties"]["school_commune"]
-    item["case_type"] = item["properties"]["case_type"]
-    quarter = (date_peye.month - 1) // 3 + 1
-    item["quarter"] = f"Q{quarter}"
+    # Calculate different category of age for dreams
+        item["category"] = SchoolingPositif.calculate_age_category.fget(
+            age)
+        item["commune"] = item["properties"]["school_commune_1"]
+        item["case_type"] = item["properties"]["case_type"]
+        # quarter = SchoolingPositif.calculate_quarter.fget(date_peye)
+        quarter = (date_peye.month - 1) // 3 + 1
+        item["quarter"] = f"Q{quarter}"
 
-# =============================================
-# Retrieve data from schooling cwv collection using a for loop
-for item in cwv_data:
-    dob_cwv = datetime.strptime(item["properties"]["dob"], "%Y-%m-%d")
-    age = (datetime.now() - dob_cwv).days // 365
-    item["age"] = age
-    item["sexe"] = "female" if item["properties"]["gender_sex"] == "F" else (
-        "male" if item["properties"]["gender_sex"] == "M" else "")
-
-# Calculate different category of age for cwv
-    item["category"] = SchoolingPositif.calculate_age_category.fget(
-        age)
-    item["commune"] = item["properties"]["school_commune_1"]
-    item["case_type"] = item["properties"]["case_type"]
-    quarter = (date_peye.month - 1) // 3 + 1
-    item["quarter"] = f"Q{quarter}"
-
-# Retrieve data from schooling dreams collection using a for loop
-for item in dreams_data:
-    if "dreams_code" in item["properties"]:
-        item["dreams_code"] = item["properties"]["dreams_code"]
-        dob = datetime.strptime(
-            item["properties"]["infant_dob"], "%Y-%m-%d")
-        age = (datetime.now() - dob).days // 365
-        item["age"] = age
-        item["sexe"] = "female" if item["properties"]["gender"] == "F" else (
-            "male" if item["properties"]["gender"] == "M" else "")
-
-# Calculate different category of age for dreams
-    item["category"] = SchoolingPositif.calculate_age_category.fget(
-        age)
-    item["commune"] = item["properties"]["school_commune_1"]
-    item["case_type"] = item["properties"]["case_type"]
-    # quarter = SchoolingPositif.calculate_quarter.fget(date_peye)
-    quarter = (date_peye.month - 1) // 3 + 1
-    item["quarter"] = f"Q{quarter}"
-
-# =============================================#
-result_count = len(positive_data) + len(oev_data) + \
-    len(cwv_data) + len(siblings_data) + len(dreams_data)
-merged_data = {
-    "glob": {'total_all_cases': result_count},
-    "data": [
-        # {"total_global": result_count},
-        *positive_data,
-        *oev_data,
-        *siblings_data,
-        *cwv_data,
-        *dreams_data
-    ],
-}
+    # =============================================#
+    result_count = len(positive_data) + len(oev_data) + \
+        len(cwv_data) + len(siblings_data) + len(dreams_data)
+    merged_data = {
+        "glob": {'total_all_cases': result_count},
+        "data": [
+            # {"total_global": result_count},
+            *positive_data,
+            *oev_data,
+            *siblings_data,
+            *cwv_data,
+            *dreams_data
+        ],
+    }
+    return merged_data
 
 
 def aggregate_cases_by_commune(cases):
@@ -424,3 +340,193 @@ def aggregate_cases_add_departement(cases):
             print(e)
             return repr(e)
     return final_query.encode("utf-8")
+
+
+def processing_schooling_case_stack(year: str = "2022-2023", start_date: str = '2022-10-01', end_date: str = '2023-09-30'):
+    positive_filter_condition = {
+        "properties.schooling_year": {"$in": [year]},
+        "closed": False,
+        "properties.eskew_peye": {"$in": ["wi", "1"]},
+        "properties.dat_peyman_fet": {"$exists": True},
+        "properties.dat_peyman_fet": {'$lte': end_date, '$gte': start_date}
+    }
+
+    positive_data = list(collection.find(
+        positive_filter_condition, positif_info))
+    if not positive_data:
+        raise HTTPException(status_code=404, detail="No data found")
+
+    oev_filter_condition = {"properties.schooling_year": {"$in": [year, "2023-2024"]},
+                            "closed": False,
+                            "properties.eskew_peye": {"$in": ["wi", "1"]},
+                            "properties.dat_peyman_fet": {"$exists": True},
+                            "properties.dat_peyman_fet": {'$lte': end_date, '$gte': start_date}
+                            }
+
+    oev_data = list(schooling_oev_collection.find(
+        oev_filter_condition, oev_info))
+    if not oev_data:
+        raise HTTPException(
+            status_code=404, detail="No data found in the second collection")
+
+    siblings_filter_condition = {"properties.schooling_year": {"$in": [year, "2023-2024"]},
+                                 "closed": False,
+                                 "properties.eskew_peye": {"$in": ["wi", "1"]},
+                                 "properties.dat_peyman_fet": {"$exists": True},
+                                 "properties.dat_peyman_fet": {'$lte': end_date, '$gte': start_date}
+                                 }
+
+    siblings_data = list(schooling_siblings_collection.find(
+        siblings_filter_condition, siblings_info))
+    if not siblings_data:
+        raise HTTPException(
+            status_code=404, detail="No data found in the second collection")
+
+    cwv_filter_condition = {
+        "properties.schooling_year": {"$in": [year, "2023-2024"]},
+        "closed": False,
+        "properties.eskew_peye": {"$in": ["wi", "1"]},
+        "properties.dat_peyman_fet": {"$exists": True},
+        "properties.dat_peyman_fet": {'$lte': end_date, '$gte': start_date},
+        "properties.dat_peyman_fet": {"$exists": True},
+        "properties.dat_peyman_fet": {'$lte': end_date, '$gte': start_date},
+    }
+
+    cwv_data = list(schooling_cwv_collection.find(
+        cwv_filter_condition, cwv_info))
+    if not cwv_data:
+        raise HTTPException(
+            status_code=404, detail="No data found in the second collection")
+    # ==============================================================================================
+    dreams_filter_condition = {
+        "properties.schooling_year": {"$in": [year, "2023-2024"]},
+        "closed": False,
+        "properties.eskew_peye": {"$in": ["wi", "1"]},
+        "properties.dat_peyman_fet": {"$exists": True},
+        "properties.dat_peyman_fet": {'$lte': end_date, '$gte': start_date}
+    }
+
+    dreams_data = list(schooling_dreams_collection.find(
+        dreams_filter_condition, dreams_info))
+    if not dreams_data:
+        raise HTTPException(
+            status_code=404, detail="No data found in the second collection")
+
+    # ==============================================================================================
+
+    for item in positive_data:
+        # Skip this iteration and move to the next item for some documents without dat_peyman_fet
+        if "dat_peyman_fet" not in item["properties"] or item["properties"]["dat_peyman_fet"] is None:
+            continue  # Skip this iteration and move to the next item
+
+        dob = datetime.strptime(
+            item["properties"]["infant_dob"], "%Y-%m-%d")
+        age = (datetime.now() - dob).days // 365
+        item["age"] = age
+        item["sexe"] = "female" if item["properties"]["gender"] == "2" else (
+            "male" if item["properties"]["gender"] == "1" else "")
+
+        # Calculate different category of age
+        item["category"] = SchoolingPositif.calculate_age_category.fget(
+            age)
+
+        item["site"] = item["properties"]["patient_code"][:8]
+        item["commune"] = item["properties"]["school_commune_1"]
+        date_peye = datetime.strptime(
+            item["properties"]["dat_peyman_fet"], "%Y-%m-%d")
+        quarter = (date_peye.month - 1) // 3 + 1
+        item["quarter"] = f"Q{quarter}"
+        item["case_type"] = item["properties"]["case_type"]
+
+    # Retrieve data from schooling oev collection using a for loop
+    for item in oev_data:
+        if "parent_patient_code" in item["properties"]:
+            item["mother_patient_code"] = item["properties"]["parent_patient_code"]
+            dob = datetime.strptime(
+                item["properties"]["infant_dob"], "%Y-%m-%d")
+            age = (datetime.now() - dob).days // 365
+            item["age"] = age
+            item["sexe"] = "female" if item["properties"]["gender"] == "2" else (
+                "male" if item["properties"]["gender"] == "1" else "")
+
+    # Calculate different category of age
+        item["category"] = SchoolingPositif.calculate_age_category.fget(
+            age)
+        item["site"] = item["properties"]["parent_patient_code"][:8]
+        item["commune"] = item["properties"]["school_commune_1"]
+        item["case_type"] = item["properties"]["case_type"]
+        quarter = (date_peye.month - 1) // 3 + 1
+        item["quarter"] = f"Q{quarter}"
+
+    # Retrieve data from schooling siblings collection using a for loop
+    for item in siblings_data:
+        if "parent_patient_code" in item["properties"]:
+            item["positive_patient_code"] = item["properties"]["parent_patient_code"]
+            dob = datetime.strptime(
+                item["properties"]["infant_dob"], "%Y-%m-%d")
+            age = (datetime.now() - dob).days // 365
+            item["age"] = age
+            item["sexe"] = "female" if item["properties"]["gender"] == "2" else (
+                "male" if item["properties"]["gender"] == "1" else "")
+
+    # Calculate different category of age for siblings
+        item["category"] = SchoolingPositif.calculate_age_category.fget(
+            age)
+        item["site"] = item["properties"]["parent_patient_code"][:8]
+        item["commune"] = item["properties"]["school_commune"]
+        item["case_type"] = item["properties"]["case_type"]
+        quarter = (date_peye.month - 1) // 3 + 1
+        item["quarter"] = f"Q{quarter}"
+
+    # =============================================
+    # Retrieve data from schooling cwv collection using a for loop
+    for item in cwv_data:
+        dob_cwv = datetime.strptime(item["properties"]["dob"], "%Y-%m-%d")
+        age = (datetime.now() - dob_cwv).days // 365
+        item["age"] = age
+        item["sexe"] = "female" if item["properties"]["gender_sex"] == "F" else (
+            "male" if item["properties"]["gender_sex"] == "M" else "")
+
+    # Calculate different category of age for cwv
+        item["category"] = SchoolingPositif.calculate_age_category.fget(
+            age)
+        item["commune"] = item["properties"]["school_commune_1"]
+        item["case_type"] = item["properties"]["case_type"]
+        quarter = (date_peye.month - 1) // 3 + 1
+        item["quarter"] = f"Q{quarter}"
+
+    # Retrieve data from schooling dreams collection using a for loop
+    for item in dreams_data:
+        if "dreams_code" in item["properties"]:
+            item["dreams_code"] = item["properties"]["dreams_code"]
+            dob = datetime.strptime(
+                item["properties"]["infant_dob"], "%Y-%m-%d")
+            age = (datetime.now() - dob).days // 365
+            item["age"] = age
+            item["sexe"] = "female" if item["properties"]["gender"] == "F" else (
+                "male" if item["properties"]["gender"] == "M" else "")
+
+    # Calculate different category of age for dreams
+        item["category"] = SchoolingPositif.calculate_age_category.fget(
+            age)
+        item["commune"] = item["properties"]["school_commune_1"]
+        item["case_type"] = item["properties"]["case_type"]
+        # quarter = SchoolingPositif.calculate_quarter.fget(date_peye)
+        quarter = (date_peye.month - 1) // 3 + 1
+        item["quarter"] = f"Q{quarter}"
+
+    # =============================================#
+    result_count = len(positive_data) + len(oev_data) + \
+        len(cwv_data) + len(siblings_data) + len(dreams_data)
+    merged_data = {
+        "glob": {'total_all_cases': result_count},
+        "data": [
+            # {"total_global": result_count},
+            *positive_data,
+            *oev_data,
+            *siblings_data,
+            *cwv_data,
+            *dreams_data
+        ],
+    }
+    return merged_data
