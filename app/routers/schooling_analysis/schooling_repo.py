@@ -326,8 +326,9 @@ def aggregate_cases_add_departement(cases):
 
     query = ' UNION ALL '.join(
         [f'SELECT {get_select_statement(item)}' for item in results])
-    final_query = r"""SELECT lc.name as departement, a.* from( """+query + \
-        r""")a LEFT JOIN lookup_commune lc on REPLACE(lc.name,"'","-")=a.commune"""
+    final_query = r"""SELECT ld.name as departement, a.* from( """+query + \
+        r""")a LEFT JOIN lookup_commune lc on REPLACE(lc.name,"'","-")=a.commune """ + \
+        r"""left join lookup_departement ld on ld.id = lc.departement"""
     # final_query = f"""SELECT lc.name as departement, a.* from {query} a LEFT JOIN lookup_commune lc on {last_segment}"""
     e = engine()
     with e as conn:
