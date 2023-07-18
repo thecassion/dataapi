@@ -1,51 +1,34 @@
-from ....core import settings, sql_achemy_engine, engine, mongo_database, mongoclient
-
-import pandas as pd
+from ...core import settings, sql_achemy_engine, engine, mongo_database, mongoclient
 
 
-class PtmeOvc:
+class PtmeOev:
     def __init__(self) -> None:
         pass
 
-    def get_appel_ptme_from_mongo(self, report_year, report_quarter, type_appel="APPELS_PTME"):
+    def get_ptme_call_or_oev_call_from_mongo(self, start_date: str = '2022-10-01', end_date: str = '2023-09-30', type_appel: str = "APPELS_PTME"):
         pipeline = [
             {
                 '$addFields': {
-                    'year_appel_ptme': {
-                        '$year': {
-                            '$toDate': '$form.'+type_appel+'.date_appel'
-                        }
-                    },
-                    'quarter_appel_ptme': {
-                        '$substr': [
-                            {
-                                '$add': [
-                                    {
-                                        '$divide': [
-                                            {
-                                                '$subtract': [
-                                                    {
-                                                        '$month': {
-                                                            '$toDate': '$form.'+type_appel+'.date_appel'
-                                                        }
-                                                    }, 1
-                                                ]
-                                            }, 3
-                                        ]
-                                    }, 1
-                                ]
-                            }, 0, 1
-                        ]
+                    'call_date': {
+                        '$toDate': '$form.'+type_appel+'.date_appel'
                     }
-                }
+                },
+                '$addFields': {
+                    'period_appel': {
+                        '$dateToString': {
+                            "format": "%Y-%m-%d",
+                            "date": "$call_date",
+                            "onNull": "0000-00-00"
+                        }
+                    }
+                },
+
             }, {
                 '$match': {
-                    '$and': [
-                        {
-                            'year_appel_ptme': int(report_year),
-                            'quarter_appel_ptme': str(report_quarter)
-                        }
-                    ]
+                    'period_appel': {
+                        '$gte': start_date,
+                        '$lte': end_date
+                    }
                 }
             }, {
                 '$project': {
@@ -63,11 +46,11 @@ class PtmeOvc:
 
         return list__
 
-    def get_ovc_query_by_year_quarter(self, report_year, report_quarter):
-        list_ptme_appel = self.get_appel_ptme_from_mongo(
-            report_year, report_quarter)
-        list_oev_appel = self.get_appel_ptme_from_mongo(
-            report_year, report_quarter, type_appel="appels_oev")
+    def get_ovc_query_by_period(self, start_date: str = '2022-10-01', end_date: str = '2023-09-30'):
+        list_ptme_appel = self.get_ptme_call_or_oev_call_from_mongo(
+            start_date, end_date)
+        list_oev_appel = self.get_ptme_call_or_oev_call_from_mongo(
+            start_date, end_date, type_appel="appels_oev")
         union_ptme_appel = " UNION ALL ".join(
             [f"SELECT '{item['patient_code']}'as patient_code" for item in list_ptme_appel])
         union_oev_appel = " UNION ALL ".join(
@@ -77,8 +60,7 @@ class PtmeOvc:
                         FROM
                             testing_mereenfant
                         WHERE
-                            QUARTER(date) = {report_quarter}
-                                AND YEAR(date) = {report_year} ) UNION (SELECT
+                            date between {start_date} and {end_date} ) UNION (SELECT
                             ss.id_patient
                         FROM
                             session ss
@@ -87,9 +69,7 @@ class PtmeOvc:
                                 LEFT JOIN
                             tracking_infant ti ON ss.id_patient = ti.id_patient
                         WHERE
-                            QUARTER(cs.date) = {report_quarter}
-                                AND YEAR(cs.date) = {report_year}
-                                AND ss.is_present = 1) UNION (SELECT
+                            cs.date between  {start_date} and {end_date} AND ss.is_present = 1) UNION (SELECT
                             ss.id_patient
                         FROM
                             session ss
@@ -98,8 +78,7 @@ class PtmeOvc:
                                 LEFT JOIN
                             tracking_motherbasicinfo ti ON ss.id_patient = ti.id_patient
                         WHERE
-                            QUARTER(cs.date) = {report_quarter}
-                                AND YEAR(cs.date) = {report_year}
+                            cs.date between  {start_date} and {end_date}
                                 AND ss.is_present = 1) UNION (SELECT
                             tf.id_patient
                         FROM
@@ -107,72 +86,71 @@ class PtmeOvc:
                                 LEFT JOIN
                             tracking_infant ti ON ti.id_patient = tf.id_patient
                         WHERE
-                            QUARTER(tf.date) = {report_quarter}
-                                AND YEAR(tf.date) = {report_year})
+                            tf.date between  {start_date} and {end_date})
                         UNION (
                         select ts.id_patient from testing_specimen ts
                         left join testing_mereenfant tm on tm.id_patient=ts.id_patient
                         WHERE
-                            QUARTER(ts.date_blood_taken) = {report_quarter}
-                                AND YEAR(ts.date_blood_taken) = {report_year}
-                                )
+                                ts.date_blood_taken between  {start_date} and {end_date}
+                        )
                         UNION (
-                        select id_patient from tracking_motherfollowup tmf where QUARTER(tmf.date) = {report_quarter}
-                                AND YEAR(tmf.date) = {report_year}
+                        select id_patient from tracking_motherfollowup tmf where 
+                                tmf.date between  {start_date} and {end_date}
                         )
                         union (
                         select p.id as id_patient from tracking_odk_phone_followup topf 
                         left join patient p on p.patient_code=UPPER(topf.patient_code)
-                        where QUARTER(topf.eccm_date) = {report_quarter}
-                                AND YEAR(topf.eccm_date) = {report_year}
+                        where 
+                            topf.eccm_date between  {start_date} and {end_date}
                         )
                         union (
                         select p.id as id_patient from tracking_odk_phone_followup topf 
                         left join odk_hivhaiti_backward_compatibility obc on obc.odk_case_id=topf.case_id
                         left join patient p on p.patient_code=UPPER(obc.patient_code)
-                        where QUARTER(topf.eccm_date) = {report_quarter}
-                                AND YEAR(topf.eccm_date) = {report_year}
+                        where 
+                            topf.eccm_date between  {start_date} and {end_date}
                         )
                         union (
                         select p.id as id_patient from odk_tracking_other_visit_ptme topf 
                         left join patient p on p.patient_code=UPPER(topf.patient_code)
-                        where QUARTER(topf.date_of_visit) = {report_quarter}
-                                AND YEAR(topf.date_of_visit) = {report_year}
+                        where 
+                            topf.date_of_visit between  {start_date} and {end_date}
                         )
                         union (
                         select p.id as id_patient from odk_tracking_other_visit_ptme topf 
                         left join odk_hivhaiti_backward_compatibility obc on obc.odk_case_id=topf.case_id
                         left join patient p on p.patient_code=UPPER(obc.patient_code)
-                        where QUARTER(topf.date_of_visit) = {report_quarter}
-                                AND YEAR(topf.date_of_visit) = {report_year}
+                        where 
+                            topf.date_of_visit between  {start_date} and {end_date}
                         )
                         union (
                         select p.id as id_patient from tracking_ptme_visit topf
                         left join patient p on p.patient_code=UPPER(topf.patient_code)
-                        where QUARTER(topf.date_of_visit) = {report_quarter}
-                                AND YEAR(topf.date_of_visit) = {report_year}
+                        where QUARTER(
+                            topf.date_of_visit between  {start_date} and {end_date}
                         )
                         union (
                         select p.id as id_patient from tracking_ptme_visit topf
                         left join odk_hivhaiti_backward_compatibility obc on obc.odk_case_id=topf.case_id
                         left join patient p on p.patient_code=UPPER(obc.patient_code)
-                        where QUARTER(topf.date_of_visit) = {report_quarter}
-                                AND YEAR(topf.date_of_visit) = {report_year}
+                        where QUARTER(
+                            topf.date_of_visit between  {start_date} and {end_date}
                         )
                         union (
                         select id_patient from tracking_regime tr
-                        where (QUARTER(tr.start_date) = {report_quarter}
-                                AND YEAR(tr.start_date) = {report_year})
-                                or (QUARTER(tr.end_date) = {report_quarter}
-                                AND YEAR(tr.end_date) = {report_year})
+                        where (
+                                tr.start_date between  {start_date} and {end_date}
+                            )
+                                or (
+                                    tr.end_date between  {start_date} and {end_date}
+                            )
                         )
                         union (
                         SELECT
                             qmhk.id_patient
                         FROM
                             questionnaire_motherhivknowledge qmhk
-                                where QUARTER(qmhk.date) = {report_quarter}
-                                AND YEAR(qmhk.date) = {report_year}
+                                where qmhk.date between  {start_date} and {end_date}
                             )
                                UNION
                                 ( SELECT
@@ -253,86 +231,3 @@ class PtmeOvc:
                        )
                         """
         return query
-
-    def get_ovc_serv_semester_query(self, report_year_1, report_quarter_1, report_year_2, report_qyarter_2, type_of_aggregation="commune"):
-        query_1 = self.get_ovc_query_by_year_quarter(
-            report_year_1, report_quarter_1)
-        query_2 = self.get_ovc_query_by_year_quarter(
-            report_year_2, report_qyarter_2)
-        query = f"""SELECT
-                        a.id_patient as id_patient from ({query_1}) a
-                        left join
-                        ({query_2}) b on a.id_patient=b.id_patient
-                        where b.id_patient is not null"""
-        aggregations = [
-            {"departement": "d.name"},
-            {"commune": "c.name"}
-
-        ]
-        select = "a.id_patient as id_patient"
-        group_by = ""
-        order_by = ""
-        aggregation_keys = [
-            key for aggregation in aggregations for key in aggregation.keys()]
-        if type_of_aggregation in aggregation_keys:
-            select = ""
-            for aggregation in aggregations:
-                for key, value in aggregation.items():
-                    select += f"{value} as {key} ,"
-                    group_by += f"{value} ,"
-                    order_by += f"{value} ,"
-                if type_of_aggregation in aggregation.keys():
-                    break
-            group_by = " group by "+group_by[:-1]
-            male = 1
-            female = 2
-            select = select + f''' count(*) as total ,
-            sum(pg.gender={male} and pg.gender is not null) as male,
-            sum(pg.gender={female} and pg.gender is not null) as female,
-            sum(pg.gender is null) as unknown_gender,
-            SUM(pg.gender={female} and pg.age<1 and (pg.gender is not null) and pg.age is not null) as f_under_1,
-            sum(pg.gender={female} and (pg.age between 1 and 4) and (pg.gender is not null) and pg.age is not null ) as f_1_4,
-            sum(pg.gender={female} and (pg.age between 5 and 9) and (pg.gender is not null) and pg.age is not null ) as f_5_9,
-            sum( pg.gender={female} and (pg.age between 10 and 14) and (pg.gender is not null) and pg.age is not null ) as f_10_14,
-            sum( pg.gender={female} and (pg.age between 15 and 17) and (pg.gender is not null) and pg.age is not null ) as f_15_17,
-            sum( pg.gender={female} and (pg.age between 18 and 20) and ( pg.gender is not null) and pg.age is not null ) as f_18_20,
-            sum( pg.gender={female} and pg.age>20 and (pg.gender is not null) and pg.age is not null ) as f_over_20,
-            SUM(pg.gender={male} and pg.age<1 and (pg.gender is not null) and pg.age is not null) as m_under_1,
-            sum(pg.gender={male} and (pg.age between 1 and 4) and (pg.gender is not null) and pg.age is not null ) as m_1_4,
-            sum(pg.gender={male} and (pg.age between 5 and 9) and (pg.gender is not null) and pg.age is not null ) as m_5_9,
-            sum( pg.gender={male} and (pg.age between 10 and 14) and (pg.gender is not null) and pg.age is not null ) as m_10_14,
-            sum( pg.gender={male} and (pg.age between 15 and 17) and (pg.gender is not null) and pg.age is not null ) as m_15_17,
-            sum( pg.gender={male} and (pg.age between 18 and 20) and ( pg.gender is not null) and pg.age is not null ) as m_18_20,
-            sum( pg.gender={male} and (pg.age>20) and (pg.gender is not null) and pg.age is not null ) as m_over_20
-
-            '''
-            order_by = " order by "+order_by[:-1]
-
-        query_final = f"""SELECT
-                         {select} from ({query}) a
-                        left join patient_gender_age_view pg on pg.id_patient=a.id_patient
-                        left join patient p on p.id=a.id_patient
-                        left join lookup_hospital h on h.city_code=p.city_code and h.hospital_code=p.hospital_code
-                        left join lookup_commune c on h.commune=c.id
-                        left join lookup_departement d on d.id=c.departement
-                        left join lookup_office o on o.id=h.office
-                        where p.linked_to_id_patient=0 and h.network !=6
-                        {group_by}
- 
-                        """
-
-        return query_final
-
-    def get_ovc_serv_semester(self, report_year_1, report_quarter_1, report_year_2, report_qyarter_2, type_of_aggregation=None):
-        e = engine()
-        with e as conn:
-            try:
-                cursor = conn.cursor()
-                query = self.get_ovc_serv_semester_query(
-                    report_year_1, report_quarter_1, report_year_2, report_qyarter_2, type_of_aggregation)
-                cursor.execute(query)
-                return cursor.fetchall()
-                # return pd.read_sql(query, conn)
-            except Exception as e:
-                print(e)
-                return []
