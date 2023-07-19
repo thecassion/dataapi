@@ -5,10 +5,12 @@ from fastapi import (
 
 from .db import PtmeOvc as ptme_ovc
 from .db.muso import Muso as muso_ovc
+from .db.dreams import Dreams as dreams_ovc
 import io
 import pandas as pd
 import datetime
 from starlette.responses import StreamingResponse
+from datetime import date
 
 
 
@@ -87,7 +89,6 @@ def muso_carismemberless_xlsx(report_year_start,report_quarter_start, type_of_ag
     }
     return StreamingResponse(buffer, headers=headers)
 
-
-@router.get("/test")
-def test():
-    return {"message":"test"}
+@router.get("/dreams")
+def dreams(start_date:date, end_date:date, type_of_aggregation="commune"):
+    return dreams_ovc().get_ovc_dreams_by_period(start_date, end_date, type_of_aggregation)
