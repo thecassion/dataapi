@@ -19,34 +19,35 @@ class StatusEid():
             "tranche_age_title": tranche_age,
             "liaison_mere_title": liaison_mere
         }
-    
+
     @classmethod
-    def pcr_status(cls,eid, year=None,office=None, hospital=None):
+    def pcr_status_deprecated(cls, eid, year=None, office=None, hospital=None):
         if (year is None and office is not None and hospital is not None):
-            eid_Qi = eid[(eid.Office==office)&(eid.hospital==hospital)]
-        elif(office is None and year is not None and hospital is not None):
-            eid_Qi = eid[(eid.Year==year)&(eid.hospital==hospital)]
-        elif(hospital is None and year is not None and office is not None):
-            eid_Qi = eid[(eid.Year==year)&(eid.Office==office)]
-        elif(year is not None and office is None and hospital is None):
-            eid_Qi = eid[(eid.Year==year)]
-        elif(office is not None and year is None and hospital is None):
-            eid_Qi = eid[(eid.Office==office)]
-        elif(hospital is not None and year is None and office is None):
-            eid_Qi = eid[(eid.hospital==hospital)]
-        elif(year is not None and office is not None and hospital is not None):
-            eid_Qi = eid[(eid.Year==year)&(eid.Office==office)&(eid.hospital==hospital)]
+            eid_Qi = eid[(eid.Office == office) & (eid.hospital == hospital)]
+        elif (office is None and year is not None and hospital is not None):
+            eid_Qi = eid[(eid.Year == year) & (eid.hospital == hospital)]
+        elif (hospital is None and year is not None and office is not None):
+            eid_Qi = eid[(eid.Year == year) & (eid.Office == office)]
+        elif (year is not None and office is None and hospital is None):
+            eid_Qi = eid[(eid.Year == year)]
+        elif (office is not None and year is None and hospital is None):
+            eid_Qi = eid[(eid.Office == office)]
+        elif (hospital is not None and year is None and office is None):
+            eid_Qi = eid[(eid.hospital == hospital)]
+        elif (year is not None and office is not None and hospital is not None):
+            eid_Qi = eid[(eid.Year == year) & (
+                eid.Office == office) & (eid.hospital == hospital)]
         else:
             eid_Qi = eid
-        
+
         EID = eid_Qi.pivot_table(
             values='Patient_code',
-            index=["tranche_age","Year", "Quarter"],
+            index=["tranche_age", "Year", "Quarter"],
             # columns=["Year", "Quarter"],
             aggfunc=len,
-            fill_value = 0, 
+            fill_value=0,
         )
-        return EID 
+        return EID
 
     @classmethod
     def pcr_status(cls, eid, year=None, office=None, hospital=None):

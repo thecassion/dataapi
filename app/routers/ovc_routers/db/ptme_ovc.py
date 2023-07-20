@@ -2,58 +2,60 @@ from ....core import settings, sql_achemy_engine, engine, mongo_database, mongoc
 
 import pandas as pd
 
+
 class PtmeOvc:
     def __init__(self) -> None:
         pass
 
-    def get_appel_ptme_from_mongo(self, report_year, report_quarter,type_appel="APPELS_PTME"):
+    def get_appel_ptme_from_mongo(self, report_year, report_quarter, type_appel="APPELS_PTME"):
         pipeline = [
-                    {
-                        '$addFields': {
-                            'year_appel_ptme': {
-                                '$year': {
-                                    '$toDate': '$form.'+type_appel+'.date_appel'
-                                }
-                            }, 
-                            'quarter_appel_ptme': {
-                                '$substr': [
+            {
+                '$addFields': {
+                    'year_appel_ptme': {
+                        '$year': {
+                            '$toDate': '$form.'+type_appel+'.date_appel'
+                        }
+                    },
+                    'quarter_appel_ptme': {
+                        '$substr': [
+                            {
+                                '$add': [
                                     {
-                                        '$add': [
+                                        '$divide': [
                                             {
-                                                '$divide': [
+                                                '$subtract': [
                                                     {
-                                                        '$subtract': [
-                                                            {
-                                                                '$month': {
-                                                                    '$toDate': '$form.'+type_appel+'.date_appel'
-                                                                }
-                                                            }, 1
-                                                        ]
-                                                    }, 3
+                                                        '$month': {
+                                                            '$toDate': '$form.'+type_appel+'.date_appel'
+                                                        }
+                                                    }, 1
                                                 ]
-                                            }, 1
+                                            }, 3
                                         ]
-                                    }, 0, 1
+                                    }, 1
                                 ]
-                            }
-                        }
-                    }, {
-                        '$match': {
-                            '$or': [
-                                {
-                                    'year_appel_ptme': int(report_year), 
-                                    'quarter_appel_ptme': str(report_quarter)
-                                }
-                            ]
-                        }
-                    }, {
-                        '$project': {
-                            '_id': 0, 
-                            'patient_code': '$form.'+type_appel+'.patient_code'
-                        }
+                            }, 0, 1
+                        ]
                     }
-                ]
-        type_collection = {"APPELS_PTME":"femme_allaitante","appels_oev":"appel_oev"}
+                }
+            }, {
+                '$match': {
+                    '$and': [
+                        {
+                            'year_appel_ptme': int(report_year),
+                            'quarter_appel_ptme': str(report_quarter)
+                        }
+                    ]
+                }
+            }, {
+                '$project': {
+                    '_id': 0,
+                    'patient_code': '$form.'+type_appel+'.patient_code'
+                }
+            }
+        ]
+        type_collection = {
+            "APPELS_PTME": "femme_allaitante", "appels_oev": "appel_oev"}
         collection = mongo_database[type_collection[type_appel]]
         cursor = collection.aggregate(pipeline)
 
@@ -61,12 +63,16 @@ class PtmeOvc:
 
         return list__
 
-    def get_ovc_query_by_year_quarter(self, report_year , report_quarter):
-                list_ptme_appel = self.get_appel_ptme_from_mongo(report_year,report_quarter)
-                list_oev_appel = self.get_appel_ptme_from_mongo(report_year,report_quarter,type_appel="appels_oev")
-                union_ptme_appel = " UNION ALL ".join([f"SELECT '{item['patient_code']}'as patient_code" for item in list_ptme_appel])
-                union_oev_appel = " UNION ALL ".join([f"SELECT '{item['patient_code']}'as patient_code" for item in list_oev_appel])
-                query = f"""(SELECT
+    def get_ovc_query_by_year_quarter(self, report_year, report_quarter):
+        list_ptme_appel = self.get_appel_ptme_from_mongo(
+            report_year, report_quarter)
+        list_oev_appel = self.get_appel_ptme_from_mongo(
+            report_year, report_quarter, type_appel="appels_oev")
+        union_ptme_appel = " UNION ALL ".join(
+            [f"SELECT '{item['patient_code']}'as patient_code" for item in list_ptme_appel])
+        union_oev_appel = " UNION ALL ".join(
+            [f"SELECT '{item['patient_code']}'as patient_code" for item in list_oev_appel])
+        query = f"""(SELECT
                             id_patient
                         FROM
                             testing_mereenfant
@@ -246,11 +252,13 @@ class PtmeOvc:
                             left join patient p on p.patient_code=a.patient_code
                        )
                         """
-                return query;
+        return query
 
-    def get_ovc_serv_semester_query(self, report_year_1 , report_quarter_1, report_year_2, report_qyarter_2, type_of_aggregation="commune"):
-        query_1= self.get_ovc_query_by_year_quarter(report_year_1 , report_quarter_1)
-        query_2= self.get_ovc_query_by_year_quarter(report_year_2 , report_qyarter_2)
+    def get_ovc_serv_semester_query(self, report_year_1, report_quarter_1, report_year_2, report_qyarter_2, type_of_aggregation="commune"):
+        query_1 = self.get_ovc_query_by_year_quarter(
+            report_year_1, report_quarter_1)
+        query_2 = self.get_ovc_query_by_year_quarter(
+            report_year_2, report_qyarter_2)
         query = f"""SELECT
                         a.id_patient as id_patient from ({query_1}) a
                         left join
@@ -264,20 +272,21 @@ class PtmeOvc:
         select = "a.id_patient as id_patient"
         group_by = ""
         order_by = ""
-        aggregation_keys = [key for aggregation in aggregations for key in aggregation.keys()]
+        aggregation_keys = [
+            key for aggregation in aggregations for key in aggregation.keys()]
         if type_of_aggregation in aggregation_keys:
             select = ""
             for aggregation in aggregations:
                 for key, value in aggregation.items():
-                    select +=f"{value} as {key} ,"
+                    select += f"{value} as {key} ,"
                     group_by += f"{value} ,"
                     order_by += f"{value} ,"
                 if type_of_aggregation in aggregation.keys():
                     break
             group_by = " group by "+group_by[:-1]
-            male =1
+            male = 1
             female = 2
-            select = select +f''' count(*) as total ,
+            select = select + f''' count(*) as total ,
             sum(pg.gender={male} and pg.gender is not null) as male,
             sum(pg.gender={female} and pg.gender is not null) as female,
             sum(pg.gender is null) as unknown_gender,
@@ -314,12 +323,13 @@ class PtmeOvc:
 
         return query_final
 
-    def get_ovc_serv_semester(self, report_year_1 , report_quarter_1, report_year_2, report_qyarter_2, type_of_aggregation=None):
+    def get_ovc_serv_semester(self, report_year_1, report_quarter_1, report_year_2, report_qyarter_2, type_of_aggregation=None):
         e = engine()
         with e as conn:
             try:
                 cursor = conn.cursor()
-                query = self.get_ovc_serv_semester_query(report_year_1 , report_quarter_1, report_year_2, report_qyarter_2, type_of_aggregation)
+                query = self.get_ovc_serv_semester_query(
+                    report_year_1, report_quarter_1, report_year_2, report_qyarter_2, type_of_aggregation)
                 cursor.execute(query)
                 return cursor.fetchall()
                 # return pd.read_sql(query, conn)
