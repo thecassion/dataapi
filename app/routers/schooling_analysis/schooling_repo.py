@@ -338,7 +338,6 @@ def aggregate_cases_add_departement(cases):
             results = cursor.fetchall()
             return results
         except Exception as e:
-            print(e)
             return repr(e)
     return final_query.encode("utf-8")
 
