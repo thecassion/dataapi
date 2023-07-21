@@ -11,7 +11,7 @@ class Dreams:
         nbre_presence_to_complete_cc= 17
         nbre_presence_to_complete_p = 12
         query = f"""
-                SELECT b.id_patient, timestampdiff(year, ben.dob, NOW()) as age FROM
+                SELECT b.id_patient, timestampdiff(year, ben.dob, '{end_date}') as age FROM
                 ((SELECT 
                     a.id_patient
                 FROM
@@ -76,6 +76,7 @@ class Dreams:
                         AND dga.value = 'P'
                         AND (dgs.date BETWEEN '{start_date}' AND '{end_date}')) ) b
                     left join beneficiary ben on ben.id_patient = b.id_patient
+                    where timestampdiff(year, ben.dob, '{end_date}') <= 17
                 """
         
         return query
