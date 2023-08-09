@@ -14,6 +14,9 @@ from .routers import eid_router
 from .routers import vbg_router
 from .routers import ovc_router
 from .routers import schooling_router
+from .routers.gardening_router import router as gardening_router
+
+from .routers.form_router import router as form_router
 
 
 app = FastAPI(
@@ -47,6 +50,8 @@ app.include_router(cases_router)
 app.include_router(vbg_router)
 app.include_router(ovc_router)
 app.include_router(schooling_router)
+app.include_router(gardening_router)
+app.include_router(form_router)
 
 
 @app.get("/")
