@@ -17,3 +17,4 @@ fastapi-filter
 python-dateutil
 polars[connectorx, pyarrow]
 pymongo[srv]
+flatten-dict
