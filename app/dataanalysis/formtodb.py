@@ -43,8 +43,9 @@ class FormToDB:
             df.columns = df.columns.str.replace("__","_")
             df.columns = df.columns.str.replace("__","_")
 
-            # take the first 50 characters in the name of a column if it is more than 62 characters
-            df.columns = [col[:50] if len(col) > 62 else col for col in df.columns]
+            # take the last 62 characters in the name of a column if it is more than 62 characters
+            df.columns = [col[-62:] if len(col) > 62 else col for col in df.columns]
+            # df.columns = [col[:50] if len(col) > 62 else col for col in df.columns]
             # df.drop(columns=["meta","case"], inplace=True)
             df.to_sql(self.table_name,sql_achemy_engine(), if_exists="replace")
             return forms
