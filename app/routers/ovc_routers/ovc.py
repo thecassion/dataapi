@@ -13,6 +13,23 @@ import datetime
 from starlette.responses import StreamingResponse
 from datetime import date
 
+from pydantic import BaseModel
+
+from enum import Enum
+
+class TypeOfReport(str, Enum):
+    ovc = "ovc"
+    program = "program"
+
+class DateRange(BaseModel):
+    start_date: date
+    end_date: date
+
+class OVCReportParameters(BaseModel):
+    period_1: DateRange
+    period_2: DateRange
+    type_of_aggregation: str = None
+    type_of_report: TypeOfReport = TypeOfReport.ovc
 
 
 router = APIRouter(
@@ -94,6 +111,6 @@ def muso_carismemberless_xlsx(report_year_start,report_quarter_start, type_of_ag
 def dreams(start_date:date, end_date:date, type_of_aggregation="commune"):
     return dreams_ovc().get_ovc_dreams_by_period(start_date, end_date, type_of_aggregation)
 
-@router.get("/gardening")
-def gardening(start_date:date, end_date:date, type_of_aggregation="commune"):
-    return gardening_ovc().get_ovc_gardening_by_period(start_date, end_date, type_of_aggregation)
+@router.post("/gardening")
+def gardening(parameters: OVCReportParameters):
+    return gardening_ovc().get_ovc_gardening_by_period(parameters.period_1.start_date, parameters.period_1.end_date,parameters.period_2.start_date,parameters.period_2.end_date, parameters.type_of_aggregation, parameters.type_of_report)
