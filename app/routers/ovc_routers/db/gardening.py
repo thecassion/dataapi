@@ -60,12 +60,47 @@ class Gardening:
         return query
     
 
-    def get_ovc_gardening_by_period(self,start_date,end_date,type_of_disagregation):
+    def get_ovc_gardening_by_period(self,start_date_1,end_date_1, start_date_2,end_date_2,type_of_disagregation, type_of_report="ovc"):
         e=engine()
         with e as conn:
             try:
-                query = self.get_ovc_query(start_date,end_date)
-                select_query = f"select count(*) as total from ({query}) as t"
+                query1 = self.get_ovc_query(start_date_1,end_date_1)
+                query2 = self.get_ovc_query(start_date_2,end_date_2)
+
+                aggregations = [
+                {"departement": "gb.address_department"},
+                {"commune": "gb.address_commune"},
+                ]
+
+                select = ""
+                order_by = ""
+                group_by = ""
+                aggregation_keys = [key for aggregation in aggregations for key in aggregation.keys()]
+                if type_of_disagregation in aggregation_keys:
+                    select =""
+                    for aggregation in aggregations:
+                        for key, value in aggregation.items():
+                            select += f"{value} AS {key} ,"
+                            order_by += f"{value} ,"
+                            group_by += f"{value} ,"
+                        if type_of_disagregation in aggregation.keys():
+                            break
+                    group_by = "group by "+group_by[:-1]
+                    order_by = "order by "+order_by[:-1]
+                    select = select + "count(*) as total"
+                
+                where_clause = ""
+                if type_of_report == "ovc":
+                    where_clause = "where gb.beneficiary_type not in ('Caris','dreams','malnutrition_program','muso','safe_space')"
+                elif type_of_report == "program":
+                    where_clause =""
+                select_query = f"""
+                select {select} from ({query1}) as t1
+                inner join ({query2}) as t2 on t1.case_id = t2.case_id
+                left join gardening_beneficiary gb on gb.case_id = t1.case_id
+                {where_clause}
+                {group_by}
+                """
                 cursor = conn.cursor()
                 cursor.execute(select_query)
                 return cursor.fetchall()
