@@ -29,17 +29,9 @@ def read_schooling(year: str = "2022-2023", start_date: str = "2022-10-01", end_
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 
-@router.get("/ptmeOev_query/test")
-def test(start_date: str = "2022-10-01", end_date: str = "2023-09-30"):
-    payload = PtmeOev().get_ovc_by_period(start_date, end_date)
-    payload = dumps(payload).encode('utf-8')
-    return Response(media_type="application/json", content=payload)
-    return payload
-
-
 @router.get("/comparaison/test")
 def test2(start_date: str = "2022-10-01", end_date: str = "2023-09-30"):
-    payload = PtmeOev().compare_results(start_date, end_date)
+    payload = PtmeOev.compare_results(start_date, end_date)
     payload = dumps(payload).encode('utf-8')
     return Response(media_type="application/json", content=payload)
     return payload

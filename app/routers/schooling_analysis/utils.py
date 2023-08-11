@@ -80,7 +80,7 @@ def pipeline_handler_oevsiblings(year, start_date, end_date):
                 "properties.dat_peyman_fet": 1,
                 "properties.eskew_peye": 1,
                 "properties.case_type": 1,
-                "properties.parent_patient_code": 1,
+                "properties.patient_code": "$properties.parent_patient_code",
                 "closed": 1,
             }
         }

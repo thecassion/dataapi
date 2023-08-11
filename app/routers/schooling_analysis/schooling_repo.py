@@ -17,12 +17,24 @@ from .utils import (
     pipeline_handler_cwv,
     pipeline_handler_dreams
 )
-import pprint
+from .schooling_repo_patient_logic import PtmeOev
+# import pprint
 
-pp = pprint.PrettyPrinter(indent=4)
+# pp = pprint.PrettyPrinter(indent=4)
+
+
+def process_the_duplication(start: str = '2022-10-01', end: str = '2022-12-01'):
+    ptme_oev = PtmeOev.compare_results(start, end)
+    ptmeoev_list = []
+    for patient_dict in ptme_oev:
+        ptmeoev_list.append(patient_dict['patient_code'])
+    # pp.pprint(ptmeoev_list)
+    return ptmeoev_list
 
 
 def processing_schooling_case(year: str = "2022-2023", start_date: str = '2022-10-01', end_date: str = '2023-09-30'):
+
+    list_ptmeoev = process_the_duplication(start_date, end_date)
 
     positive_data = list(collection.aggregate(
         pipeline_handler_positive(year, start_date, end_date)))
@@ -55,6 +67,11 @@ def processing_schooling_case(year: str = "2022-2023", start_date: str = '2022-1
             status_code=404, detail="No data found in the second collection")
 
     # ==============================================================================================
+    unmatched_positive = []
+    for item in positive_data:
+        if item['properties']["patient_code"] not in list_ptmeoev:
+            unmatched_positive.append(item)
+    positive_data = unmatched_positive
 
     for item in positive_data:
         # Skip this iteration and move to the next item for some documents without dat_peyman_fet
@@ -76,14 +93,20 @@ def processing_schooling_case(year: str = "2022-2023", start_date: str = '2022-1
         item["commune"] = item["properties"]["school_commune_1"]
         date_peye = datetime.strptime(
             item["properties"]["dat_peyman_fet"], "%Y-%m-%d")
-        quarter = (date_peye.month - 1) // 3 + 1
+        quarter = (date_peye.month - 1) // 4
         item["quarter"] = f"Q{quarter}"
         item["case_type"] = item["properties"]["case_type"]
 
     # Retrieve data from schooling oev collection using a for loop
+    unmatched_oev = []
     for item in oev_data:
-        if "parent_patient_code" in item["properties"]:
-            item["mother_patient_code"] = item["properties"]["parent_patient_code"]
+        if item['properties']["patient_code"] not in list_ptmeoev:
+            unmatched_oev.append(item)
+    oev_data = unmatched_oev
+
+    for item in oev_data:
+        if "patient_code" in item["properties"]:
+            item["mother_patient_code"] = item["properties"]["patient_code"]
             dob = datetime.strptime(
                 item["properties"]["infant_dob"], "%Y-%m-%d")
             age = (datetime.now() - dob).days // 365
@@ -94,16 +117,22 @@ def processing_schooling_case(year: str = "2022-2023", start_date: str = '2022-1
     # Calculate different category of age
         item["category"] = SchoolingPositif.calculate_age_category.fget(
             age)
-        item["site"] = item["properties"]["parent_patient_code"][:8]
+        item["site"] = item["properties"]["patient_code"][:8]
         item["commune"] = item["properties"]["school_commune_1"]
         item["case_type"] = item["properties"]["case_type"]
-        quarter = (date_peye.month - 1) // 3 + 1
+        quarter = (date_peye.month - 1) // 4
         item["quarter"] = f"Q{quarter}"
 
     # Retrieve data from schooling siblings collection using a for loop
+    unmatched_siblings = []
     for item in siblings_data:
-        if "parent_patient_code" in item["properties"]:
-            item["positive_patient_code"] = item["properties"]["parent_patient_code"]
+        if item['properties']["patient_code"] not in list_ptmeoev:
+            unmatched_siblings.append(item)
+    siblings_data = unmatched_siblings
+
+    for item in siblings_data:
+        if "patient_code" in item["properties"]:
+            item["positive_patient_code"] = item["properties"]["patient_code"]
             dob = datetime.strptime(
                 item["properties"]["infant_dob"], "%Y-%m-%d")
             age = (datetime.now() - dob).days // 365
@@ -114,10 +143,10 @@ def processing_schooling_case(year: str = "2022-2023", start_date: str = '2022-1
     # Calculate different category of age for siblings
         item["category"] = SchoolingPositif.calculate_age_category.fget(
             age)
-        item["site"] = item["properties"]["parent_patient_code"][:8]
+        item["site"] = item["properties"]["patient_code"][:8]
         item["commune"] = item["properties"]["school_commune"]
         item["case_type"] = item["properties"]["case_type"]
-        quarter = (date_peye.month - 1) // 3 + 1
+        quarter = (date_peye.month - 1) // 4
         item["quarter"] = f"Q{quarter}"
 
     # =============================================
@@ -134,7 +163,7 @@ def processing_schooling_case(year: str = "2022-2023", start_date: str = '2022-1
             age)
         item["commune"] = item["properties"]["school_commune_1"]
         item["case_type"] = item["properties"]["case_type"]
-        quarter = (date_peye.month - 1) // 3 + 1
+        quarter = (date_peye.month - 1) // 4
         item["quarter"] = f"Q{quarter}"
 
     # Retrieve data from schooling dreams collection using a for loop
@@ -154,7 +183,7 @@ def processing_schooling_case(year: str = "2022-2023", start_date: str = '2022-1
         item["commune"] = item["properties"]["school_commune_1"]
         item["case_type"] = item["properties"]["case_type"]
         # quarter = SchoolingPositif.calculate_quarter.fget(date_peye)
-        quarter = (date_peye.month - 1) // 3 + 1
+        quarter = (date_peye.month - 1) // 4
         item["quarter"] = f"Q{quarter}"
 
     # =============================================#
@@ -171,7 +200,7 @@ def processing_schooling_case(year: str = "2022-2023", start_date: str = '2022-1
             *dreams_data
         ],
     }
-    pp.pprint(merged_data)
+    # pp.pprint(merged_data)
     return merged_data
 
 

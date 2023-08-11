@@ -3,7 +3,8 @@ from ...core import engine, mongo_database
 
 class PtmeOev:
 
-    def get_ptme_call_or_oev_call_from_mongo(self, start_date: str = '2022-10-01', end_date: str = '2023-09-30', type_appel: str = 'APPELS_PTME'):
+    @classmethod
+    def get_ptme_call_or_oev_call_from_mongo(cls, start_date: str = '2022-10-01', end_date: str = '2023-09-30', type_appel: str = 'APPELS_PTME'):
         type_collection = {
             "APPELS_PTME": 'femme_allaitante', "appels_oev": 'appel_oev'}
         pipeline = [
@@ -42,10 +43,11 @@ class PtmeOev:
         list__ = list(cursor)
         return list__
 
-    def get_ovc_query_by_period(self, start_date: str = '2022-10-01', end_date: str = '2023-09-30'):
-        list_ptme_appel = self.get_ptme_call_or_oev_call_from_mongo(
+    @classmethod
+    def get_ovc_query_by_period(cls, start_date: str = '2022-10-01', end_date: str = '2023-09-30'):
+        list_ptme_appel = cls.get_ptme_call_or_oev_call_from_mongo(
             start_date, end_date)
-        list_oev_appel = self.get_ptme_call_or_oev_call_from_mongo(
+        list_oev_appel = cls.get_ptme_call_or_oev_call_from_mongo(
             start_date, end_date, type_appel='appels_oev')
 
         union_ptme_appel = " UNION ALL ".join(
@@ -130,7 +132,8 @@ class PtmeOev:
 
         return result_ovc
 
-    def get_patient_info(self):
+    @classmethod
+    def get_patient_info(cls):
         result_patient_info = f"""SELECT id as id_patient, patient_code FROM patient where id is not null"""
         e = engine()
         with e as conn:
@@ -143,15 +146,17 @@ class PtmeOev:
                 return repr(e)
         return result_patient_info
 
-    def remove_newlines_from_sql_query(self, sql_query):
+    @classmethod
+    def remove_newlines_from_sql_query(cls, sql_query):
         return sql_query.replace('\n', '')
 
-    def remove_backslash_from_sql_query(self, sql_query):
-        return sql_query.replace('\\', '')
+    # def remove_backslash_from_sql_query(self, sql_query):
+    #    return sql_query.replace('\\', '')
 
-    def get_ovc_by_period(self, start_date: str = '2022-10-01', end_date: str = '2023-09-30'):
-        query = self.get_ovc_query_by_period(start_date, end_date)
-        query = self.remove_newlines_from_sql_query(query)
+    @classmethod
+    def get_ovc_by_period(cls, start_date: str = '2022-10-01', end_date: str = '2023-09-30'):
+        query = cls.get_ovc_query_by_period(start_date, end_date)
+        query = cls.remove_newlines_from_sql_query(query)
         # query = self.remove_backslash_from_sql_query(query)
         e = engine()
         with e as conn:
@@ -164,13 +169,14 @@ class PtmeOev:
                 return repr(e)
         return query.encode("utf-8")
 
-    def compare_results(self, start_date: str = '2022-10-01', end_date: str = '2023-09-30'):
+    @staticmethod
+    def compare_results(start_date: str = '2022-10-01', end_date: str = '2023-09-30'):
         # a= ovcresult
         # b=patient_info_result
         result_dict = {}
         result_list = []
-        ovc_result = self.get_ovc_by_period(start_date, end_date)
-        patient_info_result = self.get_patient_info()
+        ovc_result = PtmeOev.get_ovc_by_period(start_date, end_date)
+        patient_info_result = PtmeOev.get_patient_info()
         patient_dict = {item.get('id_patient'): item for item in patient_info_result if isinstance(
             item, dict) and 'id_patient' in item}
         # patient_dict = {item['id_patient']: item.values for item in patient_info_result}
