@@ -126,10 +126,10 @@ class PtmeOvc:
                         )
                         union (
                         select id_patient from tracking_regime tr
-                        where (QUARTER(tr.start_date) = {report_quarter}
+                        where ((QUARTER(tr.start_date) = {report_quarter}
                                 AND YEAR(tr.start_date) = {report_year})
                                 or (QUARTER(tr.end_date) = {report_quarter}
-                                AND YEAR(tr.end_date) = {report_year}) AND tr.category='regime_mother_treatment'
+                                AND YEAR(tr.end_date) = {report_year})) AND tr.category='regime_mother_treatment'
                         )
                         union (
                         SELECT
