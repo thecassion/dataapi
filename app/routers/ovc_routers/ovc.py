@@ -114,3 +114,7 @@ def dreams(start_date:date, end_date:date, type_of_aggregation="commune"):
 @router.post("/gardening")
 def gardening(parameters: OVCReportParameters):
     return gardening_ovc().get_ovc_gardening_by_period(parameters.period_1.start_date, parameters.period_1.end_date,parameters.period_2.start_date,parameters.period_2.end_date, parameters.type_of_aggregation, parameters.type_of_report)
+
+@router.post("/ptme")
+def ptme(report_year_1: int, report_quarter_1: int, report_year_2: int, report_quarter_2: int,type_of_aggregation="commune"):
+    return ptme_ovc().get_ptme_semester(report_year_1, report_quarter_1, report_year_2, report_quarter_2, type_of_aggregation)
