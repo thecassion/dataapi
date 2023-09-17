@@ -62,6 +62,132 @@ class PtmeOvc:
         list__ = list(cursor)
 
         return list__
+    
+
+    def get_ptme_query_by_year_quarter(self, report_year, report_quarter):
+        list_ptme_appel = self.get_appel_ptme_from_mongo(
+            report_year, report_quarter)
+        union_ptme_appel = " UNION ALL ".join(
+            [f"SELECT '{item['patient_code']}'as patient_code" for item in list_ptme_appel])
+        query = f"""  (SELECT
+                            ss.id_patient
+                        FROM
+                            session ss
+                                LEFT JOIN
+                            club_session cs ON cs.id = ss.id_club_session
+                                LEFT JOIN
+                            tracking_motherbasicinfo ti ON ss.id_patient = ti.id_patient
+                        WHERE
+                            QUARTER(cs.date) = {report_quarter}
+                                AND YEAR(cs.date) = {report_year}
+                                AND ss.is_present = 1)
+                        UNION (
+                        select id_patient from tracking_motherfollowup tmf where QUARTER(tmf.date) = {report_quarter}
+                                AND YEAR(tmf.date) = {report_year}
+                        )
+                        union (
+                        select p.id as id_patient from tracking_odk_phone_followup topf 
+                        left join patient p on p.patient_code=UPPER(topf.patient_code)
+                        where QUARTER(topf.eccm_date) = {report_quarter}
+                                AND YEAR(topf.eccm_date) = {report_year} AND name='Enquette Corona club meres'
+                        )
+                        union (
+                        select p.id as id_patient from tracking_odk_phone_followup topf 
+                        left join odk_hivhaiti_backward_compatibility obc on obc.odk_case_id=topf.case_id
+                        left join patient p on p.patient_code=UPPER(obc.patient_code)
+                        where QUARTER(topf.eccm_date) = {report_quarter}
+                                AND YEAR(topf.eccm_date) = {report_year} AND name='Enquette Corona club meres'
+                        )
+                        union (
+                        select p.id as id_patient from odk_tracking_other_visit_ptme topf 
+                        left join patient p on p.patient_code=UPPER(topf.patient_code)
+                        where QUARTER(topf.date_of_visit) = {report_quarter}
+                                AND YEAR(topf.date_of_visit) = {report_year}
+                        )
+                        union (
+                        select p.id as id_patient from odk_tracking_other_visit_ptme topf 
+                        left join odk_hivhaiti_backward_compatibility obc on obc.odk_case_id=topf.case_id
+                        left join patient p on p.patient_code=UPPER(obc.patient_code)
+                        where QUARTER(topf.date_of_visit) = {report_quarter}
+                                AND YEAR(topf.date_of_visit) = {report_year}
+                        )
+                        union (
+                        select p.id as id_patient from tracking_ptme_visit topf
+                        left join patient p on p.patient_code=UPPER(topf.patient_code)
+                        where QUARTER(topf.date_of_visit) = {report_quarter}
+                                AND YEAR(topf.date_of_visit) = {report_year}
+                        )
+                        union (
+                        select p.id as id_patient from tracking_ptme_visit topf
+                        left join odk_hivhaiti_backward_compatibility obc on obc.odk_case_id=topf.case_id
+                        left join patient p on p.patient_code=UPPER(obc.patient_code)
+                        where QUARTER(topf.date_of_visit) = {report_quarter}
+                                AND YEAR(topf.date_of_visit) = {report_year}
+                        )
+                        union (
+                        select id_patient from tracking_regime tr
+                        where (QUARTER(tr.start_date) = {report_quarter}
+                                AND YEAR(tr.start_date) = {report_year})
+                                or (QUARTER(tr.end_date) = {report_quarter}
+                                AND YEAR(tr.end_date) = {report_year}) AND tr.category='regime_mother_treatment'
+                        )
+                        union (
+                        SELECT
+                            qmhk.id_patient
+                        FROM
+                            questionnaire_motherhivknowledge qmhk
+                                where QUARTER(qmhk.date) = {report_quarter}
+                                AND YEAR(qmhk.date) = {report_year}
+                            )
+                               UNION
+                                ( SELECT
+                            qms.id_patient
+                        FROM
+                            questionnaire_mothersurvey qms
+                                where QUARTER(qms.date) = {report_quarter}
+                                AND YEAR(qms.date) = {report_year} )
+                            UNION (SELECT
+                            qnhk.id_patient
+                        FROM
+                            questionnaire_newmotherhivknowledge qnhk
+                            where QUARTER(qnhk.date) = {report_quarter}
+                                    AND YEAR(qnhk.date) = {report_year}
+                        )
+                        UNION (SELECT
+                            tp.id_patient_mother as id_patient
+                            from tracking_pregnancy tp
+                            where (QUARTER(tp.ptme_enrollment_date) = {report_quarter}
+                                    AND YEAR(tp.ptme_enrollment_date) = {report_year}) or
+                                    (QUARTER(tp.actual_delivery_date ) = {report_quarter}
+                                    AND YEAR(tp.actual_delivery_date ) = {report_year})
+                        )
+                        UNION (SELECT
+                            tmb.id_patient
+                            from tracking_motherbasicinfo tmb
+                            where QUARTER(tmb.PTME_date) = {report_quarter}
+                                    AND YEAR(tmb.PTME_date) = {report_year}
+                        )
+                        UNION (SELECT
+                        tracking_motherbasicinfo.id_patient
+                            FROM
+                                tracking_motherbasicinfo
+                            LEFT JOIN patient ON patient.id = tracking_motherbasicinfo.id_patient
+                            LEFT JOIN testing_mereenfant ON CONCAT(testing_mereenfant.mother_city_code, '/', testing_mereenfant.mother_hospital_code, '/', testing_mereenfant.mother_code) = patient_code
+                            WHERE QUARTER(testing_mereenfant.date) = {report_quarter}
+                                                            AND YEAR(testing_mereenfant.date) = {report_year}
+                        )
+                        UNION (SELECT DISTINCT id_patient FROM testing_result tr
+                        WHERE (QUARTER(tr.blood_draw_date) = {report_quarter}
+                                    AND YEAR(tr.blood_draw_date) = {report_year})
+                                )
+                        UNION
+                        (
+                            SELECT p.id as id_patient from (
+                            {union_ptme_appel}) a
+                            left join patient p on p.patient_code=a.patient_code
+                       )
+                        """
+        return query
 
     def get_ovc_query_by_year_quarter(self, report_year, report_quarter):
         list_ptme_appel = self.get_appel_ptme_from_mongo(
@@ -264,10 +390,14 @@ class PtmeOvc:
                         left join
                         ({query_2}) b on a.id_patient=b.id_patient
                         where b.id_patient is not null"""
+        query_final = self.get_aggregation_query(type_of_aggregation, query)
+
+        return query_final
+
+    def get_aggregation_query(self, type_of_aggregation, query):
         aggregations = [
             {"departement": "d.name"},
             {"commune": "c.name"}
-
         ]
         select = "a.id_patient as id_patient"
         group_by = ""
@@ -304,7 +434,6 @@ class PtmeOvc:
             sum( pg.gender={male} and (pg.age between 15 and 17) and (pg.gender is not null) and pg.age is not null ) as m_15_17,
             sum( pg.gender={male} and (pg.age between 18 and 20) and ( pg.gender is not null) and pg.age is not null ) as m_18_20,
             sum( pg.gender={male} and (pg.age>20) and (pg.gender is not null) and pg.age is not null ) as m_over_20
-
             '''
             order_by = " order by "+order_by[:-1]
 
@@ -318,10 +447,25 @@ class PtmeOvc:
                         left join lookup_office o on o.id=h.office
                         where p.linked_to_id_patient=0 and h.network !=6
                         {group_by}
- 
                         """
-
+                        
         return query_final
+    
+
+    def get_ptme_semester_query(self, report_year_1, report_quarter_1, report_year_2, report_qyarter_2, type_of_aggregation="commune"):
+        query_1 = self.get_ptme_query_by_year_quarter(
+            report_year_1, report_quarter_1)
+        query_2 = self.get_ptme_query_by_year_quarter(
+            report_year_2, report_qyarter_2)
+        query = f"""SELECT
+                        a.id_patient as id_patient from ({query_1}) a
+                        left join
+                        ({query_2}) b on a.id_patient=b.id_patient
+                        where b.id_patient is not null"""
+        query_final = self.get_aggregation_query(type_of_aggregation, query)
+        return query_final
+    
+
 
     def get_ovc_serv_semester(self, report_year_1, report_quarter_1, report_year_2, report_qyarter_2, type_of_aggregation=None):
         e = engine()
@@ -336,3 +480,19 @@ class PtmeOvc:
             except Exception as e:
                 print(e)
                 return []
+            
+    
+    def get_ptme_semester(self, report_year_1, report_quarter_1, report_year_2, report_qyarter_2, type_of_aggregation=None):
+        e = engine()
+        with e as conn:
+            try:
+                cursor = conn.cursor()
+                query = self.get_ptme_semester_query(
+                    report_year_1, report_quarter_1, report_year_2, report_qyarter_2, type_of_aggregation)
+                cursor.execute(query)
+                return cursor.fetchall()
+            except Exception as e:
+                print(e)
+                return []
+            
+    
