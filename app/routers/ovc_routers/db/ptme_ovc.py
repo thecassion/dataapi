@@ -73,9 +73,9 @@ class PtmeOvc:
                             ss.id_patient
                         FROM
                             session ss
-                                LEFT JOIN
+                                INNER JOIN
                             club_session cs ON cs.id = ss.id_club_session
-                                LEFT JOIN
+                                INNER JOIN
                             tracking_motherbasicinfo ti ON ss.id_patient = ti.id_patient
                         WHERE
                             QUARTER(cs.date) = {report_quarter}
@@ -176,10 +176,6 @@ class PtmeOvc:
                             WHERE QUARTER(testing_mereenfant.date) = {report_quarter}
                                                             AND YEAR(testing_mereenfant.date) = {report_year}
                         )
-                        UNION (SELECT DISTINCT id_patient FROM testing_result tr
-                        WHERE (QUARTER(tr.blood_draw_date) = {report_quarter}
-                                    AND YEAR(tr.blood_draw_date) = {report_year})
-                                )
                         UNION
                         (
                             SELECT p.id as id_patient from (
