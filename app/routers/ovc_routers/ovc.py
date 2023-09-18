@@ -16,6 +16,9 @@ from datetime import date
 from pydantic import BaseModel
 
 from enum import Enum
+from .analysis.ovc import OVC
+from ...models.report import OVCReportParameters, FiscalYearSemester
+
 
 class TypeOfReport(str, Enum):
     ovc = "ovc"
@@ -25,7 +28,7 @@ class DateRange(BaseModel):
     start_date: date
     end_date: date
 
-class OVCReportParameters(BaseModel):
+class OVCReportParametersO(BaseModel):
     period_1: DateRange
     period_2: DateRange
     type_of_aggregation: str = None
@@ -36,6 +39,11 @@ router = APIRouter(
     prefix="/ovc",
     tags=["OVC"]
 )
+
+@router.post("/")
+def ovc(fiscal_year_semester: FiscalYearSemester):
+    ovc_report_parameters = fiscal_year_semester.to_ovc_report_parameters()
+    return OVC(ovc_report_parameters).get_ovc_serv_semester()
 
 @router.get("/semester")
 def sync_other_visit_ptme(report_year_1: int, report_quarter_1: int, report_year_2: int, report_quarter_2: int,type_of_aggregation=None):
@@ -112,7 +120,7 @@ def dreams(start_date:date, end_date:date, type_of_aggregation="commune"):
     return dreams_ovc().get_ovc_dreams_by_period(start_date, end_date, type_of_aggregation)
 
 @router.post("/gardening")
-def gardening(parameters: OVCReportParameters):
+def gardening(parameters: OVCReportParametersO):
     return gardening_ovc().get_ovc_gardening_by_period(parameters.period_1.start_date, parameters.period_1.end_date,parameters.period_2.start_date,parameters.period_2.end_date, parameters.type_of_aggregation, parameters.type_of_report)
 
 @router.post("/ptme")
