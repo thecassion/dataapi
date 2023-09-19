@@ -40,7 +40,7 @@ router = APIRouter(
     tags=["OVC"]
 )
 
-@router.post("/")
+@router.post("/all")
 def ovc(fiscal_year_semester: FiscalYearSemester):
     ovc_report_parameters = fiscal_year_semester.to_ovc_report_parameters()
     return OVC(ovc_report_parameters).get_ovc_serv_semester()
