@@ -53,6 +53,32 @@ class OVC:
 
 
         df = pd.concat([df_ovc, df_dreams, df_muso_with_household,df_gardening])
+
+        # weight per program
+        
+        # all per gender
+        programs = [
+            {
+                "program":"ovc",
+                "male":df_ovc["male"].sum(),
+                "female":df_ovc["female"].sum(),
+            },
+            {
+                "program":"dreams",
+                "male":0,
+                "female":df_dreams["female"].sum(),
+            },
+            {
+                "program":"muso",
+                "male":df_muso_with_household["male"].sum(),
+                "female": df_muso_with_household["female"].sum(),
+            },
+            {
+                "program":"gardening",
+                "male":0,
+                "female":df_gardening["female"].sum(),
+            }
+        ]
         df = df.fillna(0)
         # lowercase departement and commune
         df["departement"] = df["departement"].str.lower()
@@ -63,4 +89,7 @@ class OVC:
 
         df=df.groupby(["departement", "commune"]).sum().reset_index()
         df = df.to_dict(orient="records")
-        return df
+        return {
+            "communes":df,
+            "programs":programs
+        }
