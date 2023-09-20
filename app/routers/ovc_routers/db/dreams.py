@@ -104,6 +104,7 @@ class Dreams:
             order_by = "order by "+order_by[:-1]
 
             select = select + f''' count(*) as total ,
+            count(*) as female,
             SUM( a.age<1 and a.age is not null) as f_under_1,
             sum( (a.age between 1 and 4) and  a.age is not null ) as f_1_4,
             sum( (a.age between 5 and 9) and  a.age is not null ) as f_5_9,
