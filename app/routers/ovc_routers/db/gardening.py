@@ -87,7 +87,7 @@ class Gardening:
                             break
                     group_by = "group by "+group_by[:-1]
                     order_by = "order by "+order_by[:-1]
-                    select = select + "count(*) as total"
+                    select = select + "count(*) as f_caregiver ,count(*) as total"
                 
                 where_clause = ""
                 if type_of_report == "ovc":

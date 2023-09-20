@@ -3,6 +3,7 @@ from ....models.report import OVCReportParameters
 from ..db.ptme_ovc import PtmeOvc
 from ..db.dreams import Dreams
 from ..db.muso import Muso
+from ..db.gardening import Gardening
 
 class OVC:
     def __init__(self, OVCReportParameters: OVCReportParameters):
@@ -14,11 +15,18 @@ class OVC:
         ovc = PtmeOvc().get_ovc_serv_semester(self.OVCReportParameters.quarters.report_year_1, self.OVCReportParameters.quarters.report_quarter_1, self.OVCReportParameters.quarters.report_year_2, self.OVCReportParameters.quarters.report_quarter_2, self.OVCReportParameters.type_of_aggregation)
         dreams = Dreams().get_ovc_dreams_by_period(self.OVCReportParameters.period_1.start_date, self.OVCReportParameters.period_2.end_date, self.OVCReportParameters.type_of_aggregation)
         muso = Muso().get_ovc_muso_without_caris_member(self.OVCReportParameters.quarters.report_year_1, self.OVCReportParameters.quarters.report_quarter_1, self.OVCReportParameters.type_of_aggregation)
+        gardening = Gardening().get_ovc_gardening_by_period(
+            self.OVCReportParameters.period_1.start_date,
+            self.OVCReportParameters.period_1.end_date,
+            self.OVCReportParameters.period_2.start_date,
+            self.OVCReportParameters.period_2.end_date,
+            self.OVCReportParameters.type_of_aggregation)
         df_ovc = pd.DataFrame(ovc)
         df_dreams = pd.DataFrame(dreams)
         df_muso = pd.DataFrame(muso)
+        df_gardening = pd.DataFrame(gardening)
 
-        df = pd.concat([df_ovc, df_dreams, df_muso])
+        df = pd.concat([df_ovc, df_dreams, df_muso,df_gardening])
         df = df.fillna(0)
 
         df.groupby(["departement", "commune"]).sum().reset_index()
