@@ -57,6 +57,7 @@ class OVC:
         # weight per program
         
         # all per gender
+        print("sum ",type(df_ovc["male"].sum()))
         programs = [
             {
                 "program":"ovc",
@@ -79,6 +80,9 @@ class OVC:
                 "female":df_gardening["female"].sum(),
             }
         ]
+        df_programs = pd.DataFrame(programs)
+        df_programs = df_programs.fillna(0)
+        programs = df_programs.to_dict(orient="records")
         df = df.fillna(0)
         # lowercase departement and commune
         df["departement"] = df["departement"].str.lower()
