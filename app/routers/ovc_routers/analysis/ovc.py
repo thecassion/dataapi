@@ -25,8 +25,25 @@ class OVC:
         df_dreams = pd.DataFrame(dreams)
         df_muso = pd.DataFrame(muso)
         df_gardening = pd.DataFrame(gardening)
+        # Create a new data frame from MUSO by adding h_ to each column in MUSO without household
+        df_muso_with_household = pd.DataFrame()
+        columns = df_muso.columns
+        remove_columns = ["departement", "commune","unknown_gender"]
+        # Remove household columns (columns starting by h_)
 
-        df = pd.concat([df_ovc, df_dreams, df_muso,df_gardening])
+        columns = [column for column in columns if not column.startswith("h_")]
+
+        columns_starting_by_h = [column for column in df_muso.columns if column.startswith("h_")]
+
+        for column in columns:
+            df_muso_with_household[column] = df_muso[column]
+
+        for column in columns_starting_by_h:
+            df_muso_with_household[column.removeprefix("h_")] = df_muso[column]
+        
+
+
+        df = pd.concat([df_ovc, df_dreams, df_muso_with_household,df_gardening])
         df = df.fillna(0)
 
         df.groupby(["departement", "commune"]).sum().reset_index()
