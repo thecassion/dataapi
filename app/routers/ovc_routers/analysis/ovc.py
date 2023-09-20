@@ -39,7 +39,7 @@ class OVC:
             df_muso_with_household[column] = df_muso[column]
 
         for column in columns_starting_by_h:
-            df_muso_with_household[column.removeprefix("h_")] += df_muso[column]
+            df_muso_with_household[column.removeprefix("h_")] = df_muso_with_household[column.removeprefix("h_")]+ df_muso[column]
         
 
 
