@@ -107,7 +107,7 @@ class Muso():
             group_by = " group by "+group_by[:-1]
             male =1
             female = 2
-            select = select +f''' count(*) as total ,
+            select = select +f''' count(*)+sum(a.h_male)+sum(a.h_female) as total ,
             sum(a.gender={male} and a.gender is not null) as male, 
             sum(a.gender={female} and a.gender is not null) as female,
             sum(a.gender is null) as unknown_gender,
