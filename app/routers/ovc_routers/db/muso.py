@@ -14,9 +14,11 @@ class Muso():
             mg.name AS group_name,
             b.gender,
             b.dob,
-            timestampdiff(YEAR, b.dob, CURDATE()) AS age
+            timestampdiff(YEAR, b.dob, CURDATE()) AS age,
+            v.*
         FROM
             muso_group_members mgm
+            LEFT JOIN view_muso_household_by_group v ON v.id_patient = mgm.id_patient
                 LEFT JOIN
             beneficiary b ON b.id_patient = mgm.id_patient
                 LEFT JOIN
@@ -89,7 +91,21 @@ class Muso():
             sum(a.gender={male} and (a.age between 5 and 9) and (a.gender is not null) and a.age is not null ) as m_5_9,
             sum( a.gender={male} and (a.age between 10 and 14) and (a.gender is not null) and a.age is not null ) as m_10_14,
             sum( a.gender={male} and (a.age between 15 and 17) and (a.gender is not null) and a.age is not null ) as m_15_17,
-            sum( a.gender={male} and (a.age>18) and (a.gender is not null) and a.age is not null ) as m_caregiver
+            sum( a.gender={male} and (a.age>18) and (a.gender is not null) and a.age is not null ) as m_caregiver,
+            sum(a.h_male) as h_male, 
+            sum(a.h_female) as h_female,
+            SUM(a.h_f_under_1) as h_f_under_1,
+            sum(a.h_f_1_4) as h_f_1_4,
+            sum(a.h_f_5_9 ) as h_f_5_9,
+            sum(a.h_f_10_14) as h_f_10_14,
+            sum(a.h_f_15_17) as h_f_15_17,
+            sum(a.h_f_caregiver) as h_f_caregiver,
+            SUM(a.h_m_under_1) as h_m_under_1,
+            sum(a.h_m_1_4) as h_m_1_4,
+            sum(a.h_m_5_9) as h_m_5_9,
+            sum(a.h_m_10_14) as h_m_10_14,
+            sum(a.h_m_15_17) as h_m_15_17,
+            sum(a.h_m_caregiver) as h_m_caregiver
 
             '''
             order_by = " order by "+order_by[:-1]
