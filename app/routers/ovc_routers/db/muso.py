@@ -83,14 +83,13 @@ class Muso():
             sum( a.gender={female} and (a.age between 10 and 14) and (a.gender is not null) and a.age is not null ) as f_10_14,
             sum( a.gender={female} and (a.age between 15 and 17) and (a.gender is not null) and a.age is not null ) as f_15_17,
             sum(a.gender={female} and (a.age between 18 and 20) and ( a.gender is not null) and a.age is not null ) as f_18_20,
-            sum( a.gender={female} and a.age>20 and (a.gender is not null) and a.age is not null ) as f_over_20,
+            sum( a.gender={female} and a.age>20 and (a.gender is not null) and a.age is not null ) as f_caregiver,
             SUM(a.gender={male} and a.age<1 and (a.gender is not null) and a.age is not null) as m_under_1,
             sum(a.gender={male} and (a.age between 1 and 4) and (a.gender is not null) and a.age is not null ) as m_1_4,
             sum(a.gender={male} and (a.age between 5 and 9) and (a.gender is not null) and a.age is not null ) as m_5_9,
             sum( a.gender={male} and (a.age between 10 and 14) and (a.gender is not null) and a.age is not null ) as m_10_14,
             sum( a.gender={male} and (a.age between 15 and 17) and (a.gender is not null) and a.age is not null ) as m_15_17,
-            sum( a.gender={male} and (a.age between 18 and 20) and ( a.gender is not null) and a.age is not null ) as m_18_20,
-            sum( a.gender={male} and (a.age>20) and (a.gender is not null) and a.age is not null ) as m_over_20
+            sum( a.gender={male} and (a.age>18) and (a.gender is not null) and a.age is not null ) as m_caregiver
 
             '''
             order_by = " order by "+order_by[:-1]

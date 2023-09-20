@@ -110,7 +110,7 @@ class Dreams:
             sum( (a.age between 10 and 14) and a.age is not null ) as f_10_14,
             sum( (a.age between 15 and 17) and a.age is not null ) as f_15_17,
             sum( (a.age between 18 and 20)  and a.age is not null ) as f_18_20,
-            sum( a.age>20 and a.age is not null ) as caregiver
+            sum( a.age>20 and a.age is not null ) as f_caregiver
             '''
             ovc_query = self.get_ovc_query(start_date, end_date)
             query_final = f"""

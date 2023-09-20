@@ -421,15 +421,15 @@ class PtmeOvc:
             sum(pg.gender={female} and (pg.age between 5 and 9) and (pg.gender is not null) and pg.age is not null ) as f_5_9,
             sum( pg.gender={female} and (pg.age between 10 and 14) and (pg.gender is not null) and pg.age is not null ) as f_10_14,
             sum( pg.gender={female} and (pg.age between 15 and 17) and (pg.gender is not null) and pg.age is not null ) as f_15_17,
-            sum( pg.gender={female} and (pg.age between 18 and 20) and ( pg.gender is not null) and pg.age is not null ) as f_18_20,
-            sum( pg.gender={female} and pg.age>20 and (pg.gender is not null) and pg.age is not null ) as f_over_20,
+            sum( pg.gender={female} and (pg.age between 18 and 20) and (tmb.id_patient is null) and ( pg.gender is not null) and pg.age is not null ) as f_18_20,
+            sum( pg.gender={female} and (pg.age>20 or ( (tmb.id_patient is not null) and pg.age>17 )) and (pg.gender is not null) and pg.age is not null ) as f_caregiver,
             SUM(pg.gender={male} and pg.age<1 and (pg.gender is not null) and pg.age is not null) as m_under_1,
             sum(pg.gender={male} and (pg.age between 1 and 4) and (pg.gender is not null) and pg.age is not null ) as m_1_4,
             sum(pg.gender={male} and (pg.age between 5 and 9) and (pg.gender is not null) and pg.age is not null ) as m_5_9,
             sum( pg.gender={male} and (pg.age between 10 and 14) and (pg.gender is not null) and pg.age is not null ) as m_10_14,
             sum( pg.gender={male} and (pg.age between 15 and 17) and (pg.gender is not null) and pg.age is not null ) as m_15_17,
             sum( pg.gender={male} and (pg.age between 18 and 20) and ( pg.gender is not null) and pg.age is not null ) as m_18_20,
-            sum( pg.gender={male} and (pg.age>20) and (pg.gender is not null) and pg.age is not null ) as m_over_20
+            sum( pg.gender={male} and (pg.age>20) and (pg.gender is not null) and pg.age is not null ) as m_cargiver
             '''
             order_by = " order by "+order_by[:-1]
 
@@ -441,6 +441,7 @@ class PtmeOvc:
                         left join lookup_commune c on h.commune=c.id
                         left join lookup_departement d on d.id=c.departement
                         left join lookup_office o on o.id=h.office
+                        left join tracking_motherbasicinfo tmb on tmb.id_patient=a.id_patient
                         where p.linked_to_id_patient=0 and h.network !=6
                         {group_by}
                         """
@@ -490,5 +491,6 @@ class PtmeOvc:
             except Exception as e:
                 print(e)
                 return []
+    
             
     
