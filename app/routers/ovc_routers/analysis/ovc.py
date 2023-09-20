@@ -28,12 +28,14 @@ class OVC:
         # Create a new data frame from MUSO by adding h_ to each column in MUSO without household
         df_muso_with_household = pd.DataFrame()
         columns = df_muso.columns
-        remove_columns = ["departement", "commune","unknown_gender"]
         # Remove household columns (columns starting by h_)
 
         columns = [column for column in columns if not column.startswith("h_")]
 
         columns_starting_by_h = [column for column in df_muso.columns if column.startswith("h_")]
+
+        print("Columns start by _h", columns_starting_by_h)
+        print("Columns", columns)
 
         for column in columns:
             df_muso_with_household[column] = df_muso[column]

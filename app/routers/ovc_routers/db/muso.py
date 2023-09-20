@@ -6,6 +6,38 @@ class Muso():
         pass
 
     def get_ovc_muso_query(self, report_year_1, report_quarter_1):
+
+        muso_household_query = f"""
+            SELECT 
+                `mh`.`id_patient` AS `id`,
+                SUM(((`mh`.`sexe` = 'F'))) AS `h_female`,
+                SUM(((`mh`.`sexe` = 'M'))) AS `h_male`, 
+                SUM(((`mh`.`sexe` = 'F') AND (`mh`.`age` < 1))) AS `h_f_under_1`,
+                SUM(((`mh`.`sexe` = 'M') AND (`mh`.`age` < 1))) AS `h_m_under_1`,
+                SUM(((`mh`.`sexe` = 'F')
+                    AND (`mh`.`age` BETWEEN 1 AND 4))) AS `h_f_1_4`,
+                SUM(((`mh`.`sexe` = 'M')
+                    AND (`mh`.`age` BETWEEN 1 AND 4))) AS `h_m_1_4`,
+                SUM(((`mh`.`sexe` = 'F')
+                    AND (`mh`.`age` BETWEEN 5 AND 9))) AS `h_f_5_9`,
+                SUM(((`mh`.`sexe` = 'M')
+                    AND (`mh`.`age` BETWEEN 5 AND 9))) AS `h_m_5_9`,
+                SUM(((`mh`.`sexe` = 'F')
+                    AND (`mh`.`age` BETWEEN 10 AND 14))) AS `h_f_10_14`,
+                SUM(((`mh`.`sexe` = 'M')
+                    AND (`mh`.`age` BETWEEN 10 AND 14))) AS `h_m_10_14`,
+                SUM(((`mh`.`sexe` = 'F')
+                    AND (`mh`.`age` BETWEEN 15 AND 17))) AS `h_f_15_17`,
+                SUM(((`mh`.`sexe` = 'M')
+                    AND (`mh`.`age` BETWEEN 15 AND 17))) AS `h_m_15_17`,
+                SUM(((`mh`.`sexe` = 'F')
+                    AND (`mh`.`age` > 17))) AS `h_f_caregiver`,
+                SUM(((`mh`.`sexe` = 'M')
+                    AND (`mh`.`age` > 17))) AS `h_m_caregiver`
+            FROM
+                `muso_household_2022` `mh`
+            GROUP BY `mh`.`id_patient`
+                """
         query = f"""
         SELECT
             mgm.id_patient AS id_patient,
@@ -18,7 +50,7 @@ class Muso():
             v.*
         FROM
             muso_group_members mgm
-            LEFT JOIN view_muso_household_by_group v ON v.id_patient = mgm.id_patient
+            LEFT JOIN ({muso_household_query}) v ON v.id = mgm.id_patient
                 LEFT JOIN
             beneficiary b ON b.id_patient = mgm.id_patient
                 LEFT JOIN
