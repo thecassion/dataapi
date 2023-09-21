@@ -11,10 +11,14 @@ class TypeOfReport(str, Enum):
     ovc = "ovc"
     program = "program"
 
+class FiscalYearRange(BaseModel):
+    start_date: date
+    end_date: date
 
 class DreamsReportParameters(BaseModel):
     period_1: DateRange
     period_2: DateRange
+    fiscal_year_range: FiscalYearRange
     type_of_aggregation: str = None
     type_of_report: TypeOfReport = TypeOfReport.ovc
 
@@ -34,6 +38,7 @@ class OVCReportParameters(BaseModel):
     period_1: DateRange = None
     period_2: DateRange = None
     quarters: OVCQuarters = None
+    fiscal_year_range: FiscalYearRange = None
     type_of_aggregation: str = "commune"
     type_of_report: TypeOfReport = TypeOfReport.ovc
 
@@ -43,7 +48,7 @@ class FiscalYearSemester(BaseModel):
     # Convert FiscalYearSemester to OVCReportParameters
     def to_ovc_quarters(self):
         return OVCQuarters(
-            report_year_1 = int(self.fiscal_year.split("-")[0]),
+            report_year_1 = int(self.fiscal_year.split("-")[0]) if self.semester ==1 else int(self.fiscal_year.split("-")[1]),
             report_quarter_1 = 4 if self.semester ==1 else 2,
             report_year_2 = int(self.fiscal_year.split("-")[1]),
             report_quarter_2 = 1 if self.semester ==1 else 3
@@ -62,5 +67,11 @@ class FiscalYearSemester(BaseModel):
                 start_date = date(ovc_quarters.report_year_2, (ovc_quarters.report_quarter_2-1)*3+1, 1),
                 end_date = date(ovc_quarters.report_year_2, ovc_quarters.report_quarter_2*3, 31 if self.semester ==1 else 30)
             ),
-            quarters = self.to_ovc_quarters()
+            quarters = self.to_ovc_quarters(),
+            fiscal_year_range = self.to_fiscal_year()
+        )
+    def to_fiscal_year(self):
+        return FiscalYearRange(
+            start_date = date(int(self.fiscal_year.split("-")[0]), 10, 1),
+            end_date = date(int(self.fiscal_year.split("-")[1]), 9, 30)
         )

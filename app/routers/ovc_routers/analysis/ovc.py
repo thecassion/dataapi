@@ -13,7 +13,7 @@ class OVC:
     
     def get_ovc_serv_semester(self):
         ovc = PtmeOvc().get_ovc_serv_semester(self.OVCReportParameters.quarters.report_year_1, self.OVCReportParameters.quarters.report_quarter_1, self.OVCReportParameters.quarters.report_year_2, self.OVCReportParameters.quarters.report_quarter_2, self.OVCReportParameters.type_of_aggregation)
-        dreams = Dreams().get_ovc_dreams_by_period(self.OVCReportParameters.period_1.start_date, self.OVCReportParameters.period_2.end_date, self.OVCReportParameters.type_of_aggregation)
+        dreams = Dreams().get_ovc_dreams_by_period(self.OVCReportParameters.fiscal_year_range.start_date, self.OVCReportParameters.fiscal_year_range.end_date, self.OVCReportParameters.type_of_aggregation)
         muso = Muso().get_ovc_muso_without_caris_member(self.OVCReportParameters.quarters.report_year_1, self.OVCReportParameters.quarters.report_quarter_1, self.OVCReportParameters.type_of_aggregation)
         gardening = Gardening().get_ovc_gardening_by_period(
             self.OVCReportParameters.period_1.start_date,
@@ -57,7 +57,8 @@ class OVC:
         # weight per program
         
         # all per gender
-        print("sum ",type(df_ovc["male"].sum()))
+        print("Dreams sum ",df_dreams["female"].sum())
+        print("reportparameters", self.OVCReportParameters.dict())
         programs = [
             {
                 "program":"ovc",
