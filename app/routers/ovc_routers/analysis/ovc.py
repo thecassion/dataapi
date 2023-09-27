@@ -4,6 +4,7 @@ from ..db.ptme_ovc import PtmeOvc
 from ..db.dreams import Dreams
 from ..db.muso import Muso
 from ..db.gardening import Gardening
+from ..db.education import Education
 
 class OVC:
     def __init__(self, OVCReportParameters: OVCReportParameters):
@@ -21,6 +22,7 @@ class OVC:
             self.OVCReportParameters.period_2.start_date,
             self.OVCReportParameters.period_2.end_date,
             self.OVCReportParameters.type_of_aggregation)
+        education = Education().get_ovc_education_by_period(self.OVCReportParameters.fiscal_year_range.start_date, self.OVCReportParameters.fiscal_year_range.end_date)
         df_ovc = pd.DataFrame(ovc)
         df_ovc = df_ovc.fillna(0)
         df_dreams = pd.DataFrame(dreams)
@@ -29,6 +31,8 @@ class OVC:
         df_muso = df_muso.fillna(0)
         df_gardening = pd.DataFrame(gardening)
         df_gardening = df_gardening.fillna(0)
+        df_education = pd.DataFrame(education)
+        df_education = df_education.fillna(0)
         # Create a new data frame from MUSO by adding h_ to each column in MUSO without household
         df_muso_with_household = pd.DataFrame()
         columns = df_muso.columns
@@ -38,27 +42,20 @@ class OVC:
 
         columns_starting_by_h = [column for column in df_muso.columns if column.startswith("h_")]
 
-        print("Columns start by _h", columns_starting_by_h)
-        print("Columns", columns)
-
         for column in columns:
             df_muso_with_household[column] = df_muso[column]
 
         for column in columns_starting_by_h:
             df_muso_with_household[column.removeprefix("h_")] = df_muso_with_household[column.removeprefix("h_")]+ df_muso[column]
         
-        print("Columns", df_muso_with_household.columns)
-        print("Head", df_muso_with_household.head())
         df_muso_with_household = df_muso_with_household.fillna(0)
 
 
-        df = pd.concat([df_ovc, df_dreams, df_muso_with_household,df_gardening])
+        df = pd.concat([df_ovc, df_dreams, df_muso_with_household,df_gardening, df_education])
 
         # weight per program
         
         # all per gender
-        print("Dreams sum ",df_dreams["female"].sum())
-        print("reportparameters", self.OVCReportParameters.dict())
         programs = [
             {
                 "program":"ovc",
@@ -79,6 +76,11 @@ class OVC:
                 "program":"gardening",
                 "male":0,
                 "female":df_gardening["female"].sum(),
+            },
+            {
+                "program":"education",
+                "male":df_education["male"].sum(),
+                "female": df_education["female"].sum()
             }
         ]
         df_programs = pd.DataFrame(programs)
