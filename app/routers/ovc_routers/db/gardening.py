@@ -124,7 +124,7 @@ class Gardening:
                             break
                     group_by = "group by "+group_by[:-1]
                     order_by = "order by "+order_by[:-1]
-                    select = select + f"""count(*) as f_caregiver ,count(*) as total,count(*) as female,
+                    select = select + f"""count(*) as f_caregiver ,count(*) as total,count(*) as female,sum(a.h_male)+sum(a.h_female) as h_total,
                         sum(a.h_male) as h_male, 
                         sum(a.h_female) as h_female,
                         SUM(a.h_f_under_1) as h_f_under_1,
