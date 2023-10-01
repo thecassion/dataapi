@@ -105,6 +105,5 @@ class OVC:
 
         # Fill NaN values with 0
         df_with_household = df_with_household.fillna(0)
-        df_with_household = df_with_household.drop(columns=household_columns)
 
         return df_with_household
