@@ -61,7 +61,7 @@ class OVC:
             },
             {
                 "program":"gardening",
-                "male":0,
+                "male":df_gardening["male"].sum(),
                 "female":df_gardening["female"].sum(),
             },
             {
