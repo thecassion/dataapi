@@ -1,7 +1,8 @@
 from pydantic import (
-    BaseSettings,
     Field
 )
+
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     project_title: str = "Caris DATA API SERVICE"
@@ -27,19 +28,15 @@ class Settings(BaseSettings):
     DATIM_DESCRIPTION: str = "Get the datim data for dreams indicator - AGYW_PREV"
     DATIM_SUMMARY: str = "Get the datim data for dreams indicator - AGYW_PREV"
     
-    mysql_username: str = Field(...,env='MYSQL_USERNAME')
-    mysql_password: str = Field(...,env='MYSQL_PASSWORD')
-    mysql_host: str = Field(...,env='MYSQL_HOST')
-    mysql_port: int = Field(...,env='MYSQL_PORT')
-    mysql_database: str = Field(...,env='MYSQL_DATABASE')
+    mysql_username: str
+    mysql_password: str 
+    mysql_host: str 
+    mysql_port: int 
+    mysql_database: str 
     
-    commcare_username: str = Field(...,env='COMMCARE_USERNAME')
-    commcare_password: str = Field(...,env='COMMCARE_PASSWORD')
-    mongo_uri: str = Field(...,env='MONGODB_URI')
-    
-    class Config:
-        env_prefix = ""
-        case_sensitive = False
-        env_file = ".env"
-        env_file_encoding = "utf-8"
+    commcare_username: str 
+    commcare_password: str 
+    mongodb_uri: str 
+
+    model_config = SettingsConfigDict(env_file='.env', extra='ignore')
 settings = Settings()

@@ -4,7 +4,7 @@ from ...core import (
 from pymongo import MongoClient
 
 
-client = MongoClient(settings.mongo_uri)
+client = MongoClient(settings.mongodb_uri)
 # client = MongoClient("mongodb+srv://jhonandre:Pass2Pass@cluster0.5p8etij.mongodb.net/caris_databridge")
 
 db = client["caris_databridge"]

@@ -18,3 +18,4 @@ python-dateutil
 polars[connectorx, pyarrow]
 pymongo[srv]
 flatten-dict
+pydantic-settings
