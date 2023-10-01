@@ -116,11 +116,11 @@ class Dreams:
             ovc_query = self.get_ovc_query(start_date, end_date)
             query_final = f"""
             SELECT {select} FROM ({ovc_query}) a
-            left join dream_member dm on dm.id_patient = a.id_patient
-            left join dream_group dg on dg.id=dm.id_group
-            left join dream_hub dh on dh.id=dg.id_dream_hub
-            left join lookup_commune lc on lc.id=dh.commune
-            left join lookup_departement ld on ld.id=lc.departement
+            inner join dream_member dm on dm.id_patient = a.id_patient
+            inner join dream_group dg on dg.id=dm.id_group
+            inner join dream_hub dh on dh.id=dg.id_dream_hub
+            inner join lookup_commune lc on lc.id=dh.commune
+            inner join lookup_departement ld on ld.id=lc.departement
             {group_by}
             """
         return query_final

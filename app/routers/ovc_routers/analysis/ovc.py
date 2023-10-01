@@ -33,22 +33,9 @@ class OVC:
         df_gardening = df_gardening.fillna(0)
         df_education = pd.DataFrame(education)
         df_education = df_education.fillna(0)
-        # Create a new data frame from MUSO by adding h_ to each column in MUSO without household
-        df_muso_with_household = pd.DataFrame()
-        columns = df_muso.columns
-        # Remove household columns (columns starting by h_)
 
-        columns = [column for column in columns if not column.startswith("h_")]
-
-        columns_starting_by_h = [column for column in df_muso.columns if column.startswith("h_")]
-
-        for column in columns:
-            df_muso_with_household[column] = df_muso[column]
-
-        for column in columns_starting_by_h:
-            df_muso_with_household[column.removeprefix("h_")] = df_muso_with_household[column.removeprefix("h_")]+ df_muso[column]
-        
-        df_muso_with_household = df_muso_with_household.fillna(0)
+        df_muso_with_household= self._create_df_with_household(df_muso)
+        df_gardening= self._create_df_with_household(df_gardening)
 
 
         df = pd.concat([df_ovc, df_dreams, df_muso_with_household,df_gardening, df_education])
@@ -100,3 +87,23 @@ class OVC:
             "communes":df,
             "programs":programs
         }
+    
+        # Refactored method to create df with 'h_' columns added to corresponding columns
+    def _create_df_with_household(self, df):
+        df_with_household = df.copy()
+
+        # Identify columns starting with 'h_'
+        household_columns = [column for column in df.columns if column.startswith("h_")]
+
+        # Remove the 'h_' prefix and add to the corresponding columns
+        for column in household_columns:
+            non_household_column = column.removeprefix("h_")
+            df_with_household[non_household_column] = df_with_household.get(non_household_column, 0) + df_with_household[column]
+
+        # Drop the original 'household' columns
+        df_with_household = df_with_household.drop(household_columns, axis=1)
+
+        # Fill NaN values with 0
+        df_with_household = df_with_household.fillna(0)
+
+        return df_with_household
