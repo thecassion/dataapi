@@ -96,6 +96,7 @@ class Gardening:
                     `hg`.*, TIMESTAMPDIFF(YEAR, `hg`.`dob`, '{end_date_2}') AS age
                 FROM
                     `caris_db`.`houshold_garden` `hg`) `mh`
+                    where `mh`.`age` <= 17
             GROUP BY `mh`.`parent_id`
                 """
         e=engine()
