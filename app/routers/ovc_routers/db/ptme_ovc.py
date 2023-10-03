@@ -391,6 +391,87 @@ class PtmeOvc:
         return query_final
 
     def get_aggregation_query(self, type_of_aggregation, query):
+
+        ptme_ovc_household_query = f"""
+        SELECT 
+                *
+            FROM
+                ((SELECT 
+                    `a`.`id_patient`,
+                        SUM(((`a`.`gender` = '2'))) AS `h_female`,
+                        SUM(((`a`.`gender` = '1'))) AS `h_male`,
+                        SUM(((`a`.`gender` = '2') AND (`a`.`age` < 1))) AS `h_f_under_1`,
+                        SUM(((`a`.`gender` = '1') AND (`a`.`age` < 1))) AS `h_m_under_1`,
+                        SUM(((`a`.`gender` = '2')
+                            AND (`a`.`age` BETWEEN 1 AND 4))) AS `h_f_1_4`,
+                        SUM(((`a`.`gender` = '1')
+                            AND (`a`.`age` BETWEEN 1 AND 4))) AS `h_m_1_4`,
+                        SUM(((`a`.`gender` = '2')
+                            AND (`a`.`age` BETWEEN 5 AND 9))) AS `h_f_5_9`,
+                        SUM(((`a`.`gender` = '1')
+                            AND (`a`.`age` BETWEEN 5 AND 9))) AS `h_m_5_9`,
+                        SUM(((`a`.`gender` = '2')
+                            AND (`a`.`age` BETWEEN 10 AND 14))) AS `h_f_10_14`,
+                        SUM(((`a`.`gender` = '1')
+                            AND (`a`.`age` BETWEEN 10 AND 14))) AS `h_m_10_14`,
+                        SUM(((`a`.`gender` = '2')
+                            AND (`a`.`age` BETWEEN 15 AND 17))) AS `h_f_15_17`,
+                        SUM(((`a`.`gender` = '1')
+                            AND (`a`.`age` BETWEEN 15 AND 17))) AS `h_m_15_17`,
+                        SUM(((`a`.`gender` = '2')
+                            AND (`a`.`age` > 17))) AS `h_f_caregiver`,
+                        SUM(((`a`.`gender` = '1')
+                            AND (`a`.`age` > 17))) AS `h_m_caregiver`
+                FROM
+                    (SELECT 
+                    hm.id_patient,
+                        TIMESTAMPDIFF(YEAR, hm.dob, '2023-09-30') AS age,
+                        IF(hm.gender = 'Masculin', 1, IF(hm.gender = 'Feminin', 2, hm.gender)) AS gender
+                FROM
+                    caris_db.household_mother hm
+                WHERE
+                    hm.id_patient IS NOT NULL
+                HAVING age < 18) a
+                GROUP BY a.id_patient) UNION (SELECT 
+                    `a`.`id_patient`,
+                        SUM(((`a`.`gender` = '2' AND `a`.`age` < 18))) + IF(SUM(((`a`.`gender` = '2')
+                            AND (`a`.`age` > 17))) > 0, 1, 0) AS `h_female`,
+                        SUM(((`a`.`gender` = '1' AND `a`.`age` < 18))) + IF(SUM(((`a`.`gender` = '1')
+                            AND (`a`.`age` > 17))) > 0, 1, 0) AS `h_male`,
+                        SUM(((`a`.`gender` = '2') AND (`a`.`age` < 1))) AS `h_f_under_1`,
+                        SUM(((`a`.`gender` = '1') AND (`a`.`age` < 1))) AS `h_m_under_1`,
+                        SUM(((`a`.`gender` = '2')
+                            AND (`a`.`age` BETWEEN 1 AND 4))) AS `h_f_1_4`,
+                        SUM(((`a`.`gender` = '1')
+                            AND (`a`.`age` BETWEEN 1 AND 4))) AS `h_m_1_4`,
+                        SUM(((`a`.`gender` = '2')
+                            AND (`a`.`age` BETWEEN 5 AND 9))) AS `h_f_5_9`,
+                        SUM(((`a`.`gender` = '1')
+                            AND (`a`.`age` BETWEEN 5 AND 9))) AS `h_m_5_9`,
+                        SUM(((`a`.`gender` = '2')
+                            AND (`a`.`age` BETWEEN 10 AND 14))) AS `h_f_10_14`,
+                        SUM(((`a`.`gender` = '1')
+                            AND (`a`.`age` BETWEEN 10 AND 14))) AS `h_m_10_14`,
+                        SUM(((`a`.`gender` = '2')
+                            AND (`a`.`age` BETWEEN 15 AND 17))) AS `h_f_15_17`,
+                        SUM(((`a`.`gender` = '1')
+                            AND (`a`.`age` BETWEEN 15 AND 17))) AS `h_m_15_17`,
+                        IF(SUM(((`a`.`gender` = '2')
+                            AND (`a`.`age` > 17))) > 0, 1, 0) AS `h_f_caregiver`,
+                        IF(SUM(((`a`.`gender` = '1')
+                            AND (`a`.`age` > 17))) > 0, 1, 0) AS `h_m_caregiver`
+                FROM
+                    (SELECT 
+                    hm.id_patient,
+                        TIMESTAMPDIFF(YEAR, hm.dob, '2023-09-30') AS age,
+                        IF(hm.gender = 'Masculin', 1, IF(hm.gender = 'Feminin', 2, hm.gender)) AS gender
+                FROM
+                    caris_db.household_child hm
+                WHERE
+                    hm.id_patient IS NOT NULL) a
+                GROUP BY a.id_patient)) d
+            GROUP BY d.id_patient
+        """
         aggregations = [
             {"departement": "d.name"},
             {"commune": "c.name"}
@@ -429,12 +510,27 @@ class PtmeOvc:
             sum( pg.gender={male} and (pg.age between 10 and 14) and (pg.gender is not null) and pg.age is not null ) as m_10_14,
             sum( pg.gender={male} and (pg.age between 15 and 17) and (pg.gender is not null) and pg.age is not null ) as m_15_17,
             sum( pg.gender={male} and (pg.age between 18 and 20) and ( pg.gender is not null) and pg.age is not null ) as m_18_20,
-            sum( pg.gender={male} and (pg.age>20) and (pg.gender is not null) and pg.age is not null ) as m_cargiver
+            sum( pg.gender={male} and (pg.age>20) and (pg.gender is not null) and pg.age is not null ) as m_cargiver,
+            sum(hs.h_male) as h_male, 
+            sum(hs.h_female) as h_female,
+            SUM(hs.h_f_under_1) as h_f_under_1,
+            sum(hs.h_f_1_4) as h_f_1_4,
+            sum(hs.h_f_5_9 ) as h_f_5_9,
+            sum(hs.h_f_10_14) as h_f_10_14,
+            sum(hs.h_f_15_17) as h_f_15_17,
+            sum(hs.h_f_caregiver) as h_f_caregiver,
+            SUM(hs.h_m_under_1) as h_m_under_1,
+            sum(hs.h_m_1_4) as h_m_1_4,
+            sum(hs.h_m_5_9) as h_m_5_9,
+            sum(hs.h_m_10_14) as h_m_10_14,
+            sum(hs.h_m_15_17) as h_m_15_17,
+            sum(hs.h_m_caregiver) as h_m_caregiver
             '''
             order_by = " order by "+order_by[:-1]
 
         query_final = f"""SELECT
                          {select} from ({query}) a
+                         left join ({ptme_ovc_household_query}) hs on hs.id_patient=a.id_patient
                         left join patient_gender_age_view pg on pg.id_patient=a.id_patient
                         left join patient p on p.id=a.id_patient
                         left join lookup_hospital h on h.city_code=p.city_code and h.hospital_code=p.hospital_code
