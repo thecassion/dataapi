@@ -55,7 +55,7 @@ class Gardening:
             )
             UNION
             (
-            select fo.case_id from odk_form_gardening_final_observation fo where fo.timeStart between  '{start_date}' and '{end_date}'
+            select fo.case_id from odk_form_gardening_final_observation fo where fo.meta_timeStart between  '{start_date}' and '{end_date}'
             )
         """
         return query
