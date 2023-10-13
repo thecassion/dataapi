@@ -29,17 +29,17 @@ class OVC:
         df_dreams = df_dreams.fillna(0)
         df_muso = pd.DataFrame(muso)
         df_muso = df_muso.fillna(0)
-        # df_gardening = pd.DataFrame(gardening)
-        # df_gardening = df_gardening.fillna(0)
+        df_gardening = pd.DataFrame(gardening)
+        df_gardening = df_gardening.fillna(0)
         df_education = pd.DataFrame(education)
         df_education = df_education.fillna(0)
 
         df_muso_with_household= self._create_df_with_household(df_muso)
-        # df_gardening= self._create_df_with_household(df_gardening)
+        df_gardening= self._create_df_with_household(df_gardening)
         df_ovc = self._create_df_with_household(df_ovc)
 
 
-        df = pd.concat([df_ovc, df_dreams, df_muso_with_household, df_education])
+        df = pd.concat([df_ovc, df_dreams, df_muso_with_household,df_gardening, df_education])
 
         # weight per program
         
@@ -60,11 +60,11 @@ class OVC:
                 "male":df_muso_with_household["male"].sum(),
                 "female": df_muso_with_household["female"].sum(),
             },
-            # {
-            #     "program":"gardening",
-            #     "male":df_gardening["male"].sum(),
-            #     "female":df_gardening["female"].sum(),
-            # },
+            {
+                "program":"gardening",
+                "male":df_gardening["male"].sum(),
+                "female":df_gardening["female"].sum(),
+            },
             {
                 "program":"education",
                 "male":df_education["male"].sum(),
