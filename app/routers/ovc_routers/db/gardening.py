@@ -154,7 +154,7 @@ class Gardening:
                 left join gardening_beneficiary gb on gb.case_id = t1.case_id
                 {where_clause}
                 ) b
-                left join ({gardening_household_query}) as a on a.id COLLATE utf8mb3_general_ci = b.case_id COLLATE utf8mb3_general_ci
+                left join ({gardening_household_query}) as a on a.id = b.case_id
 
                 {group_by}
                 """
