@@ -120,7 +120,7 @@ def pipeline_handler_cwv(year, start_date, end_date):
                 "properties.gender_sex": 1,
                 "properties.dob": 1,
                 "properties.dat_peyman_fet": 1,
-                "properties.eske_peye": 1,
+                "properties.eskew_peye": 1,
                 "properties.case_type": 1,
                 "closed": 1,
             }
