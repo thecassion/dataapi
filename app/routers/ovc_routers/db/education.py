@@ -34,7 +34,7 @@ class Education:
                     GROUP BY em.case_id
                     HAVING nbre >= 8 AND age BETWEEN 10 AND 14) a
                         LEFT JOIN
-                    lookup_commune lc ON lc.name COLLATE utf8mb3_general_ci = a.commune COLLATE utf8mb3_general_ci
+                    lookup_commune lc ON lc.name = a.commune
                         LEFT JOIN
                     lookup_departement ld ON ld.id = lc.departement
                 GROUP BY a.commune
