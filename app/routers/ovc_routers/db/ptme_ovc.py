@@ -65,10 +65,6 @@ class PtmeOvc:
     
 
     def get_ptme_query_by_year_quarter(self, report_year, report_quarter):
-        list_ptme_appel = self.get_appel_ptme_from_mongo(
-            report_year, report_quarter)
-        union_ptme_appel = " UNION ALL ".join(
-            [f"SELECT '{item['patient_code']}'as patient_code" for item in list_ptme_appel])
         query = f"""  (SELECT
                             ss.id_patient
                         FROM
@@ -178,22 +174,14 @@ class PtmeOvc:
                         )
                         UNION
                         (
-                            SELECT p.id as id_patient from (
-                            {union_ptme_appel}) a
-                            left join patient p on p.patient_code=a.patient_code
+                            SELECT p.id as id_patient from odk_appel oa
+                            left join patient p on p.patient_code=oa.patient_code
+                            WHERE QUARTER(oa.date_appel) = {report_quarter} AND YEAR(oa.date_appel) = {report_year}
                        )
                         """
         return query
 
     def get_ovc_query_by_year_quarter(self, report_year, report_quarter):
-        list_ptme_appel = self.get_appel_ptme_from_mongo(
-            report_year, report_quarter)
-        list_oev_appel = self.get_appel_ptme_from_mongo(
-            report_year, report_quarter, type_appel="appels_oev")
-        union_ptme_appel = " UNION ALL ".join(
-            [f"SELECT '{item['patient_code']}'as patient_code" for item in list_ptme_appel])
-        union_oev_appel = " UNION ALL ".join(
-            [f"SELECT '{item['patient_code']}'as patient_code" for item in list_oev_appel])
         query = f"""(SELECT
                             id_patient
                         FROM
@@ -363,15 +351,15 @@ class PtmeOvc:
                         )
                         UNION
                         (
-                            SELECT p.id as id_patient from (
-                            {union_ptme_appel}) a
-                            left join patient p on p.patient_code=a.patient_code
+                            SELECT p.id as id_patient from odk_appel oa
+                            left join patient p on p.patient_code=oa.patient_code
+                            where QUARTER(oa.date_appel) = {report_quarter} AND YEAR(oa.date_appel) = {report_year}
                        )
                          UNION
                         (
-                            SELECT p.id as id_patient from (
-                            {union_oev_appel}) a
-                            left join patient p on p.patient_code=a.patient_code
+                            SELECT p.id as id_patient from odk_appel oa
+                            left join patient p on p.patient_code=oa.patient_code
+                            WHERE QUARTER(oa.date_appel) = {report_quarter} AND YEAR(oa.date_appel) = {report_year}
                        )
                         """
         return query
