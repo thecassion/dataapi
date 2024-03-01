@@ -164,3 +164,40 @@ class MusoBeneficiary:
             return True
         else:
             raise Exception("beneficiaries must be a list")
+        
+    def get_muso_beneficiaries_infos(self):
+        e = engine()
+        with e as conn:
+            try:
+                cursor = conn.cursor()
+                query = '''(SELECT
+                                'membre_actifs' AS 'info', COUNT(id_patient) AS nombre
+                        FROM
+                                view_muso_household_report) UNION (SELECT
+                                'total_membre' AS 'info', COUNT(*) AS nombre
+                        FROM
+                                muso_group_members) UNION ((SELECT
+                                'members_counted' AS 'info', COUNT(id_patient) AS nombre
+                        FROM
+                                caris_db.view_muso_household_report
+                        WHERE
+                                (! ISNULL(indice_householdcount)
+                                        OR (is_household_applicable = 'yes')))) UNION (SELECT 
+                                'members_that_not_counted', COUNT(id_patient) AS nombre
+                        FROM
+                                caris_db.view_muso_household_report
+                        WHERE
+                                (ISNULL(indice_householdcount)
+                                        AND (is_household_applicable = 'no'
+                                        OR ISNULL(is_household_applicable)))) UNION (SELECT 
+                                'members_that_not_NA', COUNT(id_patient) AS nombre
+                        FROM
+                                caris_db.view_muso_household_report
+                        WHERE
+                                is_household_applicable = 'yes')
+                    '''
+                cursor.execute(query)
+                return cursor.fetchall()
+            except Exception as e:
+                print(e)
+                return []
