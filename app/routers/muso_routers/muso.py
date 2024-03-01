@@ -183,6 +183,12 @@ def sync_beneficiaries_to_hivhaiti():
     # except Exception as e:
     #     raise HTTPException(status_code=500, detail=str(e))
 
+@router.get("/beneficiaries/infos")
+def get_beneficiaries_infos():
+    muso_beneficiary = MusoBeneficiary()
+    beneficiaries = muso_beneficiary.get_muso_beneficiaries_infos()
+    return beneficiaries
+
 
 @router.get("/households/xlsx")
 def households_to_excel():
