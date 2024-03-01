@@ -92,7 +92,7 @@ def sync_muso_groups_code():
 
 def update_code_on_cc(groupes):
     groupes_with_new_code = [
-        {"case_id": group["case_id"], "code":group["code"]} for group in groupes]
+        {"case_id": group["case_id"], "code": group["code"]} for group in groupes]
     buffer = io.BytesIO()
     with pd.ExcelWriter(buffer) as writer:
         pd.DataFrame(groupes_with_new_code).to_excel(
@@ -256,6 +256,7 @@ async def sync_beneficiaries_household_applicable():
     analysis_muso_beneficiaries.update_beneficiaries_household_not_applicable()
     return {"message": "beneficiaries status synced"}
 
+
 @router.get("/beneficiaries/update/pvvih")
 async def update_beneficiaries_pvvih():
     muso_beneficiary = MusoBeneficiary()
@@ -267,6 +268,7 @@ async def update_beneficiaries_pvvih():
     analysis_muso_beneficiaries.update_beneficiaries_pvvih()
     return {"message": "beneficiaries status synced"}
 
+
 @router.get("/beneficiaries/update/is_caris_member")
 async def update_beneficiaries_is_caris_member():
     muso_beneficiary = MusoBeneficiary()
@@ -276,3 +278,4 @@ async def update_beneficiaries_is_caris_member():
     analysis_muso_beneficiaries = MusoBeneficiaries(
         {"cc_beneficiaries": cc_beneficiaries, "hiv_beneficiaries": hiv_beneficiaries, "max_rank_beneficiaries_by_groups": max_rank_beneficiaries_by_groups})
     analysis_muso_beneficiaries.update_beneficiaries_is_caris_member()
+    return {"message": "beneficiairies status sync"}
