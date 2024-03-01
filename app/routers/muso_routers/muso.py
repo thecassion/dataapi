@@ -90,6 +90,13 @@ def sync_muso_groups_code():
     return {"message": "muso groups synced"}
 
 
+@router.get("/groupes/infos")
+def get_groupes_infos():
+    muso_group = MusoGroup()
+    groupes = muso_group.get_muso_groupes_infos()
+    return groupes
+
+
 def update_code_on_cc(groupes):
     groupes_with_new_code = [
         {"case_id": group["case_id"], "code": group["code"]} for group in groupes]

@@ -15,6 +15,35 @@ class MusoGroup:
             except Exception as e:
                 print(e)
                 return []
+    def get_muso_groupes_infos(self):
+        e = engine()
+        with e as conn:
+            try:
+                cursor = conn.cursor()
+                query = """
+
+                    (SELECT 
+                        'groupe_actifs' AS 'info', COUNT(*) AS nombre
+                    FROM
+                        muso_group
+                    WHERE
+                        (is_inactive = 0 OR is_inactive IS NULL)
+                            AND (is_graduated = 0 OR is_graduated IS NULL)
+                            AND (closed_on_commcare = 0
+                            OR closed_on_commcare IS NULL)) UNION (SELECT 
+                        'groupe_inactifs' AS 'info', COUNT(*) AS nombre
+                    FROM
+                        muso_group
+                    WHERE
+                        is_inactive = 1 or is_graduated = 1 or closed_on_commcare =1)  UNION (SELECT 
+                        'groupe_totale' AS 'info', COUNT(*) AS nombre
+                    FROM
+                        muso_group) """
+                cursor.execute(query)
+                return cursor.fetchall()
+            except Exception as e:
+                print(e)
+                return []
     def get_muso_group(self,muso_group_id):
         e = engine()
         with e.raw_connection() as conn:
