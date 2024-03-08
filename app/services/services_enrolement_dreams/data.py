@@ -136,43 +136,46 @@ class EnrolementAnalysis():
                     fiscal_year="FY19",
                     to_be_served=to_be_served_FY19.shape[0],
                     eligible=eligible_FY19.shape[0],
-                    percentage_agyw_to_be_served=(
-                        to_be_served_FY19.shape[0]/eligible_FY19.shape[0])*100
-                ),
+                    percentage_agyw_to_be_served=round((to_be_served_FY19.shape[0]/eligible_FY19.shape[0])*100)),
                 ValueEligibleToBeServed(
                     fiscal_year="FY20",
                     to_be_served=to_be_served_FY20.shape[0],
                     eligible=eligible_FY20.shape[0],
-                    percentage_agyw_to_be_served=(
-                        to_be_served_FY20.shape[0]/eligible_FY20.shape[0])*100
+                    percentage_agyw_to_be_served=round(
+                        (to_be_served_FY20.shape[0]/eligible_FY20.shape[0])*100
+                    )
                 ),
                 ValueEligibleToBeServed(
                     fiscal_year="FY21",
                     to_be_served=to_be_served_FY21.shape[0],
                     eligible=eligible_FY21.shape[0],
-                    percentage_agyw_to_be_served=(
-                        to_be_served_FY21.shape[0]/eligible_FY21.shape[0])*100
+                    percentage_agyw_to_be_served=round(
+                        (to_be_served_FY21.shape[0]/eligible_FY21.shape[0])*100
+                    )
                 ),
                 ValueEligibleToBeServed(
                     fiscal_year="FY22",
                     to_be_served=to_be_served_FY22.shape[0],
                     eligible=eligible_FY22.shape[0],
-                    percentage_agyw_to_be_served=(
-                        to_be_served_FY22.shape[0]/eligible_FY22.shape[0])*100
+                    percentage_agyw_to_be_served=round(
+                        (to_be_served_FY22.shape[0]/eligible_FY22.shape[0])*100
+                    )
                 ),
                 ValueEligibleToBeServed(
                     fiscal_year="FY23",
                     to_be_served=to_be_served_FY23.shape[0],
                     eligible=eligible_FY23.shape[0],
-                    percentage_agyw_to_be_served=(
-                        to_be_served_FY23.shape[0]/eligible_FY23.shape[0])*100
+                    percentage_agyw_to_be_served=round(
+                        (to_be_served_FY23.shape[0]/eligible_FY23.shape[0])*100
+                    )
                 ),
                 ValueEligibleToBeServed(
                     fiscal_year="FY24",
                     to_be_served=to_be_served_FY24.shape[0],
                     eligible=eligible_FY24.shape[0],
-                    percentage_agyw_to_be_served=(
-                        to_be_served_FY24.shape[0]/eligible_FY24.shape[0])*100
+                    percentage_agyw_to_be_served=round(
+                        (to_be_served_FY24.shape[0]/eligible_FY24.shape[0])*100
+                    )
                 )
             ]
         )
@@ -211,43 +214,49 @@ class EnrolementAnalysis():
                     fiscal_year="FY19",
                     screened=screened_FY19.shape[0],
                     eligible=eligible_FY19.shape[0],
-                    percentage_agyw_screened=(
-                        eligible_FY19.shape[0]/screened_FY19.shape[0])*100
+                    percentage_agyw_screened=round(
+                        (eligible_FY19.shape[0]/screened_FY19.shape[0])*100
+                    )
                 ),
                 ValueScreenedEligible(
                     fiscal_year="FY20",
                     screened=screened_FY20.shape[0],
                     eligible=eligible_FY20.shape[0],
-                    percentage_agyw_enrolled=(
-                        eligible_FY20.shape[0]/screened_FY20.shape[0])*100
+                    percentage_agyw_enrolled=round(
+                        (eligible_FY20.shape[0]/screened_FY20.shape[0])*100
+                    )
                 ),
                 ValueScreenedEligible(
                     fiscal_year="FY21",
                     screened=screened_FY21.shape[0],
                     eligible=eligible_FY21.shape[0],
-                    percentage_agyw_enrolled=(
-                        eligible_FY21.shape[0]/screened_FY21.shape[0])*100
+                    percentage_agyw_enrolled=round(
+                        (eligible_FY21.shape[0]/screened_FY21.shape[0])*100
+                    )
                 ),
                 ValueScreenedEligible(
                     fiscal_year="FY22",
                     screened=screened_FY22.shape[0],
                     eligible=eligible_FY22.shape[0],
-                    percentage_agyw_enrolled=(
-                        eligible_FY22.shape[0]/screened_FY22.shape[0])*100
+                    percentage_agyw_enrolled=round(
+                        (eligible_FY22.shape[0]/screened_FY22.shape[0])*100
+                    )
                 ),
                 ValueScreenedEligible(
                     fiscal_year="FY23",
                     screened=screened_FY23.shape[0],
                     eligible=eligible_FY23.shape[0],
-                    percentage_agyw_enrolled=(
-                        eligible_FY23.shape[0]/screened_FY23.shape[0])*100
+                    percentage_agyw_enrolled=round(
+                        (eligible_FY23.shape[0]/screened_FY23.shape[0])*100
+                    )
                 ),
                 ValueScreenedEligible(
                     fiscal_year="FY24",
                     screened=screened_FY24.shape[0],
                     eligible=eligible_FY24.shape[0],
-                    percentage_agyw_enrolled=(
-                        eligible_FY24.shape[0]/screened_FY24.shape[0])*100
+                    percentage_agyw_enrolled=round(
+                        (eligible_FY24.shape[0]/screened_FY24.shape[0])*100
+                    )
                 )
             ]
         )
