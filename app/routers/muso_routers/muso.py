@@ -96,6 +96,11 @@ def get_groupes_infos():
     groupes = muso_group.get_muso_groupes_infos()
     return groupes
 
+@router.get("/groupes/infos/commune")
+def get_groupes_infos_by_commune():
+    muso_group = MusoGroup()
+    groupes = muso_group.get_muso_groupes_infos_by_commune()
+    return groupes
 
 def update_code_on_cc(groupes):
     groupes_with_new_code = [
@@ -187,6 +192,12 @@ def sync_beneficiaries_to_hivhaiti():
 def get_beneficiaries_infos():
     muso_beneficiary = MusoBeneficiary()
     beneficiaries = muso_beneficiary.get_muso_beneficiaries_infos()
+    return beneficiaries
+
+@router.get("/beneficiaries/infos/commune")
+def get_beneficiaries_infos_by_commune():
+    muso_beneficiary = MusoBeneficiary()
+    beneficiaries = muso_beneficiary.get_muso_beneficiaries_infos_by_commune()
     return beneficiaries
 
 

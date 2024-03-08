@@ -201,3 +201,22 @@ class MusoBeneficiary:
             except Exception as e:
                 print(e)
                 return []
+
+    def get_muso_beneficiaries_infos_by_commune(self):
+        e = engine()
+        with e as conn:
+            try:
+                cursor = conn.cursor()
+                query = '''
+                select a.departement, a.commune,  count(a.id_patient) as membre_actifs,
+                       sum(!(ISNULL(a.indice_householdcount) OR a.is_household_applicable = 'no' OR ISNULL(a.is_household_applicable))) as members_counted,
+                          sum((ISNULL(a.indice_householdcount) AND (a.is_household_applicable = 'no' OR ISNULL(a.is_household_applicable)))) as members_that_not_counted,
+                            sum(a.is_household_applicable = 'yes') as members_that_not_NA
+                from    caris_db.view_muso_household_report a
+                group by a.commune
+                        '''
+                cursor.execute(query)
+                return cursor.fetchall()
+            except Exception as e:
+                print(e)
+                return []
