@@ -136,7 +136,10 @@ class EnrolementAnalysis():
                     fiscal_year="FY19",
                     to_be_served=to_be_served_FY19.shape[0],
                     eligible=eligible_FY19.shape[0],
-                    percentage_agyw_to_be_served=round((to_be_served_FY19.shape[0]/eligible_FY19.shape[0])*100)),
+                    percentage_agyw_to_be_served=round(
+                        (to_be_served_FY19.shape[0]/eligible_FY19.shape[0])*100
+                    )
+                ),
                 ValueEligibleToBeServed(
                     fiscal_year="FY20",
                     to_be_served=to_be_served_FY20.shape[0],
