@@ -194,6 +194,12 @@ def get_beneficiaries_infos():
     beneficiaries = muso_beneficiary.get_muso_beneficiaries_infos()
     return beneficiaries
 
+@router.get("/beneficiaries/infos/commune")
+def get_beneficiaries_infos_by_commune():
+    muso_beneficiary = MusoBeneficiary()
+    beneficiaries = muso_beneficiary.get_muso_beneficiaries_infos_by_commune()
+    return beneficiaries
+
 
 @router.get("/households/xlsx")
 def households_to_excel():
