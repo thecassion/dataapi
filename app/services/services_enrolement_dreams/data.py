@@ -217,7 +217,7 @@ class EnrolementAnalysis():
                     fiscal_year="FY19",
                     screened=screened_FY19.shape[0],
                     eligible=eligible_FY19.shape[0],
-                    percentage_agyw_screened=round(
+                    percentage_agyw_enrolled=round(
                         (eligible_FY19.shape[0]/screened_FY19.shape[0])*100
                     )
                 ),
