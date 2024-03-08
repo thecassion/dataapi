@@ -96,6 +96,11 @@ def get_groupes_infos():
     groupes = muso_group.get_muso_groupes_infos()
     return groupes
 
+@router.get("/groupes/infos/commune")
+def get_groupes_infos_by_commune():
+    muso_group = MusoGroup()
+    groupes = muso_group.get_muso_groupes_infos_by_commune()
+    return groupes
 
 def update_code_on_cc(groupes):
     groupes_with_new_code = [
