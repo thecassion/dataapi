@@ -19,7 +19,7 @@ from ...services.services_dreams import (
     run_datim
 )
 
-from ...services.services_enrolement_dreams.model import ScreenedVsEligible, EligibleVsToBeServed, ServedPerTrimester
+from ...services.services_enrolement_dreams.model import ScreenedEnrolled, EnrolledInactif, ServedPerTrimester
 from ...services.services_enrolement_dreams.data import EnrolementAnalysis
 
 from ...core import settings
@@ -59,30 +59,30 @@ async def vital_info():
 
 
 @router.get(
-    '/screenedVSelgible',
+    '/screened_enrolled',
     response_description="get the screened and the eligible in dreams",
     summary="get the screened and eligible in dreams",
     status_code=status.HTTP_200_OK,
-    response_model=List[ScreenedVsEligible]
+    response_model=ScreenedEnrolled
 )
 async def screened_vs_eligible():
     data = EnrolementAnalysis.screened_versus_eligible()
     if data:
-        return [data]
+        return data
     raise HTTPException(status.HTTP_404_NOT_FOUND, "Something went wrong")
 
 
 @router.get(
-    '/eligibleVsToBeServed',
+    '/enrolled_inactif',
     response_description="get the to be served and the eligible in dreams",
     summary="get the to be served and eligible in dreams",
     status_code=status.HTTP_200_OK,
-    response_model=List[EligibleVsToBeServed]
+    response_model=EnrolledInactif
 )
 async def eligible_vs_to_be_served():
     data = EnrolementAnalysis.eligible_to_be_served()
     if data:
-        return [data]
+        return data
     raise HTTPException(status.HTTP_404_NOT_FOUND, "Something went wrong")
 
 
@@ -91,10 +91,10 @@ async def eligible_vs_to_be_served():
     response_description="get the unserved per trimester",
     summary="get the UNSERVED per trimester",
     status_code=status.HTTP_200_OK,
-    response_model=List[ServedPerTrimester]
+    response_model=ServedPerTrimester
 )
 async def served_per_trismester():
     data = EnrolementAnalysis.to_be_served_per_trimester()
     if data:
-        return [data]
+        return data
     raise HTTPException(status.HTTP_404_NOT_FOUND, "Something went wrong")
