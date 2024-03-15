@@ -2,28 +2,32 @@ from pydantic import BaseModel
 from typing import List, Union
 
 
-class ValueScreenedEligible(BaseModel):
+class ValueScreenedEnrolled(BaseModel):
     fiscal_year: str
     screened: int
-    eligible: int
+    enrolled: int
     percentage_agyw_enrolled: Union[float, int]
+    percentage_agyw_enrolled_str: str
 
 
-class ScreenedVsEligible(BaseModel):
+class ScreenedEnrolled(BaseModel):
     title: str
-    values: List[ValueScreenedEligible]
+    description: str
+    values: List[ValueScreenedEnrolled]
 
 
-class ValueEligibleToBeServed(BaseModel):
+class ValueEnrolledInactif(BaseModel):
     fiscal_year: str
-    to_be_served: int
-    eligible: int
-    percentage_agyw_to_be_served: Union[float, int]
+    inactif: int
+    enrolled: int
+    percentage_agyw_inactif: Union[float, int]
+    percentage_agyw_inactif_tr: str
 
 
-class EligibleVsToBeServed(BaseModel):
+class EnrolledInactif(BaseModel):
     title: str
-    values: List[ValueEligibleToBeServed]
+    description: str
+    values: List[ValueEnrolledInactif]
 
 
 class ValuePerTrimester(BaseModel):
@@ -34,4 +38,5 @@ class ValuePerTrimester(BaseModel):
 
 class ServedPerTrimester(BaseModel):
     title: str
+    description: str
     values: List[ValuePerTrimester]

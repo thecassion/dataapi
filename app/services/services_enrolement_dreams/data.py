@@ -2,7 +2,10 @@ from pandas import read_sql_query, to_datetime
 from sqlalchemy import text
 from .db import engine
 from .query import SDATA
-from .model import *
+from .model import (
+    ValueScreenedEnrolled, ScreenedEnrolled, ValueEnrolledInactif, EnrolledInactif,
+    ValuePerTrimester, ServedPerTrimester
+)
 
 
 def query_data():
@@ -68,36 +71,37 @@ class EnrolementAnalysis():
                                                            "2023-07-01") & (EnrolementAnalysis.to_be_served.interview_date <= "2023-09-30")]
         return ServedPerTrimester(
             title="Présentation du nombre de bénéficiares à servir par trimestre",
+            description="Il 'sagit des inactives que l'on peut appeler pour les services dreams par trimestre.",
             values=[
                 ValuePerTrimester(
                     semester_fiscal_year="Q2FY24",
                     data=unserved_Q2FY24.shape[0],
-                    notation="Unserved_Q2FY24"
+                    notation="inactive_Q2FY24"
                 ),
                 ValuePerTrimester(
                     semester_fiscal_year="Q1FY24",
                     data=unserved_Q1FY24.shape[0],
-                    notation="Unserved_Q1FY24"
+                    notation="inactive_Q1FY24"
                 ),
                 ValuePerTrimester(
                     semester_fiscal_year="Q4FY23",
                     data=unserved_Q4FY23.shape[0],
-                    notation="Unserved_Q4FY23"
+                    notation="inactive_Q4FY23"
                 ),
                 ValuePerTrimester(
                     semester_fiscal_year="Q3FY23",
                     data=unserved_Q3FY23.shape[0],
-                    notation="Unserved_Q3FY23"
+                    notation="inactive_Q3FY23"
                 ),
                 ValuePerTrimester(
                     semester_fiscal_year="Q2FY23",
                     data=unserved_Q2FY23.shape[0],
-                    notation="Unserved_Q2FY23"
+                    notation="inactive_Q2FY23"
                 ),
                 ValuePerTrimester(
                     semester_fiscal_year="Q1FY23",
                     data=unserved_Q1FY23.shape[0],
-                    notation="Unserved_Q1FY23"
+                    notation="inactive_Q1FY23"
                 )
             ]
         )
@@ -129,56 +133,63 @@ class EnrolementAnalysis():
                                                     & (EnrolementAnalysis.eligible.interview_date <= "2023-09-30")]
         eligible_FY24 = EnrolementAnalysis.eligible[(EnrolementAnalysis.eligible.interview_date >= "2023-10-01")
                                                     & (EnrolementAnalysis.eligible.interview_date <= "2024-09-30")]
-        return EligibleVsToBeServed(
-            title="Présentation du nombre de bénéficiares éligibles et à servir",
+        return EnrolledInactif(
+            title="Présentation du nombre de bénéficiares enrolees et des inactives",
+            description="l'objectif est de savoir le taux de beneficiaires inactives parmis le total d'enrolles par exercices fiscal.",
             values=[
-                ValueEligibleToBeServed(
+                ValueEnrolledInactif(
                     fiscal_year="FY19",
-                    to_be_served=to_be_served_FY19.shape[0],
-                    eligible=eligible_FY19.shape[0],
-                    percentage_agyw_to_be_served=round(
+                    inactif=to_be_served_FY19.shape[0],
+                    enrolled=eligible_FY19.shape[0],
+                    percentage_agyw_inactif=round(
                         (to_be_served_FY19.shape[0]/eligible_FY19.shape[0])*100
-                    )
+                    ),
+                    percentage_agyw_inactif_str=f"{round((to_be_served_FY19.shape[0]/eligible_FY19.shape[0])*100)}%"
                 ),
-                ValueEligibleToBeServed(
+                ValueEnrolledInactif(
                     fiscal_year="FY20",
-                    to_be_served=to_be_served_FY20.shape[0],
-                    eligible=eligible_FY20.shape[0],
-                    percentage_agyw_to_be_served=round(
+                    inactif=to_be_served_FY20.shape[0],
+                    enrolled=eligible_FY20.shape[0],
+                    percentage_agyw_inactif=round(
                         (to_be_served_FY20.shape[0]/eligible_FY20.shape[0])*100
-                    )
+                    ),
+                    percentage_agyw_inactif_str=f"{round((to_be_served_FY20.shape[0]/eligible_FY20.shape[0])*100)}%"
                 ),
-                ValueEligibleToBeServed(
+                ValueEnrolledInactif(
                     fiscal_year="FY21",
-                    to_be_served=to_be_served_FY21.shape[0],
-                    eligible=eligible_FY21.shape[0],
-                    percentage_agyw_to_be_served=round(
+                    inactif=to_be_served_FY21.shape[0],
+                    enrolled=eligible_FY21.shape[0],
+                    percentage_agyw_inactif=round(
                         (to_be_served_FY21.shape[0]/eligible_FY21.shape[0])*100
-                    )
+                    ),
+                    percentage_agyw_inactif_str=f"{round((to_be_served_FY21.shape[0]/eligible_FY21.shape[0])*100)}%"
                 ),
-                ValueEligibleToBeServed(
+                ValueEnrolledInactif(
                     fiscal_year="FY22",
-                    to_be_served=to_be_served_FY22.shape[0],
-                    eligible=eligible_FY22.shape[0],
-                    percentage_agyw_to_be_served=round(
+                    inactif=to_be_served_FY22.shape[0],
+                    enrolled=eligible_FY22.shape[0],
+                    percentage_agyw_inactif=round(
                         (to_be_served_FY22.shape[0]/eligible_FY22.shape[0])*100
-                    )
+                    ),
+                    percentage_agyw_inactif_str=f"{round((to_be_served_FY22.shape[0]/eligible_FY22.shape[0])*100)}%"
                 ),
-                ValueEligibleToBeServed(
+                ValueEnrolledInactif(
                     fiscal_year="FY23",
-                    to_be_served=to_be_served_FY23.shape[0],
-                    eligible=eligible_FY23.shape[0],
-                    percentage_agyw_to_be_served=round(
+                    inactif=to_be_served_FY23.shape[0],
+                    enrolled=eligible_FY23.shape[0],
+                    percentage_agyw_inactif=round(
                         (to_be_served_FY23.shape[0]/eligible_FY23.shape[0])*100
-                    )
+                    ),
+                    percentage_agyw_inactif_str=f"{round((to_be_served_FY23.shape[0]/eligible_FY23.shape[0])*100)}%"
                 ),
-                ValueEligibleToBeServed(
+                ValueEnrolledInactif(
                     fiscal_year="FY24",
-                    to_be_served=to_be_served_FY24.shape[0],
-                    eligible=eligible_FY24.shape[0],
-                    percentage_agyw_to_be_served=round(
+                    inactif=to_be_served_FY24.shape[0],
+                    enrolled=eligible_FY24.shape[0],
+                    percentage_agyw_inactif=round(
                         (to_be_served_FY24.shape[0]/eligible_FY24.shape[0])*100
-                    )
+                    ),
+                    percentage_agyw_inactif_str=f"{round((to_be_served_FY24.shape[0]/eligible_FY24.shape[0])*100)}%"
                 )
             ]
         )
@@ -210,56 +221,63 @@ class EnrolementAnalysis():
                                                     & (EnrolementAnalysis.eligible.interview_date <= "2023-09-30")]
         eligible_FY24 = EnrolementAnalysis.eligible[(EnrolementAnalysis.eligible.interview_date >= "2023-10-01")
                                                     & (EnrolementAnalysis.eligible.interview_date <= "2024-09-30")]
-        return ScreenedVsEligible(
+        return ScreenedEnrolled(
             title=" Présentation du nombre de bénéficiares screenées et enrôlées",
+            description="l'objectif est de savoir le taux de beneficiaires enrollees parmis le total screenee par exercices fiscal.",
             values=[
-                ValueScreenedEligible(
+                ValueScreenedEnrolled(
                     fiscal_year="FY19",
                     screened=screened_FY19.shape[0],
-                    eligible=eligible_FY19.shape[0],
+                    enrolled=eligible_FY19.shape[0],
                     percentage_agyw_enrolled=round(
                         (eligible_FY19.shape[0]/screened_FY19.shape[0])*100
-                    )
+                    ),
+                    percentage_agyw_enrolled_str=f"{round((eligible_FY19.shape[0]/screened_FY19.shape[0])*100)}%"
                 ),
-                ValueScreenedEligible(
+                ValueScreenedEnrolled(
                     fiscal_year="FY20",
                     screened=screened_FY20.shape[0],
-                    eligible=eligible_FY20.shape[0],
+                    enrolled=eligible_FY20.shape[0],
                     percentage_agyw_enrolled=round(
                         (eligible_FY20.shape[0]/screened_FY20.shape[0])*100
-                    )
+                    ),
+                    percentage_agyw_enrolled_str=f"{round((eligible_FY20.shape[0]/screened_FY20.shape[0])*100)}%"
                 ),
-                ValueScreenedEligible(
+                ValueScreenedEnrolled(
                     fiscal_year="FY21",
                     screened=screened_FY21.shape[0],
-                    eligible=eligible_FY21.shape[0],
+                    enrolled=eligible_FY21.shape[0],
                     percentage_agyw_enrolled=round(
                         (eligible_FY21.shape[0]/screened_FY21.shape[0])*100
-                    )
+                    ),
+                    percentage_agyw_enrolled_str=f"{round((eligible_FY21.shape[0]/screened_FY21.shape[0])*100)}%"
                 ),
-                ValueScreenedEligible(
+                ValueScreenedEnrolled(
                     fiscal_year="FY22",
                     screened=screened_FY22.shape[0],
-                    eligible=eligible_FY22.shape[0],
+                    enrolled=eligible_FY22.shape[0],
                     percentage_agyw_enrolled=round(
                         (eligible_FY22.shape[0]/screened_FY22.shape[0])*100
-                    )
+                    ),
+                    percentage_agyw_enrolled_str=f"{round((eligible_FY22.shape[0]/screened_FY22.shape[0])*100)}%"
                 ),
-                ValueScreenedEligible(
+                ValueScreenedEnrolled(
                     fiscal_year="FY23",
                     screened=screened_FY23.shape[0],
-                    eligible=eligible_FY23.shape[0],
+                    enrolled=eligible_FY23.shape[0],
                     percentage_agyw_enrolled=round(
                         (eligible_FY23.shape[0]/screened_FY23.shape[0])*100
-                    )
+                    ),
+                    percentage_agyw_enrolled_str=f"{round((eligible_FY23.shape[0]/screened_FY23.shape[0])*100)}%"
                 ),
-                ValueScreenedEligible(
+                ValueScreenedEnrolled(
                     fiscal_year="FY24",
                     screened=screened_FY24.shape[0],
-                    eligible=eligible_FY24.shape[0],
+                    enrolled=eligible_FY24.shape[0],
                     percentage_agyw_enrolled=round(
                         (eligible_FY24.shape[0]/screened_FY24.shape[0])*100
-                    )
+                    ),
+                    percentage_agyw_enrolled_str=f"{round((eligible_FY24.shape[0]/screened_FY24.shape[0])*100)}%"
                 )
             ]
         )
