@@ -21,7 +21,7 @@ class ValueEnrolledInactif(BaseModel):
     inactif: int
     enrolled: int
     percentage_agyw_inactif: Union[float, int]
-    percentage_agyw_inactif_tr: str
+    percentage_agyw_inactif_str: str
 
 
 class EnrolledInactif(BaseModel):
