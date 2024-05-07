@@ -74,7 +74,7 @@ class OVC:
                 LEFT JOIN lookup_departement ld ON ld.id = lc.departement
                 WHERE
                     TIMESTAMPDIFF(MONTH, cs.date, NOW()) <= 6
-                        AND c.club_type != 1
+                        AND c.club_type != 1 AND s.is_present=1
                 GROUP BY s.id_patient) a
             GROUP BY a.commune
         """
