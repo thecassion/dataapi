@@ -7,6 +7,7 @@ from .db import PtmeOvc as ptme_ovc
 from .db.muso import Muso as muso_ovc
 from .db.dreams import Dreams as dreams_ovc
 from .db.gardening import Gardening as gardening_ovc
+from .db.ovc import OVC as ovc_ovc
 import io
 import pandas as pd
 import datetime
@@ -126,3 +127,7 @@ def gardening(parameters: OVCReportParametersO):
 @router.post("/ptme")
 def ptme(report_year_1: int, report_quarter_1: int, report_year_2: int, report_quarter_2: int,type_of_aggregation="commune"):
     return ptme_ovc().get_ptme_semester(report_year_1, report_quarter_1, report_year_2, report_quarter_2, type_of_aggregation)
+
+@router.get("/club/infos_by_commune")
+def get_club_infos():
+    return ovc_ovc().get_club_6_month_active_info_by_commune()
