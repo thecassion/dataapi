@@ -131,3 +131,11 @@ def ptme(report_year_1: int, report_quarter_1: int, report_year_2: int, report_q
 @router.get("/club/infos_by_commune")
 def get_club_infos():
     return ovc_ovc().get_club_6_month_active_info_by_commune()
+
+@router.get("/club/beneficiaire/infos_by_commune")
+def get_club_beneficiaire_infos():
+    return ovc_ovc().get_club_6_month_active_ovc_in_club_by_commune()
+
+@router.get("/beneficiaire/infos_by_commune")
+def get_beneficiaire_infos():
+    return ovc_ovc().get_positive_child_and_art_by_commune_infos()
