@@ -135,7 +135,7 @@ class OVC:
                     LEFT JOIN lookup_departement ld ON ld.id = lc.departement
                     WHERE
                         (ti.id_patient IS NOT NULL)
-                            AND (ti.is_dead IS NULL OR ti.is_dead = 0)) m
+                            AND (ti.is_dead IS NULL OR ti.is_dead = 0) and (ti.is_abandoned is null or ti.is_abandoned=0) ) m
                 GROUP BY m.departement , m.commune
         """
         e = engine()
