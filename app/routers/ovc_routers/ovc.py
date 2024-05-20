@@ -128,14 +128,14 @@ def gardening(parameters: OVCReportParametersO):
 def ptme(report_year_1: int, report_quarter_1: int, report_year_2: int, report_quarter_2: int,type_of_aggregation="commune"):
     return ptme_ovc().get_ptme_semester(report_year_1, report_quarter_1, report_year_2, report_quarter_2, type_of_aggregation)
 
-@router.get("/club/infos_by_commune")
+@router.get("/club/infos_by_site")
 def get_club_infos():
-    return ovc_ovc().get_club_6_month_active_info_by_commune()
+    return ovc_ovc().get_club_6_month_active_info_by_site()
 
-@router.get("/club/beneficiaire/infos_by_commune")
+@router.get("/club/beneficiaire/infos_by_site")
 def get_club_beneficiaire_infos():
-    return ovc_ovc().get_club_6_month_active_ovc_in_club_by_commune()
+    return ovc_ovc().get_club_6_month_active_ovc_in_club_by_site()
 
-@router.get("/beneficiaire/infos_by_commune")
+@router.get("/beneficiaire/infos_by_site")
 def get_beneficiaire_infos():
-    return ovc_ovc().get_positive_child_and_art_by_commune_infos()
+    return ovc_ovc().get_positive_child_and_art_by_site_infos()

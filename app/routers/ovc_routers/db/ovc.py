@@ -3,11 +3,12 @@ from ....core import engine, sql_achemy_engine
 class OVC:
     def __init__(self):
         pass
-    def get_club_6_month_active_info_by_commune(self):
+    def get_club_6_month_active_info_by_site(self):
         query = """
             SELECT 
                 a.departement,
                 a.commune,
+                a.site,
                 COUNT(*) AS nbre,
                 SUM(a.club_type = 5) AS enfant_3_5,
                 SUM(a.club_type = 6) AS enfant_6_8,
@@ -20,6 +21,7 @@ class OVC:
                         c.id_hospital,
                         lc.name AS commune,
                         ld.name AS departement,
+                        concat(lh.city_code,"/", lh.hospital_code) AS site,
                         c.club_type
                 FROM
                     club_session cs
@@ -30,9 +32,9 @@ class OVC:
                 LEFT JOIN lookup_departement ld ON ld.id = lc.departement
                 WHERE
                     TIMESTAMPDIFF(MONTH, cs.date, NOW()) <= 6
-                        AND c.club_type != 1
+                        AND c.club_type != 1 and s.is_present=1
                 GROUP BY cs.id_club) a
-            GROUP BY a.commune
+            GROUP BY a.site
         """
         e = engine()
         with e as conn:
@@ -45,11 +47,12 @@ class OVC:
                 return []
             
 
-    def get_club_6_month_active_ovc_in_club_by_commune(self):
+    def get_club_6_month_active_ovc_in_club_by_site(self):
         query = """
             SELECT 
                 a.departement,
                 a.commune,
+                a.site,
                 COUNT(*) AS nbre,
                 SUM(a.club_type = 5) AS enfant_3_5,
                 SUM(a.club_type = 6) AS enfant_6_8,
@@ -61,6 +64,7 @@ class OVC:
                     s.id_patient,
                         cs.id_club,
                         c.id_hospital,
+                        concat(lh.city_code, lh.hospital_code) AS site,
                         lc.name AS commune,
                         ld.name AS departement,
                         c.club_type
@@ -76,7 +80,7 @@ class OVC:
                     TIMESTAMPDIFF(MONTH, cs.date, NOW()) <= 6
                         AND c.club_type != 1 AND s.is_present=1
                 GROUP BY s.id_patient) a
-            GROUP BY a.commune
+            GROUP BY a.site
         """
         e = engine()
         with e as conn:
@@ -88,11 +92,12 @@ class OVC:
                 print(e)
                 return []
     
-    def get_positive_child_and_art_by_commune_infos(self):
+    def get_positive_child_and_art_by_site_infos(self):
         query = """
             SELECT 
                 m.departement,
                 m.commune,
+                m.site,
                 COUNT(m.positive_id) AS nbre_positive,
                 SUM(m.positive_id IS NOT NULL AND m.age < 18) AS nbre_positive_under_18,
                 COUNT(m.arv_id) AS nbre_on_arv,
@@ -107,6 +112,7 @@ class OVC:
                 (SELECT 
                     ld.name AS departement,
                         lc.name AS commune,
+                        CONCAT(lh.city_code, '/', lh.hospital_code) AS site,
                         a.id_patient AS positive_id,
                         arv.id_patient AS arv_id,
                         vt.id_patient AS viral_load_test_in_the_last_12months_id_patient,
@@ -180,7 +186,7 @@ class OVC:
                         AND (ti.is_dead IS NULL OR ti.is_dead = 0)
                         AND (ti.is_abandoned IS NULL
                         OR ti.is_abandoned = 0)) m
-            GROUP BY m.departement , m.commune
+            GROUP BY m.site
         """
         e = engine()
         with e as conn:

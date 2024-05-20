@@ -13,6 +13,7 @@ class Pmtct:
                     SELECT 
                         ld.name AS departement,
                         lc.name AS commune,
+                        concat(lh.city_code,"/", lh.hospital_code) AS site,
                         COUNT(a.id_club) AS nbre_club_active
                     FROM
                         (SELECT DISTINCT
@@ -29,7 +30,7 @@ class Pmtct:
                         lookup_commune lc ON lc.id = lh.commune
                             LEFT JOIN
                         lookup_departement ld ON ld.id = lc.departement
-                    GROUP BY lc.name
+                    GROUP BY lh.id
                 """
                 cursor.execute(query)
                 return cursor.fetchall()
@@ -46,6 +47,7 @@ class Pmtct:
                     SELECT 
                         ld.name AS departement,
                         lc.name AS commune,
+                        concat(lh.city_code,"/", lh.hospital_code) AS site,
                         COUNT(a.id_patient) AS nbre_pmtct_active
                     FROM
                         (SELECT 
@@ -56,7 +58,7 @@ class Pmtct:
                         LEFT JOIN club c ON c.id = cs.id_club
                         WHERE
                             TIMESTAMPDIFF(MONTH, cs.date, NOW()) <= 6
-                                AND c.club_type = 1
+                                AND c.club_type = 1 and s.is_present = 1
                         GROUP BY s.id_patient) a
                             LEFT JOIN
                         lookup_hospital lh ON lh.id = a.id_hospital
@@ -64,7 +66,7 @@ class Pmtct:
                         lookup_commune lc ON lc.id = lh.commune
                             LEFT JOIN
                         lookup_departement ld ON ld.id = lc.departement
-                    GROUP BY lc.name
+                    GROUP BY lh.id
                 """
                 cursor.execute(query)
                 return cursor.fetchall()
