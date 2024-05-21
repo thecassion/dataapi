@@ -94,99 +94,123 @@ class OVC:
     
     def get_positive_child_and_art_by_site_infos(self):
         query = """
-            SELECT 
-                m.departement,
-                m.commune,
-                m.site,
-                COUNT(m.positive_id) AS nbre_positive,
-                SUM(m.positive_id IS NOT NULL AND m.age < 18) AS nbre_positive_under_18,
-                COUNT(m.arv_id) AS nbre_on_arv,
-                SUM(m.arv_id IS NOT NULL AND m.age < 18) AS nbre_on_arv_under_18,
-                SUM(m.viral_load_test_in_the_last_12months_id_patient IS NOT NULL
-                    AND m.age < 18) AS nbre_viral_load_test_in_the_last_12months_under_18,
-                SUM(m.viral_load_result_in_the_last_12months_and_suppress_id_patient IS NOT NULL
-                    AND m.age < 18) AS nbre_viral_load_result_in_the_last_12months_and_suppress_under_18,
-                SUM(m.last_viral_load_suppress_in_the_last_12months_id_patient IS NOT NULL
-                    AND m.age < 18) AS nbre_last_viral_load_suppress_in_the_last_12months_under_18
+SELECT 
+    m.departement,
+    m.commune,
+    m.site,
+    COUNT(m.positive_id) AS nbre_positive,
+    SUM(m.positive_id IS NOT NULL
+        AND (m.active_patient IS NOT NULL)) AS nbre_positive_active,
+    SUM(m.positive_id IS NOT NULL AND m.age < 18) AS nbre_positive_under_18,
+    SUM(m.positive_id IS NOT NULL AND m.age < 18
+        AND (m.active_patient IS NOT NULL)) AS nbre_positive_active_under_18,
+    COUNT(m.arv_id) AS nbre_on_arv,
+    SUM(m.arv_id IS NOT NULL
+        AND (m.active_patient IS NOT NULL)) AS nbre_on_arv_active,
+    SUM(m.arv_id IS NOT NULL AND m.age < 18) AS nbre_on_arv_under_18,
+    SUM(m.arv_id IS NOT NULL AND m.age < 18
+        AND (m.active_patient IS NOT NULL)) AS nbre_on_arv_active_under_18,
+    SUM(m.viral_load_test_in_the_last_12months_id_patient IS NOT NULL
+        AND m.age < 18) AS nbre_viral_load_test_in_the_last_12months_under_18,
+    SUM(m.viral_load_test_in_the_last_12months_id_patient IS NOT NULL
+        AND m.age < 18
+        AND (m.active_patient IS NOT NULL)) AS nbre_viral_load_test_in_the_last_12months_active_under_18,
+    SUM(m.viral_load_result_in_the_last_12months_and_suppress_id_patient IS NOT NULL
+        AND m.age < 18) AS nbre_viral_load_result_in_the_last_12months_and_suppress_under_18,
+    SUM(m.viral_load_result_in_the_last_12months_and_suppress_id_patient IS NOT NULL
+        AND m.age < 18
+        AND (m.active_patient IS NOT NULL)) AS nbre_viral_load_result_in_the_last_12months_and_suppress_active_under_18,
+    SUM(m.last_viral_load_suppress_in_the_last_12months_id_patient IS NOT NULL
+        AND m.age < 18) AS nbre_last_viral_load_suppress_in_the_last_12months_under_18,
+    SUM(m.last_viral_load_suppress_in_the_last_12months_id_patient IS NOT NULL
+        AND m.age < 18
+        AND (m.active_patient IS NOT NULL)) AS nbre_last_viral_load_suppress_in_the_last_12months_active_under_18
+FROM
+    (SELECT 
+        ld.name AS departement,
+            lc.name AS commune,
+            CONCAT(lh.city_code, '/', lh.hospital_code) AS site,
+            a.id_patient AS positive_id,
+            arv.id_patient AS arv_id,
+            vt.id_patient AS viral_load_test_in_the_last_12months_id_patient,
+            vrs.id_patient AS viral_load_result_in_the_last_12months_and_suppress_id_patient,
+            lvrs.id_patient AS last_viral_load_suppress_in_the_last_12months_id_patient,
+            ap.id_patient AS active_patient,
+            TIMESTAMPDIFF(YEAR, ti.dob, NOW()) AS age
+    FROM
+        (SELECT 
+        id AS id_patient
+    FROM
+        view_patient_positive UNION (SELECT 
+        id_patient
+    FROM
+        tracking_regime t_reg
+    WHERE
+        t_reg.category = 'regime_infant_treatment') UNION (SELECT 
+        id_patient
+    FROM
+        club_patient cp
+    LEFT JOIN club c ON c.id = cp.id_club
+    WHERE
+        c.club_type != 1)) a
+    LEFT JOIN (SELECT 
+        p.id AS id_patient
+    FROM
+        tracking_regime tr
+    LEFT JOIN lookup_arv la ON la.id = tr.id_arv
+    LEFT JOIN patient p ON p.id = tr.id_patient
+    LEFT JOIN tracking_infant ti ON ti.id_patient = p.id
+    WHERE
+        tr.category = 'regime_infant_treatment'
+            AND ti.id_patient IS NOT NULL
+    GROUP BY tr.id_patient) arv ON arv.id_patient = a.id_patient
+    LEFT JOIN (SELECT DISTINCT
+        tf.id_patient
+    FROM
+        tracking_followup tf
+    WHERE
+        TIMESTAMPDIFF(MONTH, tf.viral_load_collection_date, NOW()) <= 12) vt ON vt.id_patient = a.id_patient
+    LEFT JOIN (SELECT DISTINCT
+        tf.id_patient
+    FROM
+        tracking_followup tf
+    WHERE
+        TIMESTAMPDIFF(MONTH, tf.viral_load_date, NOW()) <= 12
+            AND (tf.viral_load_count IS NULL
+            OR tf.viral_load_count < 1000)) vrs ON vrs.id_patient = a.id_patient
+    LEFT JOIN (SELECT DISTINCT
+        tf.id_patient
+    FROM
+        tracking_followup tf
+    WHERE
+        TIMESTAMPDIFF(MONTH, tf.viral_load_date, NOW()) <= 12
+            AND tf.viral_load_date = (SELECT 
+                MAX(tf2.viral_load_date)
             FROM
-                (SELECT 
-                    ld.name AS departement,
-                        lc.name AS commune,
-                        CONCAT(lh.city_code, '/', lh.hospital_code) AS site,
-                        a.id_patient AS positive_id,
-                        arv.id_patient AS arv_id,
-                        vt.id_patient AS viral_load_test_in_the_last_12months_id_patient,
-                        vrs.id_patient AS viral_load_result_in_the_last_12months_and_suppress_id_patient,
-                        lvrs.id_patient AS last_viral_load_suppress_in_the_last_12months_id_patient,
-                        TIMESTAMPDIFF(YEAR, ti.dob, NOW()) AS age
-                FROM
-                    (SELECT 
-                    id AS id_patient
-                FROM
-                    view_patient_positive UNION (SELECT 
-                    id_patient
-                FROM
-                    tracking_regime t_reg
-                WHERE
-                    t_reg.category = 'regime_infant_treatment') UNION (SELECT 
-                    id_patient
-                FROM
-                    club_patient cp
-                LEFT JOIN club c ON c.id = cp.id_club
-                WHERE
-                    c.club_type != 1)) a
-                LEFT JOIN (SELECT 
-                    p.id AS id_patient
-                FROM
-                    tracking_regime tr
-                LEFT JOIN lookup_arv la ON la.id = tr.id_arv
-                LEFT JOIN patient p ON p.id = tr.id_patient
-                LEFT JOIN tracking_infant ti ON ti.id_patient = p.id
-                WHERE
-                    tr.category = 'regime_infant_treatment'
-                        AND ti.id_patient IS NOT NULL
-                GROUP BY tr.id_patient) arv ON arv.id_patient = a.id_patient
-                LEFT JOIN (SELECT DISTINCT
-                    tf.id_patient
-                FROM
-                    tracking_followup tf
-                WHERE
-                    TIMESTAMPDIFF(MONTH, tf.viral_load_collection_date, NOW()) <= 12) vt ON vt.id_patient = a.id_patient
-                LEFT JOIN (SELECT DISTINCT
-                    tf.id_patient
-                FROM
-                    tracking_followup tf
-                WHERE
-                    TIMESTAMPDIFF(MONTH, tf.viral_load_date, NOW()) <= 12
-                        AND (tf.viral_load_count IS NULL
-                        OR tf.viral_load_count < 1000)) vrs ON vrs.id_patient = a.id_patient
-                LEFT JOIN (SELECT DISTINCT
-                    tf.id_patient
-                FROM
-                    tracking_followup tf
-                WHERE
-                    TIMESTAMPDIFF(MONTH, tf.viral_load_date, NOW()) <= 12
-                        AND tf.viral_load_date = (SELECT 
-                            MAX(tf2.viral_load_date)
-                        FROM
-                            tracking_followup tf2
-                        WHERE
-                            tf2.id_patient = tf.id_patient)
-                        AND (tf.viral_load_count < 1000
-                        OR (tf.viral_load_count IS NULL))
-                GROUP BY tf.id_patient) lvrs ON lvrs.id_patient = a.id_patient
-                LEFT JOIN tracking_infant ti ON ti.id_patient = a.id_patient
-                LEFT JOIN tracking_motherbasicinfo tm ON tm.id_patient = a.id_patient
-                LEFT JOIN patient p ON p.id = a.id_patient
-                LEFT JOIN lookup_hospital lh ON CONCAT(lh.city_code, '/', lh.hospital_code) = CONCAT(p.city_code, '/', p.hospital_code)
-                LEFT JOIN lookup_commune lc ON lc.id = lh.commune
-                LEFT JOIN lookup_departement ld ON ld.id = lc.departement
-                WHERE
-                    (tm.id_patient IS NULL)
-                        AND (ti.is_dead IS NULL OR ti.is_dead = 0)
-                        AND (ti.is_abandoned IS NULL
-                        OR ti.is_abandoned = 0)) m
-            GROUP BY m.site
+                tracking_followup tf2
+            WHERE
+                tf2.id_patient = tf.id_patient)
+            AND (tf.viral_load_count < 1000
+            OR (tf.viral_load_count IS NULL))
+    GROUP BY tf.id_patient) lvrs ON lvrs.id_patient = a.id_patient
+    LEFT JOIN (SELECT DISTINCT
+        id_patient
+    FROM
+        tracking_followup tf
+    WHERE
+        TIMESTAMPDIFF(MONTH, tf.date, NOW()) <= 3) ap ON ap.id_patient = a.id_patient
+    LEFT JOIN tracking_infant ti ON ti.id_patient = a.id_patient
+    LEFT JOIN tracking_motherbasicinfo tm ON tm.id_patient = a.id_patient
+    LEFT JOIN patient p ON p.id = a.id_patient
+    LEFT JOIN lookup_hospital lh ON CONCAT(lh.city_code, '/', lh.hospital_code) = CONCAT(p.city_code, '/', p.hospital_code)
+    LEFT JOIN lookup_commune lc ON lc.id = lh.commune
+    LEFT JOIN lookup_departement ld ON ld.id = lc.departement
+    WHERE
+        (tm.id_patient IS NULL)
+            AND (ti.is_dead IS NULL OR ti.is_dead = 0)
+            AND (ti.is_abandoned IS NULL
+            OR ti.is_abandoned = 0)) m
+GROUP BY m.site
         """
         e = engine()
         with e as conn:
