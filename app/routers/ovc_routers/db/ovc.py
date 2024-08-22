@@ -221,3 +221,55 @@ GROUP BY m.site
             except Exception as e:
                 print(e)
                 return []
+
+
+    def get_mastersheet_stat_by_site(self):
+        query = """
+                    SELECT
+            a.office,
+            departement,
+            commune,
+            a.site,
+            count(*) as total,
+                SUM(LTFU_30days = 'No') AS nbr_non_LTFU_30days,
+                SUM(timestampdiff(MONTH,next_appointment_date,NOW())>=12) as nbr_LTFU_12months_plus,
+                SUM(TIMESTAMPDIFF(MONTH, a.next_appointment_date, NOW()) >= 1
+                            AND TIMESTAMPDIFF(MONTH, a.next_appointment_date, NOW()) < 6) as SUM_LTFU_1month_inf_6months,
+                SUM( TIMESTAMPDIFF(MONTH, a.next_appointment_date, NOW()) >= 6
+                            AND TIMESTAMPDIFF(MONTH, a.next_appointment_date, NOW()) < 12) as SUM_LTFU_6_inf12months,
+                SUM( TIMESTAMPDIFF(MONTH, a.next_appointment_date, NOW()) >= 12) as SUM_LTFU_12months_plus
+            FROM
+                caris_db.mastersheet_children a
+                        LEFT JOIN
+                (SELECT
+                    ld.name AS departement,
+                        lc.name AS commune,
+                        ls.name AS section,
+                        CONCAT(lh.city_code, '/', lh.hospital_code) AS site,
+                        lh.name AS hospital_name,
+                        ln.name as network
+                FROM
+                    lookup_hospital lh
+                LEFT JOIN lookup_section ls ON ls.id = lh.section
+                LEFT JOIN lookup_commune lc ON lc.id = lh.commune
+                LEFT JOIN lookup_departement ld ON ld.id = lc.departement
+                left join lookup_network ln on ln.id=lh.network) b ON a.site = b.site
+                where
+                NOT(b.departement IN ('Nippes' , 'Sud', 'Sud-Est', 'Grand-Anse')
+                OR office IN ('JER' , 'CAY', 'FDN', 'MIR'))
+                and is_ugp!="Yes"
+
+            group by site
+            order by count(*) DESC
+
+        """
+
+        e = engine()
+        with e as conn:
+            try:
+                cursor = conn.cursor()
+                cursor.execute(query)
+                return cursor.fetchall()
+            except Exception as e:
+                print(e)
+                return []

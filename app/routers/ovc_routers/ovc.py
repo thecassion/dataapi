@@ -139,3 +139,8 @@ def get_club_beneficiaire_infos():
 @router.get("/beneficiaire/infos_by_site")
 def get_beneficiaire_infos():
     return ovc_ovc().get_positive_child_and_art_by_site_infos()
+
+
+@router.get("/mastersheet/by_site")
+def get_mastersheet_by_site():
+    return ovc_ovc().get_mastersheet_stat_by_site()
