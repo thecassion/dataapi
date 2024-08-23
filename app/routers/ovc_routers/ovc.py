@@ -144,3 +144,7 @@ def get_beneficiaire_infos():
 @router.get("/mastersheet/by_site")
 def get_mastersheet_by_site():
     return ovc_ovc().get_mastersheet_stat_by_site()
+
+@router.get("/mastersheet_stats")
+def get_mastersheet_stats():
+    return ovc_ovc().get_mastersheet_stat()
