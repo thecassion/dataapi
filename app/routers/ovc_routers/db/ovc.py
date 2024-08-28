@@ -324,17 +324,17 @@ GROUP BY m.site
                     a.next_appointment_date,
                     NOW()) >= 12) AS SUM_LTFU_12months_plus,
                 SUM(a.age < 15 AND a.age >= 0) AS TX_CURR,
-                SUM(TIMESTAMPDIFF(YEAR,
+                SUM(TIMESTAMPDIFF(DAY,
                     a.last_viral_load_collection_date,
-                    NOW()) >= 1
+                    NOW()) <=365
                     AND a.age < 15
                     AND a.age >= 0) AS vl_coverage,
-                SUM(TIMESTAMPDIFF(YEAR,
+                SUM(TIMESTAMPDIFF(DAY,
                     a.last_viral_load_collection_date,
-                    NOW()) >= 1
-                    AND TIMESTAMPDIFF(YEAR,
+                    NOW()) <=365
+                    AND TIMESTAMPDIFF(DAY,
                     a.viral_load_date,
-                    NOW()) >= 1
+                    NOW()) <=365
                     AND a.age < 15
                     AND a.age >= 0
                     AND a.indetectable_ou_inf_1000 = 'OUI') AS vl_suppression
