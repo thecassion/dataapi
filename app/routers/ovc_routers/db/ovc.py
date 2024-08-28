@@ -316,78 +316,122 @@ GROUP BY m.site
 
     def get_mastersheet_stat(self):
         query = """
-SELECT
-    COUNT(*) AS total,
-    SUM(LTFU_30days = 'No') AS nbr_non_LTFU_30days,
-    SUM(TIMESTAMPDIFF(MONTH,
-        next_appointment_date,
-        NOW()) >= 12) AS nbr_LTFU_12months_plus,
-    SUM(TIMESTAMPDIFF(MONTH,
-        a.next_appointment_date,
-        NOW()) >= 1
-        AND TIMESTAMPDIFF(MONTH,
-        a.next_appointment_date,
-        NOW()) < 6) AS SUM_LTFU_1month_inf_6months,
-    SUM(TIMESTAMPDIFF(MONTH,
-        a.next_appointment_date,
-        NOW()) >= 6
-        AND TIMESTAMPDIFF(MONTH,
-        a.next_appointment_date,
-        NOW()) < 12) AS SUM_LTFU_6_inf12months,
-    SUM(TIMESTAMPDIFF(MONTH,
-        a.next_appointment_date,
-        NOW()) >= 12) AS SUM_LTFU_12months_plus,
-    SUM(a.age < 15 AND (is_abandoned=0 or is_abandoned is null) and LTFU_30days="No"
-    AND (b.network not in ('PIH', 'MSPP', 'UGP'))
-    ) AS TX_CURR,
-    SUM(
-    (a.last_viral_load_collection_date is not null) AND
-    TIMESTAMPDIFF(DAY,
-        a.last_viral_load_collection_date,
-        NOW()) <= 365
-        AND a.age < 15
-         AND (is_abandoned=0 or is_abandoned is null)
-		and LTFU_30days="No"
-        AND (b.network not in ('PIH', 'MSPP', 'UGP'))
-        
-        ) AS vl_coverage,
-    SUM(
-    (a.last_viral_load_collection_date is not null) and
-    TIMESTAMPDIFF(DAY,
-        a.last_viral_load_collection_date,
-        NOW()) <= 365
-        AND 
-       TIMESTAMPDIFF(DAY,
-       a.viral_load_date,
-       NOW()) <=365
-       AND 
-        a.age < 15
-        AND a.indetectable_ou_inf_1000 = 'OUI'
-        AND (is_abandoned=0 or is_abandoned is null)
-		and LTFU_30days="No"
-        AND (b.network not in ('PIH', 'MSPP', 'UGP'))
-        ) AS vl_suppression
-FROM
-    caris_db.mastersheet_children a
-        LEFT JOIN
-    (SELECT 
-        ld.name AS departement,
-            lc.name AS commune,
-            ls.name AS section,
-            CONCAT(lh.city_code, '/', lh.hospital_code) AS site,
-            lh.name AS hospital_name,
-            ln.name AS network
-    FROM
-        lookup_hospital lh
-    LEFT JOIN lookup_section ls ON ls.id = lh.section
-    LEFT JOIN lookup_commune lc ON lc.id = lh.commune
-    LEFT JOIN lookup_departement ld ON ld.id = lc.departement
-    LEFT JOIN lookup_network ln ON ln.id = lh.network) b ON a.site = b.site
-WHERE
-    NOT (b.departement IN ('Nippes' , 'Sud', 'Sud-Est', 'Grand-Anse')
-        OR office IN ('JER' , 'CAY', 'FDN', 'MIR'))
-        AND 
-        is_ugp != 'Yes'
+            SELECT
+                COUNT(*) AS total,
+                SUM(LTFU_30days = 'No') AS nbr_non_LTFU_30days,
+                SUM(TIMESTAMPDIFF(MONTH,
+                    next_appointment_date,
+                    NOW()) >= 12) AS nbr_LTFU_12months_plus,
+                SUM(TIMESTAMPDIFF(MONTH,
+                    a.next_appointment_date,
+                    NOW()) >= 1
+                    AND TIMESTAMPDIFF(MONTH,
+                    a.next_appointment_date,
+                    NOW()) < 6) AS SUM_LTFU_1month_inf_6months,
+                SUM(TIMESTAMPDIFF(MONTH,
+                    a.next_appointment_date,
+                    NOW()) >= 6
+                    AND TIMESTAMPDIFF(MONTH,
+                    a.next_appointment_date,
+                    NOW()) < 12) AS SUM_LTFU_6_inf12months,
+                SUM(TIMESTAMPDIFF(MONTH,
+                    a.next_appointment_date,
+                    NOW()) >= 12) AS SUM_LTFU_12months_plus,
+                SUM(a.age < 15
+                    AND (is_abandoned = 0 OR is_abandoned IS NULL)
+                    AND LTFU_30days = 'No'
+                    AND (b.network NOT IN ('PIH' , 'MSPP', 'UGP'))) AS TX_CURR_lt15,
+                SUM((a.last_viral_load_collection_date IS NOT NULL)
+                    AND TIMESTAMPDIFF(DAY,
+                    a.last_viral_load_collection_date,
+                    NOW()) <= 365
+                    AND a.age < 15
+                    AND (is_abandoned = 0 OR is_abandoned IS NULL)
+                    AND LTFU_30days = 'No'
+                    AND (b.network NOT IN ('PIH' , 'MSPP', 'UGP'))) AS vl_coverage_lt15,
+                SUM((a.last_viral_load_collection_date IS NOT NULL)
+                    AND TIMESTAMPDIFF(DAY,
+                    a.last_viral_load_collection_date,
+                    NOW()) <= 365
+                    AND TIMESTAMPDIFF(DAY,
+                    a.viral_load_date,
+                    NOW()) <= 365
+                    AND a.age < 15
+                    AND a.indetectable_ou_inf_1000 = 'OUI'
+                    AND (is_abandoned = 0 OR is_abandoned IS NULL)
+                    AND LTFU_30days = 'No'
+                    AND (b.network NOT IN ('PIH' , 'MSPP', 'UGP'))) AS vl_suppression_lt15,
+                SUM(a.age < 18
+                    AND (is_abandoned = 0 OR is_abandoned IS NULL)
+                    AND LTFU_30days = 'No'
+                    AND (b.network NOT IN ('PIH' , 'MSPP', 'UGP'))) AS TX_CURR_lt18,
+                SUM((a.last_viral_load_collection_date IS NOT NULL)
+                    AND TIMESTAMPDIFF(DAY,
+                    a.last_viral_load_collection_date,
+                    NOW()) <= 365
+                    AND a.age < 18
+                    AND (is_abandoned = 0 OR is_abandoned IS NULL)
+                    AND LTFU_30days = 'No'
+                    AND (b.network NOT IN ('PIH' , 'MSPP', 'UGP'))) AS vl_coverage_lt18,
+                SUM((a.last_viral_load_collection_date IS NOT NULL)
+                    AND TIMESTAMPDIFF(DAY,
+                    a.last_viral_load_collection_date,
+                    NOW()) <= 365
+                    AND TIMESTAMPDIFF(DAY,
+                    a.viral_load_date,
+                    NOW()) <= 365
+                    AND a.age < 18
+                    AND a.indetectable_ou_inf_1000 = 'OUI'
+                    AND (is_abandoned = 0 OR is_abandoned IS NULL)
+                    AND LTFU_30days = 'No'
+                    AND (b.network NOT IN ('PIH' , 'MSPP', 'UGP'))) AS vl_suppression_lt18,
+                SUM(a.age <= 17 AND a.age >= 15
+                    AND (is_abandoned = 0 OR is_abandoned IS NULL)
+                    AND LTFU_30days = 'No'
+                    AND (b.network NOT IN ('PIH' , 'MSPP', 'UGP'))) AS TX_CURR_bt15_17,
+                SUM((a.last_viral_load_collection_date IS NOT NULL)
+                    AND TIMESTAMPDIFF(DAY,
+                    a.last_viral_load_collection_date,
+                    NOW()) <= 365
+                    AND a.age <= 17
+                    AND a.age >= 15
+                    AND (is_abandoned = 0 OR is_abandoned IS NULL)
+                    AND LTFU_30days = 'No'
+                    AND (b.network NOT IN ('PIH' , 'MSPP', 'UGP'))) AS vl_coverage_bt15_17,
+                SUM((a.last_viral_load_collection_date IS NOT NULL)
+                    AND TIMESTAMPDIFF(DAY,
+                    a.last_viral_load_collection_date,
+                    NOW()) <= 365
+                    AND TIMESTAMPDIFF(DAY,
+                    a.viral_load_date,
+                    NOW()) <= 365
+                    AND a.age <= 17
+                    AND a.age >= 15
+                    AND a.indetectable_ou_inf_1000 = 'OUI'
+                    AND (is_abandoned = 0 OR is_abandoned IS NULL)
+                    AND LTFU_30days = 'No'
+                    AND (b.network NOT IN ('PIH' , 'MSPP', 'UGP'))) AS vl_suppression_bt15_17
+                FROM
+                    caris_db.mastersheet_children a
+                        LEFT JOIN
+                    (SELECT 
+                        ld.name AS departement,
+                            lc.name AS commune,
+                            ls.name AS section,
+                            CONCAT(lh.city_code, '/', lh.hospital_code) AS site,
+                            lh.name AS hospital_name,
+                            ln.name AS network
+                    FROM
+                        lookup_hospital lh
+                    LEFT JOIN lookup_section ls ON ls.id = lh.section
+                    LEFT JOIN lookup_commune lc ON lc.id = lh.commune
+                    LEFT JOIN lookup_departement ld ON ld.id = lc.departement
+                    LEFT JOIN lookup_network ln ON ln.id = lh.network) b ON a.site = b.site
+                WHERE
+                    NOT (b.departement IN ('Nippes' , 'Sud', 'Sud-Est', 'Grand-Anse')
+                        OR office IN ('JER' , 'CAY', 'FDN', 'MIR'))
+                        AND 
+                        is_ugp != 'Yes'
             """
         e = engine()
         with e as conn:
