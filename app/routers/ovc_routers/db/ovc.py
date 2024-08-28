@@ -262,7 +262,6 @@ GROUP BY m.site
                         AND (is_abandoned=0 or is_abandoned is null)
                         and LTFU_30days="No"
                         AND (b.network not in ('PIH', 'MSPP', 'UGP'))
-                        
                         ) AS coverage,
                     SUM(
                     (a.last_viral_load_collection_date is not null) and
@@ -351,7 +350,7 @@ SELECT
 		and LTFU_30days="No"
         AND (b.network not in ('PIH', 'MSPP', 'UGP'))
         
-        ) AS coverage,
+        ) AS vl_coverage,
     SUM(
     (a.last_viral_load_collection_date is not null) and
     TIMESTAMPDIFF(DAY,
@@ -367,7 +366,7 @@ SELECT
         AND (is_abandoned=0 or is_abandoned is null)
 		and LTFU_30days="No"
         AND (b.network not in ('PIH', 'MSPP', 'UGP'))
-        ) AS suppression
+        ) AS vl_suppression
 FROM
     caris_db.mastersheet_children a
         LEFT JOIN
