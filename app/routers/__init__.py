@@ -6,3 +6,4 @@ from .eid_routers import eid_router
 from .vbg_routers import vbg_router
 from .ovc_routers import ovc_router
 from .schooling_analysis import schooling_router
+from .datim_routers import datim_router

@@ -15,6 +15,7 @@ from .routers import vbg_router
 from .routers import ovc_router
 from .routers import schooling_router
 from .routers.gardening_router import router as gardening_router
+from .routers import datim_router
 
 from .routers.form_router import router as form_router
 
@@ -52,7 +53,7 @@ app.include_router(ovc_router)
 app.include_router(schooling_router)
 app.include_router(gardening_router)
 app.include_router(form_router)
-
+app.include_router(datim_router)
 
 @app.get("/")
 def home():

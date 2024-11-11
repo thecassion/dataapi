@@ -5,6 +5,7 @@ from ..db.dreams import Dreams
 from ..db.muso import Muso
 from ..db.gardening import Gardening
 from ..db.education import Education
+from ..db.ovc import OVC as DbOVC
 
 class OVC:
     def __init__(self, OVCReportParameters: OVCReportParameters):
@@ -88,7 +89,6 @@ class OVC:
             "communes":df,
             "programs":programs
         }
-    
         # Refactored method to create df with 'h_' columns added to corresponding columns
     def _create_df_with_household(self, df):
         df_with_household = df.copy()
